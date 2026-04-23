@@ -23,7 +23,6 @@
       --uv: #5F4B8B;
       --bg: #ffffff;
       --ink: #111111;
-      --ink-mute: #9CA3AF;
       --line: #F3F4F6;
     }
 
@@ -37,7 +36,6 @@
     .font-mono { font-family: 'Space Mono', monospace; }
     .font-logo { font-family: 'Syne', sans-serif; }
 
-    /* ─── DROPDOWN ─── */
     .dropdown-menu {
       opacity: 0;
       visibility: hidden;
@@ -59,7 +57,6 @@
       transform: translateY(0);
     }
 
-    /* ─── ALBUM CARD ─── */
     .album-card .cover-box {
       background: #f8f8f8;
       border: 1px solid #eee;
@@ -75,7 +72,6 @@
       .album-card:hover .album-title { color: var(--uv); }
     }
 
-    /* ─── HERO TITLE ─── */
     #theme-title {
       font-size: clamp(1.8rem, 8vw, 3.2rem);
       font-weight: 900;
@@ -85,31 +81,6 @@
       word-break: keep-all;
     }
 
-    /* ─── HERO IMAGE — MOBILE-FIRST FIX ─── */
-    .hero-img-box {
-      width: 100%;
-      max-width: 220px;          /* 모바일 기본 제한 */
-      aspect-ratio: 1 / 1;
-      margin: 0 auto;
-      position: relative;
-      background: #f1f1f1;
-      overflow: hidden;
-      border-radius: 2px;
-    }
-    @media (min-width: 768px) {
-      .hero-img-box {
-        max-width: 280px;
-        box-shadow: 0 25px 50px -12px rgba(0,0,0,.25);
-      }
-    }
-    #theme-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* ─── TICKER ─── */
     .ticker-wrap {
       width: 100%;
       overflow: hidden;
@@ -136,7 +107,6 @@
       color: rgba(255,255,255,0.5);
     }
 
-    /* ─── MODAL ─── */
     .modal {
       position: fixed;
       inset: 0;
@@ -167,14 +137,12 @@
     }
     .footer-logo { height: 18px; width: auto; object-fit: contain; }
 
-    /* ─── CARD REVEAL ─── */
     @keyframes cardIn {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .album-card { animation: cardIn .4s ease both; }
 
-    /* ─── UTILITIES ─── */
     .uv-dot { color: var(--uv); }
     .focus-ring:focus-visible {
       outline: 2px solid var(--uv);
@@ -232,15 +200,27 @@
 
       <div class="grid md:grid-cols-12 relative z-10 items-stretch">
 
-        <!-- Image column: padded on mobile too -->
+        <!-- ✦ Image column — FIXED mobile cover sizing ✦ -->
         <div class="md:col-span-4 lg:col-span-3 py-8 px-6 md:p-8 flex items-center justify-center bg-gray-50/60 md:bg-gray-50/50 border-b md:border-b-0 md:border-r border-black">
-          <div class="hero-img-box">
-            <img id="theme-img" alt="Theme Cover" src="https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=800" class="grayscale-[5%] md:hover:grayscale-0 transition-all duration-700" loading="eager" decoding="async">
+          <!--
+            모바일: 180px 고정 정사각형
+            태블릿+: 240px
+            데스크톱+: 280px
+            aspect-square + 명시적 w-[..]로 부모 flex가 늘리지 못하게 고정
+          -->
+          <div class="relative aspect-square overflow-hidden bg-gray-100 rounded-sm w-[180px] sm:w-[220px] md:w-[240px] lg:w-[280px] shrink-0 md:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]">
+            <img
+              id="theme-img"
+              alt="Theme Cover"
+              src="https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=800"
+              class="absolute inset-0 w-full h-full object-cover grayscale-[5%] md:hover:grayscale-0 transition-all duration-700"
+              loading="eager"
+              decoding="async">
           </div>
         </div>
 
         <!-- Text column -->
-        <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center">
+        <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center min-w-0">
           <div class="px-6 py-10 md:px-12 relative z-20">
             <div class="flex items-center gap-3 mb-6">
               <span class="w-10 h-[2px] bg-[var(--uv)]"></span>
@@ -283,7 +263,6 @@
     import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    /* ─── CONFIG ─── */
     const firebaseConfig = {
       apiKey: "AIzaSyDXMTDaE76mqn6S6w2F5s4qHhdFphNULg8",
       authDomain: "monthly-city-pop.firebaseapp.com",
@@ -296,11 +275,7 @@
     const FALLBACK_IMG = 'https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=800';
     const PLACEHOLDER_IMG = 'https://via.placeholder.com/500?text=No+Cover';
 
-    /* ─── STATE ─── */
-    const state = {
-      archive: {},
-      currentMonth: ''
-    };
+    const state = { archive: {}, currentMonth: '' };
 
     const mockData = {
       "2026.04": {
@@ -311,7 +286,6 @@
       }
     };
 
-    /* ─── DOM REFS (cached once) ─── */
     const $ = (id) => document.getElementById(id);
     const refs = {
       navMonth: $('nav-month'),
@@ -329,7 +303,11 @@
       modalDesc: $('modal-desc'),
     };
 
-    /* ─── RENDER ─── */
+    // Image error fallback
+    refs.img.addEventListener('error', () => {
+      if (refs.img.src !== FALLBACK_IMG) refs.img.src = FALLBACK_IMG;
+    });
+
     const renderMonth = (month) => {
       const data = state.archive[month];
       if (!data) return;
@@ -343,7 +321,6 @@
       refs.title.textContent = data.theme || '';
       refs.img.src = data.themeImg || FALLBACK_IMG;
 
-      // Build grid with DocumentFragment (single reflow)
       const frag = document.createDocumentFragment();
       (data.albums || []).forEach((album, idx) => {
         const card = document.createElement('div');
@@ -354,7 +331,7 @@
         card.innerHTML = `
           <button type="button" class="modal-trigger cover-box w-full aspect-square mb-5 md:mb-6 relative rounded-sm focus-ring" data-idx="${idx}" aria-label="${album.title || ''} — liner notes">
             <span class="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white font-mono text-[9px] font-black px-1.5 md:px-2 py-0.5 z-10 tracking-widest uppercase">#${num}</span>
-            <img src="${album.img || PLACEHOLDER_IMG}" alt="${album.title || ''}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700" loading="lazy" decoding="async">
+            <img src="${album.img || PLACEHOLDER_IMG}" alt="${album.title || ''}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700" loading="lazy" decoding="async" onerror="if(this.src!==window.__PH__)this.src=window.__PH__">
           </button>
           <div class="flex-1 flex flex-col">
             <h3 class="album-title font-black text-sm md:text-base uppercase tracking-tight truncate text-black mb-1 leading-none transition-colors">${album.title || ''}</h3>
@@ -366,9 +343,11 @@
           </div>`;
         frag.appendChild(card);
       });
-
       refs.grid.replaceChildren(frag);
     };
+
+    // Expose placeholder for inline onerror (no closure leak)
+    window.__PH__ = PLACEHOLDER_IMG;
 
     const renderSelector = () => {
       const months = Object.keys(state.archive).sort().reverse();
@@ -387,7 +366,6 @@
       refs.monthList.replaceChildren(frag);
     };
 
-    /* ─── EVENT DELEGATION ─── */
     const openModal = (album) => {
       refs.modalTitle.textContent = album.title || 'UNTITLED';
       refs.modalArtist.textContent = album.artist || 'UNKNOWN';
@@ -395,26 +373,17 @@
       refs.modal.classList.add('open');
       document.body.style.overflow = 'hidden';
     };
-
     const closeModal = () => {
       refs.modal.classList.remove('open');
       document.body.style.overflow = '';
     };
-
     const toggleDropdown = (force) => {
       refs.dropdown.classList.toggle('active', force);
     };
 
-    // One global click handler via delegation
     document.addEventListener('click', (e) => {
-      // Dropdown toggle
       const dropdownBtn = e.target.closest('.dropdown-btn');
-      if (dropdownBtn) {
-        e.stopPropagation();
-        toggleDropdown();
-        return;
-      }
-      // Month select
+      if (dropdownBtn) { e.stopPropagation(); toggleDropdown(); return; }
       const monthBtn = e.target.closest('.month-btn');
       if (monthBtn) {
         e.stopPropagation();
@@ -427,7 +396,6 @@
         }
         return;
       }
-      // Album trigger
       const trigger = e.target.closest('.modal-trigger');
       if (trigger) {
         const idx = Number(trigger.dataset.idx);
@@ -435,58 +403,39 @@
         if (album) openModal(album);
         return;
       }
-      // Modal close buttons
-      if (e.target.closest('.modal-close')) {
-        closeModal();
-        return;
-      }
-      // Click outside modal content
-      if (e.target === refs.modal) {
-        closeModal();
-        return;
-      }
-      // Click outside dropdown
-      if (!e.target.closest('#dropdown-toggle')) {
-        toggleDropdown(false);
-      }
+      if (e.target.closest('.modal-close')) { closeModal(); return; }
+      if (e.target === refs.modal) { closeModal(); return; }
+      if (!e.target.closest('#dropdown-toggle')) { toggleDropdown(false); }
     });
 
-    // ESC key
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
       if (refs.modal.classList.contains('open')) closeModal();
       else toggleDropdown(false);
     });
 
-    /* ─── INIT ─── */
     const init = async () => {
-      // 1. Instant render with mock
       state.archive = mockData;
       state.currentMonth = Object.keys(state.archive)[0];
       renderMonth(state.currentMonth);
       renderSelector();
 
-      // 2. Firebase auth
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
 
       try {
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          try {
-            await signInWithCustomToken(auth, __initial_auth_token);
-          } catch {
-            await signInAnonymously(auth);
-          }
+          try { await signInWithCustomToken(auth, __initial_auth_token); }
+          catch { await signInAnonymously(auth); }
         } else {
           await signInAnonymously(auth);
         }
       } catch (err) {
         console.error('Auth error:', err);
-        return; // stay with mock
+        return;
       }
 
-      // 3. Subscribe to archive
       onAuthStateChanged(auth, (user) => {
         if (!user) return;
         onSnapshot(
@@ -494,11 +443,8 @@
           (snap) => {
             const incoming = snap.exists() ? snap.data() : null;
             state.archive = (incoming && Object.keys(incoming).length) ? incoming : mockData;
-
             const keys = Object.keys(state.archive).sort().reverse();
-            if (!state.archive[state.currentMonth]) {
-              state.currentMonth = keys[0] || '';
-            }
+            if (!state.archive[state.currentMonth]) state.currentMonth = keys[0] || '';
             if (state.currentMonth) {
               renderMonth(state.currentMonth);
               renderSelector();
