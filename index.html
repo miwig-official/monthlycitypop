@@ -117,28 +117,35 @@
         /* Hero Image Container - FLUID FOR MOBILE & RESIZING FIXED */
         .hero-img-box {
             width: 100%;
-            aspect-ratio: 1 / 1;
             position: relative;
-            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f1f1f1;
+            background: transparent;
         }
         
         @media (min-width: 768px) {
             .hero-img-box {
                 max-width: 280px;
+                aspect-ratio: 1 / 1;
+                background: #f1f1f1;
                 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
                 border-radius: 0.125rem;
+                overflow: hidden;
             }
         }
 
         #theme-img {
             width: 100%;
-            height: 100%;
+            height: auto; /* 모바일: 가로폭에 맞춰 원본 비율 유지 */
             display: block;
-            object-fit: cover;
+        }
+
+        @media (min-width: 768px) {
+            #theme-img {
+                height: 100%;
+                object-fit: cover; /* PC: 정사각형 박스에 꽉 차게 크롭 */
+            }
         }
 
         /* Support for newlines */
