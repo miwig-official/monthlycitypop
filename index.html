@@ -131,7 +131,14 @@
       to { opacity: 1; transform: translateY(0) }
     }
 
-    #theme-intro, #modal-desc {
+    #theme-title,
+    #theme-intro,
+    #modal-title,
+    #modal-artist,
+    #modal-desc,
+    .album-title,
+    .album-artist,
+    .album-desc {
       white-space: pre-wrap;
       word-break: break-word;
     }
@@ -328,26 +335,56 @@
         card.style.animationDelay = `${Math.min(idx * 40, 400)}ms`;
 
         const num = String(idx + 1).padStart(2, '0');
-        card.innerHTML = `
-          <button type="button" class="modal-trigger cover-box w-full aspect-square mb-5 md:mb-6 relative rounded-sm focus-ring" data-idx="${idx}" aria-label="${album.title || ''} — liner notes">
-            <span class="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white font-mono text-[9px] font-black px-1.5 md:px-2 py-0.5 z-10 tracking-widest uppercase">#${num}</span>
-            <img src="${album.img || PLACEHOLDER_IMG}" alt="${album.title || ''}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700" loading="lazy" decoding="async" onerror="if(this.src!==window.__PH__)this.src=window.__PH__">
-          </button>
-          <div class="flex-1 flex flex-col">
-            <h3 class="album-title font-black text-sm md:text-base uppercase tracking-tight truncate text-black mb-1 leading-none transition-colors">${album.title || ''}</h3>
-            <p class="font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest truncate mb-4">${album.artist || ''}</p>
-            <button type="button" class="modal-trigger w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 focus-ring" data-idx="${idx}">
-              <span class="w-4 h-px bg-black/20"></span>
-              Liner Notes
-            </button>
-          </div>`;
+
+        // Cover button
+        const coverBtn = document.createElement('button');
+        coverBtn.type = 'button';
+        coverBtn.className = 'modal-trigger cover-box w-full aspect-square mb-5 md:mb-6 relative rounded-sm focus-ring';
+        coverBtn.dataset.idx = idx;
+        coverBtn.setAttribute('aria-label', `${album.title || ''} — liner notes`);
+
+        const numBadge = document.createElement('span');
+        numBadge.className = 'absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white font-mono text-[9px] font-black px-1.5 md:px-2 py-0.5 z-10 tracking-widest uppercase';
+        numBadge.textContent = `#${num}`;
+
+        const img = document.createElement('img');
+        img.src = album.img || PLACEHOLDER_IMG;
+        img.alt = album.title || '';
+        img.className = 'w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.addEventListener('error', () => {
+          if (img.src !== PLACEHOLDER_IMG) img.src = PLACEHOLDER_IMG;
+        });
+
+        coverBtn.append(numBadge, img);
+
+        // Info block
+        const info = document.createElement('div');
+        info.className = 'flex-1 flex flex-col';
+
+        const title = document.createElement('h3');
+        title.className = 'album-title font-black text-sm md:text-base uppercase tracking-tight text-black mb-1 leading-tight transition-colors';
+        title.textContent = album.title || '';
+
+        const artist = document.createElement('p');
+        artist.className = 'album-artist font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest mb-4 leading-tight';
+        artist.textContent = album.artist || '';
+
+        const notesBtn = document.createElement('button');
+        notesBtn.type = 'button';
+        notesBtn.className = 'modal-trigger w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 focus-ring';
+        notesBtn.dataset.idx = idx;
+        notesBtn.innerHTML = '<span class="w-4 h-px bg-black/20"></span>Liner Notes';
+
+        info.append(title, artist, notesBtn);
+        card.append(coverBtn, info);
         frag.appendChild(card);
       });
       refs.grid.replaceChildren(frag);
     };
 
-    // Expose placeholder for inline onerror (no closure leak)
-    window.__PH__ = PLACEHOLDER_IMG;
+    // (PLACEHOLDER_IMG is referenced directly — no global leak needed)
 
     const renderSelector = () => {
       const months = Object.keys(state.archive).sort().reverse();
