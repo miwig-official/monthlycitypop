@@ -200,7 +200,7 @@
                     <div class="px-6 py-10 md:px-12 relative z-20">
                         <div class="flex items-center gap-3 mb-6">
                             <span class="w-10 h-[2px] bg-[#111111]"></span>
-                            <span id="theme-vol-label" class="font-mono text-[10px] md:text-[11px] font-black text-black uppercase tracking-[0.4em]">Volume --</span>
+                            <span id="theme-vol-label" class="font-mono text-[10px] md:text-[11px] font-black text-black uppercase tracking-[0.3em]">---</span>
                         </div>
                         <h2 id="theme-title" class="mb-6 max-w-4xl break-keep"></h2>
                         <div class="max-w-xl">
@@ -279,11 +279,12 @@
             const data = archiveData[month]; if (!data) return;
             const issueNo = month.split('.')[1] || "--";
             document.getElementById('nav-month').innerText = month;
-            document.getElementById('theme-vol-label').innerText = `Volume ${issueNo}`;
+            
+            // Vol. 2026.04 형태로 변경하여 오해 소지 제거
+            document.getElementById('theme-vol-label').innerText = `VOL. ${month}`;
             document.getElementById('theme-watermark').innerText = issueNo;
             document.getElementById('theme-intro').innerText = data.intro || "";
             
-            // Set image src correctly and ensure visible
             const themeImgEl = document.getElementById('theme-img');
             if(data.themeImg) {
                 themeImgEl.src = data.themeImg;
