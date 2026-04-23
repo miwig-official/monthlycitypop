@@ -38,7 +38,7 @@
             background: var(--bg); 
             border: 1px solid #eeeeee; 
             border-radius: 12px; 
-            min-width: 160px; 
+            min-width: 180px; 
             z-index: 50; 
             box-shadow: 0 15px 30px rgba(0,0,0,0.06); 
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
@@ -51,6 +51,7 @@
             overflow: hidden;
             background: #f8f8f8;
             border: 1px solid #eeeeee;
+            cursor: pointer;
         }
         .album-card:hover .cover-box { 
             transform: translateY(-6px); 
@@ -60,11 +61,13 @@
 
         /* Title Style */
         #theme-title {
-            font-size: clamp(1.8rem, 7vw, 3.2rem);
+            font-size: clamp(1.8rem, 8vw, 3.2rem);
             font-weight: 900;
             line-height: 0.9;
             letter-spacing: -0.02em;
             color: #111111;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         /* Ticker Style */
@@ -111,6 +114,7 @@
         }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Hero Image Container - Fixed height/width issue */
         .hero-img-box {
             width: 100%;
             max-width: 280px;
@@ -118,6 +122,20 @@
             position: relative;
             background: #f1f1f1;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Support for newlines */
+        #theme-intro, #modal-desc {
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .footer-logo { height: 18px; width: auto; object-fit: contain; }
@@ -141,9 +159,9 @@
         </div>
     </div>
 
-    <!-- Header: Highest Hierarchy -->
+    <!-- Header: Height and Padding optimized for mobile breathing room -->
     <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-[1400px] mx-auto flex items-center justify-between h-14 px-4 md:px-6">
+        <div class="max-w-[1400px] mx-auto flex items-center justify-between h-16 md:h-14 px-5 md:px-6">
             <div class="flex items-center">
                 <h1 class="font-logo text-lg md:text-2xl text-[var(--text-main)] uppercase tracking-tighter whitespace-nowrap leading-none pt-0.5">Monthly City Pop</h1>
                 <div class="hidden sm:block w-px h-3 bg-gray-200 mx-4"></div>
@@ -152,8 +170,8 @@
 
             <div class="flex items-center">
                 <div class="dropdown relative cursor-pointer" id="dropdown-toggle" onclick="window.toggleDropdown(event)">
-                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm">
-                        <div class="w-1 h-1 rounded-full bg-black"></div>
+                    <div class="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm">
+                        <div class="w-1.5 h-1.5 rounded-full bg-black"></div>
                         <span id="nav-month" class="font-mono text-[9px] font-black uppercase tracking-widest text-gray-800 pt-0.5">---</span>
                         <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
@@ -168,12 +186,15 @@
             <div id="theme-watermark" class="absolute right-0 bottom-0 text-[10rem] md:text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4">--</div>
 
             <div class="grid md:grid-cols-12 relative z-10 items-stretch">
+                <!-- Image Side -->
                 <div class="md:col-span-4 lg:col-span-3 p-6 md:p-8 flex items-center justify-center bg-gray-50/50 border-b md:border-b-0 md:border-r border-black">
                     <div class="hero-img-box shadow-2xl rounded-sm">
-                        <img id="theme-img" src="" alt="" class="absolute inset-0 w-full h-full object-cover grayscale-[5%] hover:grayscale-0 transition-all duration-1000">
+                        <!-- Img tag ensured to be present and updated by JS -->
+                        <img id="theme-img" src="" alt="" class="grayscale-[5%] hover:grayscale-0 transition-all duration-1000">
                     </div>
                 </div>
                 
+                <!-- Text Side -->
                 <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center">
                     <div class="px-6 py-10 md:px-12 relative z-20">
                         <div class="flex items-center gap-3 mb-6">
@@ -239,7 +260,7 @@
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), (snap) => {
-                        if (snap.exists() && Object.keys(snap.data()).length > 0) { 
+                        if (snap.exists()) { 
                             archiveData = snap.data(); 
                             const keys = Object.keys(archiveData).sort().reverse();
                             if (!currentMonth && keys.length > 0) currentMonth = keys[0];
@@ -260,29 +281,27 @@
             document.getElementById('theme-vol-label').innerText = `Volume ${issueNo}`;
             document.getElementById('theme-watermark').innerText = issueNo;
             document.getElementById('theme-intro').innerText = data.intro || "";
-            document.getElementById('theme-img').src = data.themeImg || "";
-
-            const fullTheme = data.theme || "";
-            const words = fullTheme.split(' ');
-            let titleHTML = "";
-
-            if (words.length >= 3) {
-                const splitIndex = Math.ceil(words.length / 2);
-                const line1 = words.slice(0, splitIndex).join(' ');
-                const line2 = words.slice(splitIndex).join(' ');
-                titleHTML = `<span class="block">${line1}</span><span class="block">${line2}</span>`;
+            
+            // Set image src correctly
+            const themeImgEl = document.getElementById('theme-img');
+            if(data.themeImg) {
+                themeImgEl.src = data.themeImg;
+                themeImgEl.style.display = 'block';
             } else {
-                titleHTML = `<span class="block">${fullTheme}</span>`;
+                themeImgEl.style.display = 'none';
             }
-            document.getElementById('theme-title').innerHTML = titleHTML;
+
+            document.getElementById('theme-title').innerText = data.theme || "";
 
             const grid = document.getElementById('grid-container');
             grid.innerHTML = '';
             (data.albums || []).forEach((album, idx) => {
                 const div = document.createElement('div');
                 div.className = 'album-card group flex flex-col animate-snap';
+                const modalParams = `"${(album.title || "").replace(/"/g, '&quot;')}", "${(album.artist || "").replace(/"/g, '&quot;')}", "${(album.desc || "").replace(/"/g, '&quot;')}"`;
+
                 div.innerHTML = `
-                    <div class="cover-box w-full aspect-square mb-5 md:mb-6 bg-gray-50 relative rounded-sm">
+                    <div class="cover-box w-full aspect-square mb-5 md:mb-6 bg-gray-50 relative rounded-sm" onclick='openModal(${modalParams})'>
                         <div class="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white font-mono text-[9px] font-black px-1.5 md:px-2 py-0.5 z-10 tracking-widest uppercase">#${String(idx+1).padStart(2,'0')}</div>
                         <img src="${album.img || ''}" alt="${album.title}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700">
                     </div>
@@ -290,7 +309,7 @@
                         <h3 class="font-black text-sm md:text-base uppercase tracking-tight truncate text-black mb-1 leading-none">${album.title || ''}</h3>
                         <p class="font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest truncate mb-4">${album.artist || ''}</p>
                         
-                        <button onclick='openModal("${(album.title || "").replace(/"/g, '&quot;')}", "${(album.artist || "").replace(/"/g, '&quot;')}", "${(album.desc || "").replace(/"/g, '&quot;')}")' class="w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 group-hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 group/btn">
+                        <button onclick='openModal(${modalParams})' class="w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 group-hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 group/btn">
                             <span class="w-4 h-px bg-black/10 group-hover/btn:bg-black transition-all"></span>
                             NOTES
                         </button>
