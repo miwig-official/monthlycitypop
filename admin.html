@@ -3,86 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCP | 관리자 페이지</title>
+    <title>MCP | 관리자 전용 대시보드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; color: #18181b; }
-        .input-field { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.875rem; transition: border-color 0.2s; }
-        .input-field:focus { border-color: #5F4B8B; outline: none; }
-        .card { background: white; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .btn-primary { background-color: #5F4B8B; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; transition: all 0.2s; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-secondary { background-color: #f1f5f9; color: #475569; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; transition: all 0.2s; }
-        .btn-secondary:hover { background-color: #e2e8f0; }
-        .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 800; text-transform: uppercase; }
-        .loading-overlay { position: fixed; inset: 0; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; display: flex; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f1f5f9; color: #1e293b; }
         
-        /* 업그레이드된 파일 업로드 버튼 스타일 */
-        .file-upload-btn { 
-            @apply flex items-center gap-1.5 text-[10px] font-black text-[#5F4B8B] bg-white px-3 py-2 rounded-lg border border-[#5F4B8B]/30 shadow-sm hover:shadow-md hover:bg-[#5F4B8B] hover:text-white transition-all cursor-pointer active:scale-95 uppercase tracking-tighter;
+        /* Typography & Spacing */
+        .tracking-tight-custom { tracking-tighter: -0.05em; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Unified Input Styling */
+        .input-group { 
+            display: flex; 
+            align-items: center; 
+            background: #ffffff; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 0.75rem; 
+            overflow: hidden;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .input-group:focus-within { 
+            border-color: #5F4B8B; 
+            box-shadow: 0 0 0 3px rgba(95, 75, 139, 0.1); 
+        }
+        .input-field-bare { 
+            flex: 1; 
+            padding: 0.75rem 1rem; 
+            font-size: 0.875rem; 
+            outline: none;
+            background: transparent;
+        }
+
+        /* Premium File Upload Button */
+        .file-upload-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            background: #5F4B8B;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .file-upload-trigger:hover { 
+            background: #4a3a6e; 
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(95, 75, 139, 0.2);
+        }
+        .file-upload-trigger:active { transform: translateY(0); }
+
+        /* Card & Layout */
+        .card { 
+            background: white; 
+            border-radius: 1.25rem; 
+            padding: 2rem; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.02);
+            margin-bottom: 1.5rem;
+        }
+        .btn-main { 
+            background: #1e293b; 
+            color: white; 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 0.75rem; 
+            font-weight: 800; 
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        .btn-main:hover { background: #0f172a; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        
+        .btn-save {
+            background: #5F4B8B;
+            color: white;
+            font-weight: 900;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 20px rgba(95, 75, 139, 0.2);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-save:hover { transform: scale(1.05); background: #4a3a6e; }
+
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="selection:bg-[#5F4B8B] selection:text-white antialiased">
 
     <div id="loading-overlay" class="loading-overlay">
-        <div class="w-10 h-10 border-4 border-gray-100 border-t-[#5F4B8B] rounded-full animate-spin mb-4"></div>
-        <p class="font-mono text-xs text-gray-400 tracking-widest uppercase text-center">Connecting to Database...</p>
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 border-[3px] border-slate-100 border-t-[#5F4B8B] rounded-full animate-spin"></div>
+            <p class="mt-6 font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Vault Authorization...</p>
+        </div>
     </div>
 
-    <div class="max-w-4xl mx-auto">
-        <header class="flex items-center justify-between mb-10">
+    <div class="max-w-5xl mx-auto min-h-screen flex flex-col">
+        <header class="flex items-end justify-between pt-12 pb-10 px-4">
             <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Admin Console</h1>
-                <p class="text-sm text-slate-500 font-medium italic mt-2">Zero-Storage Archive Management</p>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="status-dot bg-slate-300" id="auth-dot"></span>
+                    <span id="auth-status" class="text-[10px] font-black uppercase tracking-widest text-slate-400">Connection Pending</span>
+                </div>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">Management Center</h1>
+                <p class="text-xs text-slate-400 font-bold mt-2 uppercase tracking-wide">Monthly City Pop Archive Project</p>
             </div>
-            <div class="flex items-center gap-4">
-                <div id="auth-status" class="status-badge bg-gray-100 text-gray-400">Offline</div>
-                <button id="save-btn" class="btn-primary flex items-center gap-2 shadow-lg shadow-[#5F4B8B]/20">저장하기</button>
-            </div>
+            <button id="save-btn" class="btn-save flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                저장하기
+            </button>
         </header>
 
-        <div class="grid md:grid-cols-3 gap-6">
-            <div class="md:col-span-1">
-                <div class="card sticky top-10">
-                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Volume History</h2>
-                    <div id="month-list" class="space-y-2 mb-6"></div>
-                    <button id="add-month-btn" class="w-full py-4 border-2 border-dashed border-slate-100 rounded-xl text-slate-300 font-bold text-xs hover:border-[#5F4B8B] hover:text-[#5F4B8B] transition-all">+ NEW VOLUME</button>
+        <div class="grid md:grid-cols-12 gap-8 flex-1 pb-20">
+            <!-- Sidebar -->
+            <div class="md:col-span-4 lg:col-span-3 px-4">
+                <div class="sticky top-8">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Archive Index</h2>
+                        <div id="month-list" class="space-y-1.5 mb-6"></div>
+                        <button id="add-month-btn" class="group w-full py-4 rounded-xl border-2 border-dashed border-slate-200 text-slate-300 hover:border-[#5F4B8B] hover:text-[#5F4B8B] transition-all flex flex-col items-center justify-center gap-1">
+                            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            <span class="text-[10px] font-black uppercase">Add Volume</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="md:col-span-2">
-                <div id="editor-container" class="hidden">
-                    <div class="card">
-                        <h2 class="text-sm font-black text-slate-900 mb-6 flex items-center gap-2"><span class="w-1.5 h-4 bg-[#5F4B8B] rounded-full"></span>Theme Header</h2>
-                        <div class="space-y-4">
-                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Title</label><input type="text" id="theme-title" class="input-field" oninput="updateThemeData('theme', this.value)"></div>
+            <!-- Editor -->
+            <div class="md:col-span-8 lg:col-span-9 px-4">
+                <div id="editor-container" class="hidden space-y-6">
+                    <!-- Theme Edit -->
+                    <div class="card animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="w-1 h-6 bg-[#5F4B8B] rounded-full"></div>
+                            <h2 class="text-lg font-black text-slate-900 tracking-tight uppercase pt-0.5">Primary Theme</h2>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="group">
+                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest group-focus-within:text-[#5F4B8B] transition-colors">Theme Concept Title</label>
+                                <input type="text" id="theme-title" class="input-field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:border-[#5F4B8B] focus:ring-4 focus:ring-[#5F4B8B]/5 transition-all outline-none" placeholder="예: Midnight Urban Drive" oninput="updateThemeData('theme', this.value)">
+                            </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Image</label>
-                                <div class="flex gap-2 items-center">
-                                    <input type="text" id="theme-img" class="input-field font-mono text-[10px] flex-1 bg-slate-50 border-dashed" placeholder="이미지 주소 혹은 우측 버튼 클릭" oninput="updateThemeData('themeImg', this.value)">
-                                    <label class="file-upload-btn shrink-0">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        파일 업로드
+                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Master Cover Image</label>
+                                <div class="input-group">
+                                    <input type="text" id="theme-img" class="input-field-bare font-mono text-xs text-slate-500" placeholder="직접 URL을 입력하거나 파일을 선택하세요" oninput="updateThemeData('themeImg', this.value)">
+                                    <label class="file-upload-trigger">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                        UPLOAD
                                         <input type="file" class="hidden" accept="image/*" onchange="handleFileAsBase64(this, 'theme-img', 'themeImg')">
                                     </label>
                                 </div>
                             </div>
-                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Intro Text</label><textarea id="theme-intro" class="input-field h-24" oninput="updateThemeData('intro', this.value)"></textarea></div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Introduction Passage</label>
+                                <textarea id="theme-intro" class="input-field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium min-h-[120px] focus:border-[#5F4B8B] focus:ring-4 focus:ring-[#5F4B8B]/5 transition-all outline-none leading-relaxed" placeholder="테마에 대한 짧은 설명을 입력하세요." oninput="updateThemeData('intro', this.value)"></textarea>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-sm font-black text-slate-900 flex items-center gap-2"><span class="w-1.5 h-4 bg-[#5F4B8B] rounded-full"></span>Track Catalog</h2>
-                            <button id="add-track-btn" class="btn-secondary">+ ADD TRACK</button>
+                    <!-- Album List -->
+                    <div class="card animate-in fade-in slide-in-from-bottom-6 duration-700">
+                        <div class="flex items-center justify-between mb-10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-1 h-6 bg-[#5F4B8B] rounded-full"></div>
+                                <h2 class="text-lg font-black text-slate-900 tracking-tight uppercase pt-0.5 text-nowrap">Curation Catalog</h2>
+                            </div>
+                            <button id="add-track-btn" class="btn-main flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                                ADD TRACK
+                            </button>
                         </div>
-                        <div id="tracks-container" class="space-y-6"></div>
+                        <div id="tracks-container" class="space-y-10"></div>
                     </div>
                 </div>
-                <div id="no-selection" class="card flex flex-col items-center justify-center py-32 text-slate-300">
-                    <p class="font-bold tracking-widest text-xs uppercase text-center px-6 leading-relaxed">Select a volume to start editing.<br><span class="opacity-50 font-medium">Images will be saved directly to DB.</span></p>
+                
+                <div id="no-selection" class="card flex flex-col items-center justify-center py-40 text-slate-300">
+                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <p class="font-black tracking-widest text-[10px] uppercase text-center px-6 leading-relaxed">Select a volume to manage the collection</p>
                 </div>
             </div>
         </div>
@@ -112,8 +218,9 @@
             await signInAnonymously(auth);
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
-                    document.getElementById('auth-status').innerText = "Online";
-                    document.getElementById('auth-status').className = "status-badge bg-green-50 text-green-600";
+                    document.getElementById('auth-dot').className = "status-dot bg-green-500 animate-pulse";
+                    document.getElementById('auth-status').innerText = "Database Connected";
+                    document.getElementById('auth-status').classList.replace('text-slate-400', 'text-green-600');
                     await loadData();
                 } else document.getElementById('loading-overlay').style.display = 'none';
             });
@@ -131,7 +238,8 @@
             const container = document.getElementById('month-list'); container.innerHTML = '';
             Object.keys(archiveData).sort().reverse().forEach(m => {
                 const btn = document.createElement('button');
-                btn.className = `w-full text-left px-4 py-3 rounded-lg text-xs font-bold transition-all ${m === selectedMonth ? 'bg-[#5F4B8B] text-white shadow-lg' : 'bg-slate-50 text-slate-600'}`;
+                const active = m === selectedMonth;
+                btn.className = `w-full text-left px-5 py-4 rounded-xl text-xs font-black transition-all ${active ? 'bg-[#5F4B8B] text-white shadow-xl shadow-[#5F4B8B]/20 scale-[1.02]' : 'bg-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`;
                 btn.innerText = m; btn.onclick = () => selectMonth(m);
                 container.appendChild(btn);
             });
@@ -152,24 +260,39 @@
         const renderTracks = (albums) => {
             const container = document.getElementById('tracks-container'); container.innerHTML = '';
             albums.forEach((album, idx) => {
-                const div = document.createElement('div'); div.className = 'p-5 border border-slate-100 rounded-xl relative bg-slate-50/30';
+                const div = document.createElement('div'); 
+                div.className = 'group p-8 border border-slate-100 rounded-3xl relative bg-white hover:border-[#5F4B8B]/30 hover:shadow-2xl hover:shadow-slate-200 transition-all duration-300';
                 div.innerHTML = `
-                    <div class="absolute top-4 left-4 text-[10px] font-black text-[#5F4B8B]">TRACK ${idx+1}</div>
-                    <button onclick="removeTrack(${idx})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <div class="absolute top-8 left-8 text-[10px] font-black text-[#5F4B8B] tracking-widest flex items-center gap-2">
+                        <span class="w-4 h-[2px] bg-[#5F4B8B]"></span> TRACK ${String(idx+1).padStart(2,'0')}
+                    </div>
+                    <button onclick="removeTrack(${idx})" class="absolute top-8 right-8 text-slate-200 hover:text-red-500 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                        <input type="text" value="${album.title || ''}" oninput="updateTrackData(${idx}, 'title', this.value)" class="input-field" placeholder="제목">
-                        <input type="text" value="${album.artist || ''}" oninput="updateTrackData(${idx}, 'artist', this.value)" class="input-field" placeholder="가수">
-                        <div class="md:col-span-2 flex gap-2 items-center">
-                            <input type="text" id="track-img-${idx}" value="${album.img || ''}" oninput="updateTrackData(${idx}, 'img', this.value)" class="input-field font-mono text-[10px] flex-1 bg-slate-50 border-dashed" placeholder="이미지 주소">
-                            <label class="file-upload-btn shrink-0">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                이미지 선택
-                                <input type="file" class="hidden" accept="image/*" onchange="handleTrackFileAsBase64(this, ${idx})">
-                            </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 mt-10">
+                        <div>
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Album Title</label>
+                            <input type="text" value="${album.title || ''}" oninput="updateTrackData(${idx}, 'title', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold focus:border-[#5F4B8B] outline-none transition-all" placeholder="Title">
                         </div>
-                        <textarea oninput="updateTrackData(${idx}, 'desc', this.value)" class="input-field md:col-span-2 h-24" placeholder="상세 해설">${album.desc || ''}</textarea>
+                        <div>
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Artist Name</label>
+                            <input type="text" value="${album.artist || ''}" oninput="updateTrackData(${idx}, 'artist', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold focus:border-[#5F4B8B] outline-none transition-all" placeholder="Artist">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Cover Source</label>
+                            <div class="input-group">
+                                <input type="text" id="track-img-${idx}" value="${album.img || ''}" oninput="updateTrackData(${idx}, 'img', this.value)" class="input-field-bare font-mono text-[10px] text-slate-500" placeholder="https://...">
+                                <label class="file-upload-trigger">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                    UPLOAD
+                                    <input type="file" class="hidden" accept="image/*" onchange="handleTrackFileAsBase64(this, ${idx})">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Liner Notes</label>
+                            <textarea oninput="updateTrackData(${idx}, 'desc', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-medium min-h-[100px] focus:border-[#5F4B8B] outline-none transition-all leading-relaxed" placeholder="Album backstory...">${album.desc || ''}</textarea>
+                        </div>
                     </div>`;
                 container.appendChild(div);
             });
@@ -177,7 +300,7 @@
 
         window.handleFileAsBase64 = (input, displayId, dataKey) => {
             const file = input.files[0]; if (!file) return;
-            if (file.size > 1024 * 1024) { alert("파일이 너무 큽니다 (1MB 이하 권장)."); return; }
+            if (file.size > 1.2 * 1024 * 1024) { alert("파일이 너무 큽니다 (1MB 이하 권장)."); return; }
             const reader = new FileReader();
             reader.onload = (e) => {
                 const base64Data = e.target.result;
@@ -189,7 +312,7 @@
 
         window.handleTrackFileAsBase64 = (input, idx) => {
             const file = input.files[0]; if (!file) return;
-            if (file.size > 800 * 1024) { alert("파일이 너무 큽니다. (1MB 이하 권장)"); return; }
+            if (file.size > 1024 * 1024) { alert("파일 용량을 줄여주세요 (1MB 이하 권장)."); return; }
             const reader = new FileReader();
             reader.onload = (e) => {
                 const base64Data = e.target.result;
@@ -201,7 +324,7 @@
 
         window.updateThemeData = (field, value) => { if (selectedMonth) archiveData[selectedMonth][field] = value; };
         window.updateTrackData = (idx, field, value) => { if (selectedMonth) archiveData[selectedMonth].albums[idx][field] = value; };
-        window.removeTrack = (idx) => { if (confirm("삭제하시겠습니까?")) { archiveData[selectedMonth].albums.splice(idx, 1); renderTracks(archiveData[selectedMonth].albums); } };
+        window.removeTrack = (idx) => { if (confirm("이 트랙을 아카이브에서 영구적으로 삭제하시겠습니까?")) { archiveData[selectedMonth].albums.splice(idx, 1); renderTracks(archiveData[selectedMonth].albums); } };
 
         document.getElementById('add-track-btn').onclick = () => {
             if (!selectedMonth) return;
@@ -211,22 +334,29 @@
         };
 
         document.getElementById('add-month-btn').onclick = () => {
-            const nextMonth = prompt("새로운 호 입력 (예: 2026.05)");
+            const nextMonth = prompt("새로운 호의 연도와 월을 입력하세요 (예: 2026.05)");
             if (nextMonth && !archiveData[nextMonth]) {
-                archiveData[nextMonth] = { theme: "New Theme", themeImg: "", intro: "", albums: [] };
+                archiveData[nextMonth] = { theme: "새로운 테마", themeImg: "", intro: "", albums: [] };
                 renderSidebar(); selectMonth(nextMonth);
-            }
+            } else if (archiveData[nextMonth]) { alert("이미 존재하는 월호입니다."); }
         };
 
         document.getElementById('save-btn').onclick = async () => {
             const btn = document.getElementById('save-btn');
-            btn.disabled = true; btn.innerText = "Saving...";
+            const originalText = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '<span class="animate-pulse">Syncing...</span>';
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), archiveData);
-                alert("성공적으로 저장되었습니다!");
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert("✨ 데이터베이스 동기화가 완료되었습니다.");
+                }, 500);
             } catch (e) {
-                alert("저장 실패 (용량이 너무 클 수 있습니다): " + e.message);
-            } finally { btn.disabled = false; btn.innerText = "저장하기"; }
+                alert("동기화 실패 (용량 초과 가능성): " + e.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         };
 
         init();
