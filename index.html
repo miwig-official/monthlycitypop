@@ -153,24 +153,24 @@
             <p id="modal-artist" class="font-mono text-[10px] text-gray-400 uppercase tracking-[0.3em] mb-4"></p>
             <h2 id="modal-title" class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-8 md:mb-10 leading-none"></h2>
             <div class="w-12 h-px bg-black/10 mx-auto mb-8"></div>
-            <div class="max-h-[50vh] overflow-y-auto px-2">
+            <div class="max-h-[50vh] overflow-y-auto px-2 text-justify md:text-center">
                 <p class="text-base text-gray-600 leading-relaxed font-medium max-w-md mx-auto" id="modal-desc"></p>
             </div>
             <button onclick="closeModal()" class="mt-12 md:mt-16 font-mono text-[10px] font-black tracking-widest uppercase border-b border-black pb-1">Close Window</button>
         </div>
     </div>
 
-    <!-- Header: Height and Padding optimized for mobile breathing room -->
+    <!-- Header: Optimized to prevent truncation of the brand title -->
     <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-[1400px] mx-auto flex items-center justify-between h-16 md:h-14 px-4 md:px-6 overflow-hidden">
-            <div class="flex items-center min-w-0 mr-4">
-                <!-- 가변형 텍스트 크기 적용 (text-base ~ text-2xl) -->
-                <h1 class="font-logo text-base xs:text-lg sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-tighter whitespace-nowrap leading-none pt-0.5 flex-shrink truncate">Monthly City Pop</h1>
-                <div class="hidden sm:block w-px h-3 bg-gray-200 mx-4 flex-shrink-0"></div>
-                <div class="hidden lg:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em] flex-shrink-0">Curated Archive</div>
+        <div class="max-w-[1400px] mx-auto flex items-center justify-between h-16 md:h-14 px-4 md:px-6">
+            <div class="flex items-center">
+                <!-- Removed 'truncate' and 'flex-shrink' to prioritize brand name visibility -->
+                <h1 class="font-logo text-lg xs:text-xl sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-tighter whitespace-nowrap leading-none pt-0.5">Monthly City Pop</h1>
+                <div class="hidden md:block w-px h-3 bg-gray-200 mx-4"></div>
+                <div class="hidden lg:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em]">Curated Archive</div>
             </div>
 
-            <div class="flex items-center flex-shrink-0">
+            <div class="flex items-center flex-shrink-0 ml-4">
                 <div class="dropdown relative cursor-pointer" id="dropdown-toggle" onclick="window.toggleDropdown(event)">
                     <div class="flex items-center gap-2 px-3 py-1.5 md:py-2 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm">
                         <div class="w-1.5 h-1.5 rounded-full bg-black"></div>
@@ -279,18 +279,19 @@
             const data = archiveData[month]; if (!data) return;
             const issueNo = month.split('.')[1] || "--";
             document.getElementById('nav-month').innerText = month;
-            
-            // Vol. 2026.04 형태로 변경하여 오해 소지 제거
             document.getElementById('theme-vol-label').innerText = `VOL. ${month}`;
             document.getElementById('theme-watermark').innerText = issueNo;
             document.getElementById('theme-intro').innerText = data.intro || "";
             
+            // Re-ensuring theme image visibility and proper sourcing
             const themeImgEl = document.getElementById('theme-img');
             if(data.themeImg) {
                 themeImgEl.src = data.themeImg;
-                themeImgEl.classList.remove('hidden');
+                themeImgEl.style.opacity = '1';
+                themeImgEl.alt = "Theme Cover";
             } else {
-                themeImgEl.classList.add('hidden');
+                themeImgEl.src = "";
+                themeImgEl.style.opacity = '0';
             }
 
             document.getElementById('theme-title').innerText = data.theme || "";
