@@ -15,11 +15,12 @@
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-secondary { background-color: #f1f5f9; color: #475569; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; }
         .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 800; text-transform: uppercase; }
+        .loading-overlay { position: fixed; inset: 0; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; display: flex; }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <div id="loading-overlay" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+    <div id="loading-overlay" class="loading-overlay">
         <div class="w-10 h-10 border-4 border-gray-100 border-t-[#5F4B8B] rounded-full animate-spin mb-4"></div>
         <p class="font-mono text-xs text-gray-400 tracking-widest uppercase">Connecting to Database...</p>
     </div>
@@ -65,15 +66,15 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Title</label>
-                                <input type="text" id="theme-title" class="input-field" placeholder="예: Midnight Urban Drive">
+                                <input type="text" id="theme-title" class="input-field" placeholder="예: Midnight Urban Drive" oninput="updateThemeData('theme', this.value)">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Image URL (1:1)</label>
-                                <input type="text" id="theme-img" class="input-field" placeholder="Unsplash 등 이미지 주소">
+                                <input type="text" id="theme-img" class="input-field" placeholder="Unsplash 등 이미지 주소" oninput="updateThemeData('themeImg', this.value)">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Intro Text</label>
-                                <textarea id="theme-intro" class="input-field h-24" placeholder="테마에 대한 짧은 설명을 입력하세요."></textarea>
+                                <textarea id="theme-intro" class="input-field h-24" placeholder="테마에 대한 짧은 설명을 입력하세요." oninput="updateThemeData('intro', this.value)"></textarea>
                             </div>
                         </div>
                     </div>
@@ -107,58 +108,80 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Config (Provided by environment)
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'citypop-archive';
-
+        // Global State
         let archiveData = {};
         let selectedMonth = "";
+        let auth, db, appId;
+
+        const hideLoading = () => {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.style.display = 'none';
+        };
 
         const init = async () => {
-            // Rule 3: Auth Before Queries
             try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'citypop-archive';
+
+                // Rule 3: Auth first
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
-            } catch (err) {
-                console.error("Auth Error:", err);
-            }
 
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    document.getElementById('auth-status').innerText = "Connected";
-                    document.getElementById('auth-status').className = "status-badge bg-green-50 text-green-600";
-                    
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive');
-                    const snap = await getDoc(docRef);
-                    if (snap.exists()) {
-                        archiveData = snap.data();
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        document.getElementById('auth-status').innerText = "Connected";
+                        document.getElementById('auth-status').className = "status-badge bg-green-50 text-green-600";
+                        await loadData();
                     } else {
-                        // Initial Default Data
-                        archiveData = { 
-                            "2026.04": { 
-                                theme: "Midnight Urban Drive", 
-                                themeImg: "https://images.unsplash.com/photo-1493225457224-ca2e6fc737c6?q=80&w=1000", 
-                                intro: "차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들.", 
-                                albums: [] 
-                            } 
-                        };
+                        console.error("Auth failed or user not found");
+                        hideLoading();
                     }
-                    document.getElementById('loading-overlay').style.display = 'none';
-                    renderSidebar();
+                });
+
+            } catch (err) {
+                console.error("Initialization Error:", err);
+                hideLoading();
+            }
+        };
+
+        const loadData = async () => {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive');
+                const snap = await getDoc(docRef);
+                
+                if (snap.exists()) {
+                    archiveData = snap.data();
+                } else {
+                    // Fallback to default
+                    archiveData = { 
+                        "2026.04": { 
+                            theme: "Midnight Urban Drive", 
+                            themeImg: "https://images.unsplash.com/photo-1493225457224-ca2e6fc737c6?q=80&w=1000", 
+                            intro: "차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들.", 
+                            albums: [] 
+                        } 
+                    };
                 }
-            });
+                renderSidebar();
+            } catch (err) {
+                console.error("Data Load Error:", err);
+            } finally {
+                hideLoading();
+            }
         };
 
         const renderSidebar = () => {
             const container = document.getElementById('month-list');
+            if (!container) return;
             container.innerHTML = '';
-            Object.keys(archiveData).sort().reverse().forEach(m => {
+            const sortedKeys = Object.keys(archiveData).sort().reverse();
+            sortedKeys.forEach(m => {
                 const btn = document.createElement('button');
                 const isSelected = m === selectedMonth;
                 btn.className = `w-full text-left px-4 py-3 rounded-lg text-xs font-bold transition-all ${isSelected ? 'bg-[#5F4B8B] text-white shadow-lg' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`;
@@ -184,6 +207,7 @@
 
         const renderTracks = (albums) => {
             const container = document.getElementById('tracks-container');
+            if (!container) return;
             container.innerHTML = '';
             albums.forEach((album, idx) => {
                 const div = document.createElement('div');
@@ -214,9 +238,15 @@
             });
         };
 
-        // Window Globals
+        // Global Event Handlers
+        window.updateThemeData = (field, value) => {
+            if (!selectedMonth) return;
+            archiveData[selectedMonth][field] = value;
+        };
+
         window.updateTrackData = (idx, field, value) => {
-            if (!archiveData[selectedMonth]) return;
+            if (!selectedMonth) return;
+            if (!archiveData[selectedMonth].albums[idx]) archiveData[selectedMonth].albums[idx] = {};
             archiveData[selectedMonth].albums[idx][field] = value;
         };
 
@@ -245,15 +275,11 @@
         };
 
         document.getElementById('save-btn').onclick = async () => {
-            if (!auth.currentUser) return;
-            
-            // Sync Current Theme Form
-            if (selectedMonth) {
-                archiveData[selectedMonth].theme = document.getElementById('theme-title').value;
-                archiveData[selectedMonth].themeImg = document.getElementById('theme-img').value;
-                archiveData[selectedMonth].intro = document.getElementById('theme-intro').value;
+            if (!auth.currentUser) {
+                alert("연결이 끊겼습니다. 새로고침 후 다시 시도해주세요.");
+                return;
             }
-
+            
             const btn = document.getElementById('save-btn');
             const originalText = btn.innerHTML;
             btn.disabled = true;
@@ -262,7 +288,7 @@
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive');
             try {
                 await setDoc(docRef, archiveData);
-                alert("성공적으로 저장되었습니다.");
+                alert("클라우드 저장소에 성공적으로 저장되었습니다.");
             } catch (e) {
                 console.error("Save Error:", e);
                 alert("저장 실패: " + e.message);
@@ -272,7 +298,8 @@
             }
         };
 
-        init();
+        // Start initialization
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
