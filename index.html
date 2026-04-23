@@ -1,446 +1,515 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MONTHLY CITY POP | ARCHIVE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@800&display=swap');
-        
-        :root { 
-            --uv: #5F4B8B; 
-            --bg: #ffffff; 
-            --grid-line: #f3f4f6; 
-            --text-main: #111111; 
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monthly City Pop | Archive</title>
+  <meta name="description" content="매달 10장의 시티팝 명반을 큐레이션해 소개하는 독립 아카이브 프로젝트.">
+  <meta property="og:title" content="Monthly City Pop">
+  <meta property="og:description" content="Curated Sound Archive — 시티팝 월간 아카이브">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://miwig-official.github.io/monthlycitypop/logo.jpg">
 
-        body { 
-            background-color: var(--bg); 
-            color: var(--text-main); 
-            font-family: 'Pretendard', sans-serif; 
-            -webkit-font-smoothing: antialiased; 
-            scroll-behavior: smooth; 
-        }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
-        .font-mono { font-family: 'Space Mono', monospace; }
-        .font-logo { font-family: 'Syne', sans-serif; }
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@800&display=swap">
 
-        /* Dropdown Menu */
-        .dropdown-menu { 
-            opacity: 0; 
-            visibility: hidden; 
-            transform: translateY(10px); 
-            position: absolute; 
-            top: 100%; 
-            right: 0; 
-            background: var(--bg); 
-            border: 1px solid #eeeeee; 
-            border-radius: 12px; 
-            min-width: 180px; 
-            z-index: 50; 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.06); 
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
-        }
-        .dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+  <style>
+    :root {
+      --uv: #5F4B8B;
+      --bg: #ffffff;
+      --ink: #111111;
+      --ink-mute: #9CA3AF;
+      --line: #F3F4F6;
+    }
 
-        /* Album Card */
-        .album-card .cover-box { 
-            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); 
-            overflow: hidden;
-            background: #f8f8f8;
-            border: 1px solid #eeeeee;
-            cursor: pointer;
-        }
-        .album-card:hover .cover-box { 
-            transform: translateY(-6px); 
-            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
-            border-color: #111111;
-        }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Pretendard Variable', Pretendard, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-mono { font-family: 'Space Mono', monospace; }
+    .font-logo { font-family: 'Syne', sans-serif; }
 
-        /* Title Style */
-        #theme-title {
-            font-size: clamp(1.8rem, 8vw, 3.2rem);
-            font-weight: 900;
-            line-height: 0.9;
-            letter-spacing: -0.02em;
-            color: #111111;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
+    /* ─── DROPDOWN ─── */
+    .dropdown-menu {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--bg);
+      border: 1px solid #eee;
+      border-radius: 12px;
+      min-width: 180px;
+      z-index: 50;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.06);
+      transition: opacity .25s, transform .25s, visibility .25s;
+    }
+    .dropdown.active .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
 
-        /* Ticker Style */
-        .ticker-wrap {
-            width: 100%;
-            overflow: hidden;
-            background: #111111;
-            padding: 12px 0;
-        }
-        @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
-        .animate-marquee { 
-            display: inline-block; 
-            white-space: nowrap; 
-            animation: marquee 45s linear infinite; 
-        }
-        .marquee-text {
-            font-family: 'Space Mono', monospace;
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3em;
-            color: rgba(255, 255, 255, 0.5);
-        }
+    /* ─── ALBUM CARD ─── */
+    .album-card .cover-box {
+      background: #f8f8f8;
+      border: 1px solid #eee;
+      overflow: hidden;
+      transition: transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s;
+    }
+    @media (hover: hover) {
+      .album-card:hover .cover-box {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+        border-color: var(--ink);
+      }
+      .album-card:hover .album-title { color: var(--uv); }
+    }
 
-        /* Modal */
-        #note-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            animation: fadeIn 0.4s ease forwards;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal-content {
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    /* ─── HERO TITLE ─── */
+    #theme-title {
+      font-size: clamp(1.8rem, 8vw, 3.2rem);
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      word-break: keep-all;
+    }
 
-        /* Hero Image Container - 완벽한 모바일 리사이징 및 1:1 비율 강제 */
-        .hero-img-box {
-            width: 100%;
-            aspect-ratio: 1 / 1; /* 모바일/PC 모두 항상 1:1 유지 */
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f1f1f1;
-            overflow: hidden;
-        }
-        
-        @media (min-width: 768px) {
-            .hero-img-box {
-                max-width: 280px; /* PC에서만 크기 제한 */
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-                border-radius: 0.125rem;
-            }
-        }
+    /* ─── HERO IMAGE — MOBILE-FIRST FIX ─── */
+    .hero-img-box {
+      width: 100%;
+      max-width: 220px;          /* 모바일 기본 제한 */
+      aspect-ratio: 1 / 1;
+      margin: 0 auto;
+      position: relative;
+      background: #f1f1f1;
+      overflow: hidden;
+      border-radius: 2px;
+    }
+    @media (min-width: 768px) {
+      .hero-img-box {
+        max-width: 280px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,.25);
+      }
+    }
+    #theme-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
-        #theme-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
+    /* ─── TICKER ─── */
+    .ticker-wrap {
+      width: 100%;
+      overflow: hidden;
+      background: var(--ink);
+      padding: 12px 0;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-marquee {
+      display: inline-flex;
+      gap: 3rem;
+      white-space: nowrap;
+      animation: marquee 45s linear infinite;
+      will-change: transform;
+    }
+    .marquee-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: rgba(255,255,255,0.5);
+    }
 
-        /* Support for newlines */
-        #theme-intro, #modal-desc {
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
+    /* ─── MODAL ─── */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(255,255,255,0.98);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .modal.open { display: flex; animation: fadeIn .35s ease forwards; }
+    .modal-content {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      animation: slideUp .5s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px) }
+      to { opacity: 1; transform: translateY(0) }
+    }
 
-        .footer-logo { height: 18px; width: auto; object-fit: contain; }
-    </style>
+    #theme-intro, #modal-desc {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .footer-logo { height: 18px; width: auto; object-fit: contain; }
+
+    /* ─── CARD REVEAL ─── */
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .album-card { animation: cardIn .4s ease both; }
+
+    /* ─── UTILITIES ─── */
+    .uv-dot { color: var(--uv); }
+    .focus-ring:focus-visible {
+      outline: 2px solid var(--uv);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  </style>
 </head>
-<body class="selection:bg-[#111111] selection:text-white antialiased overflow-x-hidden">
+<body class="selection:bg-black selection:text-white overflow-x-hidden">
 
-    <!-- Liner Note Modal -->
-    <div id="note-modal" onclick="closeModal()">
-        <div class="modal-content px-4" onclick="event.stopPropagation()">
-            <button onclick="closeModal()" class="absolute top-6 right-6 md:top-10 md:right-10 text-black">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <p id="modal-artist" class="font-mono text-[10px] text-gray-400 uppercase tracking-[0.3em] mb-4"></p>
-            <h2 id="modal-title" class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-8 md:mb-10 leading-none"></h2>
-            <div class="w-12 h-px bg-black/10 mx-auto mb-8"></div>
-            <div class="max-h-[50vh] overflow-y-auto px-2 text-justify md:text-center">
-                <p class="text-base text-gray-600 leading-relaxed font-medium max-w-md mx-auto" id="modal-desc"></p>
-            </div>
-            <button onclick="closeModal()" class="mt-12 md:mt-16 font-mono text-[10px] font-black tracking-widest uppercase border-b border-black pb-1">Close Window</button>
-        </div>
+  <!-- ─── MODAL ─── -->
+  <div id="note-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content px-4 relative">
+      <button type="button" class="modal-close absolute -top-2 right-0 md:top-0 md:right-0 text-black focus-ring" aria-label="Close">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <p id="modal-artist" class="font-mono text-[10px] text-gray-400 uppercase tracking-[0.3em] mb-4"></p>
+      <h2 id="modal-title" class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-8 md:mb-10 leading-none"></h2>
+      <div class="w-12 h-px bg-black/10 mx-auto mb-8"></div>
+      <div class="max-h-[50vh] overflow-y-auto px-2">
+        <p id="modal-desc" class="text-base text-gray-600 leading-relaxed font-medium max-w-md mx-auto text-left md:text-center"></p>
+      </div>
+      <button type="button" class="modal-close mt-12 md:mt-16 font-mono text-[10px] font-black tracking-widest uppercase border-b border-black pb-1 focus-ring">Close Window</button>
     </div>
+  </div>
 
-    <!-- Header: Two-line Title on Mobile -->
-    <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-[1400px] mx-auto flex items-center justify-between min-h-[70px] md:h-14 px-4 md:px-6 py-2 md:py-0">
-            <div class="flex items-center min-w-0">
-                <h1 class="font-logo text-[1.1rem] sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-tighter leading-[0.95] pt-0.5 flex flex-col sm:flex-row">
-                    <span>Monthly</span>
-                    <span class="sm:ml-2">City Pop</span>
-                </h1>
-                <div class="hidden md:block w-px h-3 bg-gray-200 mx-4"></div>
-                <div class="hidden lg:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em]">Curated Archive</div>
-            </div>
+  <!-- ─── HEADER ─── -->
+  <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40">
+    <div class="max-w-[1400px] mx-auto flex items-center justify-between min-h-[70px] md:h-14 px-4 md:px-6 py-2 md:py-0">
+      <div class="flex items-center min-w-0">
+        <h1 class="font-logo text-[1.1rem] sm:text-xl md:text-2xl uppercase tracking-tighter leading-[0.95] pt-0.5 flex flex-col sm:flex-row">
+          <span>Monthly</span>
+          <span class="sm:ml-2">City Pop<span class="uv-dot">.</span></span>
+        </h1>
+        <div class="hidden md:block w-px h-3 bg-gray-200 mx-4"></div>
+        <div class="hidden lg:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em]">Curated Archive</div>
+      </div>
 
-            <div class="flex items-center flex-shrink-0 ml-4">
-                <div class="dropdown relative cursor-pointer" id="dropdown-toggle" onclick="window.toggleDropdown(event)">
-                    <div class="flex items-center gap-2 px-3 py-1.5 md:py-2 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm">
-                        <div class="w-1.5 h-1.5 rounded-full bg-black"></div>
-                        <span id="nav-month" class="font-mono text-[9px] font-black uppercase tracking-widest text-gray-800 pt-0.5">---</span>
-                        <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                    <div id="month-list" class="dropdown-menu mt-2 p-2"></div>
-                </div>
-            </div>
+      <div class="dropdown relative shrink-0 ml-4" id="dropdown-toggle">
+        <button type="button" class="dropdown-btn flex items-center gap-2 px-3 py-1.5 md:py-2 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm focus-ring">
+          <div class="w-1.5 h-1.5 rounded-full bg-black"></div>
+          <span id="nav-month" class="font-mono text-[9px] font-black uppercase tracking-widest text-gray-800 pt-0.5">---</span>
+          <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div id="month-list" class="dropdown-menu mt-2 p-2" role="menu"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[1400px] mx-auto w-full">
+
+    <!-- ─── HERO ─── -->
+    <section class="relative bg-white overflow-hidden border-y border-black">
+      <div id="theme-watermark" class="absolute right-0 bottom-0 text-[10rem] md:text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4" aria-hidden="true">--</div>
+
+      <div class="grid md:grid-cols-12 relative z-10 items-stretch">
+
+        <!-- Image column: padded on mobile too -->
+        <div class="md:col-span-4 lg:col-span-3 py-8 px-6 md:p-8 flex items-center justify-center bg-gray-50/60 md:bg-gray-50/50 border-b md:border-b-0 md:border-r border-black">
+          <div class="hero-img-box">
+            <img id="theme-img" alt="Theme Cover" src="https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=800" class="grayscale-[5%] md:hover:grayscale-0 transition-all duration-700" loading="eager" decoding="async">
+          </div>
         </div>
-    </header>
 
-    <main class="max-w-[1400px] mx-auto w-full">
-        <section class="animate-snap relative bg-white overflow-hidden border-y border-black">
-            <div id="theme-watermark" class="absolute right-0 bottom-0 text-[10rem] md:text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4">--</div>
-
-            <div class="grid md:grid-cols-12 relative z-10 items-stretch">
-                <!-- Image Side: 모바일에서는 패딩 삭제 (p-0)하여 이미지 꽉 차게 -->
-                <div class="md:col-span-4 lg:col-span-3 p-0 md:p-8 flex items-center justify-center bg-transparent md:bg-gray-50/50 border-b md:border-b-0 md:border-r border-black overflow-hidden">
-                    <div class="hero-img-box">
-                        <img id="theme-img" src="" alt="Theme Cover" class="grayscale-[5%] hover:grayscale-0 transition-all duration-1000" onerror="this.src='https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=1000'">
-                    </div>
-                </div>
-                
-                <!-- Text Side -->
-                <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center">
-                    <div class="px-6 py-10 md:px-12 relative z-20">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="w-10 h-[2px] bg-[#111111]"></span>
-                            <span id="theme-vol-label" class="font-mono text-[10px] md:text-[11px] font-black text-black uppercase tracking-[0.3em]">---</span>
-                        </div>
-                        <h2 id="theme-title" class="mb-6 max-w-4xl break-keep"></h2>
-                        <div class="max-w-xl">
-                            <p id="theme-intro" class="text-sm md:text-base text-gray-500 leading-relaxed font-medium italic border-l-[3px] border-black pl-5"></p>
-                        </div>
-                    </div>
-                    <div class="mt-auto ticker-wrap">
-                        <div class="animate-marquee flex gap-12 whitespace-nowrap">
-                            <span class="marquee-text">* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span>
-                            <span class="marquee-text">* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span>
-                        </div>
-                    </div>
-                </div>
+        <!-- Text column -->
+        <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center">
+          <div class="px-6 py-10 md:px-12 relative z-20">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="w-10 h-[2px] bg-[var(--uv)]"></span>
+              <span id="theme-vol-label" class="font-mono text-[10px] md:text-[11px] font-black text-black uppercase tracking-[0.3em]">---</span>
             </div>
-        </section>
-
-        <section class="p-6 md:p-10 lg:p-14 bg-white animate-snap">
-            <div class="mb-10 md:mb-14 flex items-end justify-between">
-                <div>
-                    <h3 class="font-logo text-lg md:text-xl font-black uppercase tracking-tighter text-black leading-none">Collection</h3>
-                </div>
-                <div class="flex-1 h-px bg-gray-100 ml-8 md:ml-12 hidden sm:block mb-1"></div>
+            <h2 id="theme-title" class="mb-6 max-w-4xl"></h2>
+            <p id="theme-intro" class="text-sm md:text-base text-gray-500 leading-relaxed font-medium italic border-l-[3px] border-[var(--uv)] pl-5 max-w-xl"></p>
+          </div>
+          <div class="mt-auto ticker-wrap" aria-hidden="true">
+            <div class="animate-marquee">
+              <span class="marquee-text">✦ Monthly City Pop Archive &nbsp;&nbsp;//&nbsp;&nbsp; Independent Sound Catalog &nbsp;&nbsp;//&nbsp;&nbsp; Curated Urban Groove &nbsp;&nbsp;//&nbsp;&nbsp; Digital Index &nbsp;&nbsp;//&nbsp;&nbsp; Since 2026 ✦</span>
+              <span class="marquee-text">✦ Monthly City Pop Archive &nbsp;&nbsp;//&nbsp;&nbsp; Independent Sound Catalog &nbsp;&nbsp;//&nbsp;&nbsp; Curated Urban Groove &nbsp;&nbsp;//&nbsp;&nbsp; Digital Index &nbsp;&nbsp;//&nbsp;&nbsp; Since 2026 ✦</span>
             </div>
-            <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 md:gap-x-12 gap-y-16 items-start"></div>
-        </section>
-    </main>
-
-    <footer class="bg-white py-8 border-t border-gray-100 text-center flex flex-col items-center gap-2.5">
-        <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" alt="MCP Logo" class="footer-logo">
-        <div class="flex flex-col items-center gap-1">
-            <p class="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-black">Midnight with Groove Archive Project</p>
-            <p class="font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-gray-300">© 2026. All rights reserved.</p>
+          </div>
         </div>
-    </footer>
+      </div>
+    </section>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- ─── COLLECTION ─── -->
+    <section class="p-6 md:p-10 lg:p-14 bg-white">
+      <div class="mb-10 md:mb-14 flex items-end justify-between">
+        <h3 class="font-logo text-lg md:text-xl font-black uppercase tracking-tighter text-black leading-none">Collection</h3>
+        <div class="flex-1 h-px bg-gray-100 ml-8 md:ml-12 hidden sm:block mb-1"></div>
+      </div>
+      <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 md:gap-x-10 gap-y-12 md:gap-y-16 items-start"></div>
+    </section>
+  </main>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDXMTDaE76mqn6S6w2F5s4qHhdFphNULg8",
-            authDomain: "monthly-city-pop.firebaseapp.com",
-            projectId: "monthly-city-pop",
-            storageBucket: "monthly-city-pop.firebasestorage.app",
-            messagingSenderId: "860318834352",
-            appId: "1:860318834352:web:f1b4d1c3212a41a9dde575"
-        };
+  <!-- ─── FOOTER ─── -->
+  <footer class="bg-white py-8 border-t border-gray-100 text-center flex flex-col items-center gap-2.5">
+    <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" alt="MCP Logo" class="footer-logo" loading="lazy">
+    <div class="flex flex-col items-center gap-1">
+      <p class="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-black">Midnight with Groove Archive Project</p>
+      <p class="font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-gray-300">© 2026. All rights reserved.</p>
+    </div>
+  </footer>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = 'monthly-city-pop';
-        let archiveData = {}; 
-        let currentMonth = "";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 방어 로직: DB 연결 딜레이 시 보이는 스켈레톤/폴백 데이터 (빈 화면 방지용)
-        const mockData = {
-            "2026.04": {
-                theme: "LOADING ARCHIVE...",
-                themeImg: "https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=1000",
-                intro: "아카이브 시스템과 동기화 중입니다.\n잠시만 기다려주세요.",
-                albums: [
-                    { title: "System Ready", artist: "MCP", img: "", desc: "데이터 로드 대기 중..." }
-                ]
+    /* ─── CONFIG ─── */
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXMTDaE76mqn6S6w2F5s4qHhdFphNULg8",
+      authDomain: "monthly-city-pop.firebaseapp.com",
+      projectId: "monthly-city-pop",
+      storageBucket: "monthly-city-pop.firebasestorage.app",
+      messagingSenderId: "860318834352",
+      appId: "1:860318834352:web:f1b4d1c3212a41a9dde575"
+    };
+    const APP_ID = 'monthly-city-pop';
+    const FALLBACK_IMG = 'https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=800';
+    const PLACEHOLDER_IMG = 'https://via.placeholder.com/500?text=No+Cover';
+
+    /* ─── STATE ─── */
+    const state = {
+      archive: {},
+      currentMonth: ''
+    };
+
+    const mockData = {
+      "2026.04": {
+        theme: "LOADING ARCHIVE…",
+        themeImg: FALLBACK_IMG,
+        intro: "아카이브 시스템과 동기화 중입니다.\n잠시만 기다려주세요.",
+        albums: [{ title: "System Ready", artist: "MCP", img: "", desc: "데이터 로드 대기 중…" }]
+      }
+    };
+
+    /* ─── DOM REFS (cached once) ─── */
+    const $ = (id) => document.getElementById(id);
+    const refs = {
+      navMonth: $('nav-month'),
+      volLabel: $('theme-vol-label'),
+      watermark: $('theme-watermark'),
+      intro: $('theme-intro'),
+      title: $('theme-title'),
+      img: $('theme-img'),
+      grid: $('grid-container'),
+      monthList: $('month-list'),
+      dropdown: $('dropdown-toggle'),
+      modal: $('note-modal'),
+      modalTitle: $('modal-title'),
+      modalArtist: $('modal-artist'),
+      modalDesc: $('modal-desc'),
+    };
+
+    /* ─── RENDER ─── */
+    const renderMonth = (month) => {
+      const data = state.archive[month];
+      if (!data) return;
+
+      const issueNo = month.split('.')[1] || '--';
+
+      refs.navMonth.textContent = month;
+      refs.volLabel.textContent = `VOL. ${month.replace('.', '/')}`;
+      refs.watermark.textContent = issueNo;
+      refs.intro.textContent = data.intro || '';
+      refs.title.textContent = data.theme || '';
+      refs.img.src = data.themeImg || FALLBACK_IMG;
+
+      // Build grid with DocumentFragment (single reflow)
+      const frag = document.createDocumentFragment();
+      (data.albums || []).forEach((album, idx) => {
+        const card = document.createElement('div');
+        card.className = 'album-card group flex flex-col';
+        card.style.animationDelay = `${Math.min(idx * 40, 400)}ms`;
+
+        const num = String(idx + 1).padStart(2, '0');
+        card.innerHTML = `
+          <button type="button" class="modal-trigger cover-box w-full aspect-square mb-5 md:mb-6 relative rounded-sm focus-ring" data-idx="${idx}" aria-label="${album.title || ''} — liner notes">
+            <span class="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white font-mono text-[9px] font-black px-1.5 md:px-2 py-0.5 z-10 tracking-widest uppercase">#${num}</span>
+            <img src="${album.img || PLACEHOLDER_IMG}" alt="${album.title || ''}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700" loading="lazy" decoding="async">
+          </button>
+          <div class="flex-1 flex flex-col">
+            <h3 class="album-title font-black text-sm md:text-base uppercase tracking-tight truncate text-black mb-1 leading-none transition-colors">${album.title || ''}</h3>
+            <p class="font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest truncate mb-4">${album.artist || ''}</p>
+            <button type="button" class="modal-trigger w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 focus-ring" data-idx="${idx}">
+              <span class="w-4 h-px bg-black/20"></span>
+              Liner Notes
+            </button>
+          </div>`;
+        frag.appendChild(card);
+      });
+
+      refs.grid.replaceChildren(frag);
+    };
+
+    const renderSelector = () => {
+      const months = Object.keys(state.archive).sort().reverse();
+      const frag = document.createDocumentFragment();
+      months.forEach((m) => {
+        const btn = document.createElement('button');
+        const isActive = m === state.currentMonth;
+        btn.type = 'button';
+        btn.className = `month-btn w-full text-left px-4 py-3 font-mono text-[10px] font-black tracking-widest uppercase rounded-lg mb-1 flex justify-between items-center transition-all focus-ring ${
+          isActive ? 'bg-black text-white shadow-xl shadow-black/20' : 'hover:bg-gray-50 text-gray-400 hover:text-black'
+        }`;
+        btn.dataset.month = m;
+        btn.textContent = m;
+        frag.appendChild(btn);
+      });
+      refs.monthList.replaceChildren(frag);
+    };
+
+    /* ─── EVENT DELEGATION ─── */
+    const openModal = (album) => {
+      refs.modalTitle.textContent = album.title || 'UNTITLED';
+      refs.modalArtist.textContent = album.artist || 'UNKNOWN';
+      refs.modalDesc.textContent = album.desc || 'No liner notes available.';
+      refs.modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeModal = () => {
+      refs.modal.classList.remove('open');
+      document.body.style.overflow = '';
+    };
+
+    const toggleDropdown = (force) => {
+      refs.dropdown.classList.toggle('active', force);
+    };
+
+    // One global click handler via delegation
+    document.addEventListener('click', (e) => {
+      // Dropdown toggle
+      const dropdownBtn = e.target.closest('.dropdown-btn');
+      if (dropdownBtn) {
+        e.stopPropagation();
+        toggleDropdown();
+        return;
+      }
+      // Month select
+      const monthBtn = e.target.closest('.month-btn');
+      if (monthBtn) {
+        e.stopPropagation();
+        const m = monthBtn.dataset.month;
+        if (m && state.archive[m]) {
+          state.currentMonth = m;
+          renderMonth(m);
+          renderSelector();
+          toggleDropdown(false);
+        }
+        return;
+      }
+      // Album trigger
+      const trigger = e.target.closest('.modal-trigger');
+      if (trigger) {
+        const idx = Number(trigger.dataset.idx);
+        const album = state.archive[state.currentMonth]?.albums?.[idx];
+        if (album) openModal(album);
+        return;
+      }
+      // Modal close buttons
+      if (e.target.closest('.modal-close')) {
+        closeModal();
+        return;
+      }
+      // Click outside modal content
+      if (e.target === refs.modal) {
+        closeModal();
+        return;
+      }
+      // Click outside dropdown
+      if (!e.target.closest('#dropdown-toggle')) {
+        toggleDropdown(false);
+      }
+    });
+
+    // ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (refs.modal.classList.contains('open')) closeModal();
+      else toggleDropdown(false);
+    });
+
+    /* ─── INIT ─── */
+    const init = async () => {
+      // 1. Instant render with mock
+      state.archive = mockData;
+      state.currentMonth = Object.keys(state.archive)[0];
+      renderMonth(state.currentMonth);
+      renderSelector();
+
+      // 2. Firebase auth
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          try {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } catch {
+            await signInAnonymously(auth);
+          }
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error('Auth error:', err);
+        return; // stay with mock
+      }
+
+      // 3. Subscribe to archive
+      onAuthStateChanged(auth, (user) => {
+        if (!user) return;
+        onSnapshot(
+          doc(db, 'artifacts', APP_ID, 'public', 'data', 'archive', 'master'),
+          (snap) => {
+            const incoming = snap.exists() ? snap.data() : null;
+            state.archive = (incoming && Object.keys(incoming).length) ? incoming : mockData;
+
+            const keys = Object.keys(state.archive).sort().reverse();
+            if (!state.archive[state.currentMonth]) {
+              state.currentMonth = keys[0] || '';
             }
-        };
-
-        // 방어 로직: 인라인 이벤트 핸들러용 문자열 이스케이핑 (줄바꿈/따옴표 크래시 방지)
-        const escapeForJS = (str) => {
-            if (!str) return "";
-            return str.replace(/\\/g, "\\\\")
-                      .replace(/'/g, "\\'")
-                      .replace(/"/g, '&quot;')
-                      .replace(/\n/g, '\\n')
-                      .replace(/\r/g, '');
-        };
-
-        const init = async () => {
-            // 체감 성능 향상: 빈 화면 방지를 위해 먼저 렌더링
-            archiveData = mockData;
-            currentMonth = Object.keys(archiveData)[0];
-            renderMonth(currentMonth);
-            renderSelector();
-
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } catch (customTokenError) {
-                        console.warn("Custom token invalid/mismatched, retrying anonymously...", customTokenError);
-                        await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Auth Error:", err);
+            if (state.currentMonth) {
+              renderMonth(state.currentMonth);
+              renderSelector();
             }
+          },
+          (err) => console.error('Firestore error:', err)
+        );
+      });
+    };
 
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), (snap) => {
-                        if (snap.exists() && Object.keys(snap.data()).length > 0) { 
-                            archiveData = snap.data(); 
-                        } else {
-                            archiveData = mockData; // DB가 비어있을 경우 안전장치
-                        }
-                        
-                        const keys = Object.keys(archiveData).sort().reverse();
-                        if (keys.length > 0) {
-                            if (!currentMonth || !archiveData[currentMonth]) currentMonth = keys[0];
-                            renderMonth(currentMonth); 
-                            renderSelector();
-                        }
-                    }, (error) => {
-                        console.error("Firestore Error:", error);
-                    });
-                }
-            });
-        };
-
-        const renderMonth = (month) => {
-            const data = archiveData[month]; 
-            if (!data) return;
-
-            const issueNo = month.split('.')[1] || "--";
-            
-            // Header Update
-            const navMonthEl = document.getElementById('nav-month');
-            if(navMonthEl) navMonthEl.innerText = month;
-            
-            // VOL Label (2026/04 format)
-            const volLabelEl = document.getElementById('theme-vol-label');
-            if(volLabelEl) volLabelEl.innerText = `VOL. ${month.replace('.', '/')}`;
-            
-            const watermarkEl = document.getElementById('theme-watermark');
-            if(watermarkEl) watermarkEl.innerText = issueNo;
-
-            const introEl = document.getElementById('theme-intro');
-            if(introEl) introEl.innerText = data.intro || "";
-            
-            const titleEl = document.getElementById('theme-title');
-            if(titleEl) titleEl.innerText = data.theme || "";
-            
-            // Theme Image Rendering Fix
-            const themeImgEl = document.getElementById('theme-img');
-            if(themeImgEl) {
-                themeImgEl.src = data.themeImg || "https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=1000";
-            }
-
-            const grid = document.getElementById('grid-container');
-            if(!grid) return;
-            
-            grid.innerHTML = '';
-            (data.albums || []).forEach((album, idx) => {
-                const div = document.createElement('div');
-                div.className = 'album-card group flex flex-col animate-snap';
-                
-                // 스크립트 크래시 원천 차단: onclick 문자열 삽입 대신 data-idx 속성 사용
-                div.innerHTML = `
-                    <div class="cover-box modal-trigger w-full aspect-square mb-5 md:mb-6 bg-gray-50 relative rounded-sm" data-idx="${idx}">
-                        <div class="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white font-mono text-[9px] font-black px-1.5 md:px-2 py-0.5 z-10 tracking-widest uppercase">#${String(idx+1).padStart(2,'0')}</div>
-                        <img src="${album.img || ''}" alt="${album.title}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700" onerror="this.src='https://via.placeholder.com/500?text=No+Cover'">
-                    </div>
-                    <div class="flex-1 flex flex-col">
-                        <h3 class="font-black text-sm md:text-base uppercase tracking-tight truncate text-black mb-1 leading-none">${album.title || ''}</h3>
-                        <p class="font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest truncate mb-4">${album.artist || ''}</p>
-                        
-                        <button class="modal-trigger w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 group-hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 group/btn" data-idx="${idx}">
-                            <span class="w-4 h-px bg-black/10 group-hover/btn:bg-black transition-all"></span>
-                            NOTES
-                        </button>
-                    </div>`;
-                grid.appendChild(div);
-            });
-
-            // 생성된 요소들에 안전하게 이벤트 리스너 부착
-            document.querySelectorAll('.modal-trigger').forEach(trigger => {
-                trigger.addEventListener('click', (e) => {
-                    const idx = e.currentTarget.getAttribute('data-idx');
-                    const album = archiveData[currentMonth].albums[idx];
-                    openModal(album.title, album.artist, album.desc);
-                });
-            });
-        };
-
-        const renderSelector = () => {
-            const list = document.getElementById('month-list');
-            if(!list) return;
-            
-            list.innerHTML = '';
-            Object.keys(archiveData).sort().reverse().forEach(m => {
-                const btn = document.createElement('button');
-                btn.className = `w-full text-left px-4 py-3 font-mono text-[10px] font-black tracking-widest uppercase rounded-lg mb-1 flex justify-between items-center transition-all ${m === currentMonth ? 'bg-black text-white shadow-xl shadow-black/20' : 'hover:bg-gray-50 text-gray-400 hover:text-black'}`;
-                btn.innerHTML = `<span>${m}</span>`;
-                btn.onclick = () => { currentMonth = m; renderMonth(m); document.getElementById('dropdown-toggle').classList.remove('active'); };
-                list.appendChild(btn);
-            });
-        };
-
-        window.toggleDropdown = (e) => { 
-            if(e) e.stopPropagation(); 
-            const toggle = document.getElementById('dropdown-toggle');
-            if(toggle) toggle.classList.toggle('active'); 
-        };
-        
-        window.openModal = (title, artist, desc) => {
-            const modal = document.getElementById('note-modal');
-            if(!modal) return;
-            
-            document.getElementById('modal-title').innerText = title || "UNTITLED";
-            document.getElementById('modal-artist').innerText = artist || "UNKNOWN";
-            document.getElementById('modal-desc').innerText = desc || "No liner notes available.";
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; 
-        };
-
-        window.closeModal = () => {
-            const modal = document.getElementById('note-modal');
-            if(modal) modal.style.display = 'none';
-            document.body.style.overflow = '';
-        };
-
-        document.addEventListener('click', () => {
-            const toggle = document.getElementById('dropdown-toggle');
-            if(toggle) toggle.classList.remove('active');
-        });
-
-        init();
-    </script>
+    init();
+  </script>
 </body>
 </html>
