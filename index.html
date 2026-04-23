@@ -13,9 +13,7 @@
             --uv: #5F4B8B; 
             --bg: #ffffff; 
             --grid-line: #f3f4f6; 
-            --text-main: #18181b; 
-            --ticker-bg: #111111; 
-            --memo-bg: #f5f3f7; 
+            --text-main: #111111; 
         }
 
         body { 
@@ -29,6 +27,7 @@
         .font-mono { font-family: 'Space Mono', monospace; }
         .font-logo { font-family: 'Syne', sans-serif; }
 
+        /* Dropdown Menu */
         .dropdown-menu { 
             opacity: 0; 
             visibility: hidden; 
@@ -37,115 +36,180 @@
             top: 100%; 
             right: 0; 
             background: var(--bg); 
-            border: 1px solid var(--grid-line); 
+            border: 1px solid #eeeeee; 
             border-radius: 12px; 
-            min-width: 180px; 
+            min-width: 160px; 
             z-index: 50; 
-            box-shadow: 0 20px 40px rgba(95, 75, 139, 0.1); 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.06); 
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
         }
         .dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
 
+        /* Album Card */
         .album-card .cover-box { 
-            border: 1px solid var(--grid-line); 
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            overflow: hidden;
+            background: #f8f8f8;
+            border: 1px solid #eeeeee;
         }
         .album-card:hover .cover-box { 
-            border-color: var(--uv); 
-            transform: translateY(-5px); 
+            transform: translateY(-6px); 
+            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+            border-color: #111111;
         }
 
-        @keyframes snapIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-snap { animation: snapIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        /* Title Style */
+        #theme-title {
+            font-size: clamp(1.8rem, 7vw, 3.2rem);
+            font-weight: 900;
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+            color: #111111;
+        }
 
+        /* Ticker Style */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background: #111111;
+            padding: 12px 0;
+        }
         @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
-        .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 40s linear infinite; }
+        .animate-marquee { 
+            display: inline-block; 
+            white-space: nowrap; 
+            animation: marquee 45s linear infinite; 
+        }
+        .marquee-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: rgba(255, 255, 255, 0.5);
+        }
 
-        .title-outline { -webkit-text-stroke: 1.5px var(--text-main); color: transparent; }
-        .memo-container { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .memo-container.expanded { grid-template-rows: 1fr; }
-        .memo-content { overflow: hidden; }
-        .memo-scroll::-webkit-scrollbar { width: 3px; }
-        .memo-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        /* Modal */
+        #note-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 푸터 로고: 비율 유지 및 크기 최적화 */
-        .footer-logo { height: 21px; width: auto; object-fit: contain; }
+        .hero-img-box {
+            width: 100%;
+            max-width: 280px;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            background: #f1f1f1;
+            overflow: hidden;
+        }
+
+        .footer-logo { height: 18px; width: auto; object-fit: contain; }
     </style>
 </head>
-<body class="selection:bg-[#5F4B8B] selection:text-white">
+<body class="selection:bg-[#111111] selection:text-white antialiased overflow-x-hidden">
 
-    <!-- Header -->
+    <!-- Liner Note Modal -->
+    <div id="note-modal" onclick="closeModal()">
+        <div class="modal-content px-4" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute top-6 right-6 md:top-10 md:right-10 text-black">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <p id="modal-artist" class="font-mono text-[10px] text-gray-400 uppercase tracking-[0.3em] mb-4"></p>
+            <h2 id="modal-title" class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-8 md:mb-10 leading-none"></h2>
+            <div class="w-12 h-px bg-black/10 mx-auto mb-8"></div>
+            <div class="max-h-[50vh] overflow-y-auto px-2">
+                <p class="text-base text-gray-600 leading-relaxed font-medium max-w-md mx-auto" id="modal-desc"></p>
+            </div>
+            <button onclick="closeModal()" class="mt-12 md:mt-16 font-mono text-[10px] font-black tracking-widest uppercase border-b border-black pb-1">Close Window</button>
+        </div>
+    </div>
+
+    <!-- Header: Highest Hierarchy -->
     <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-[1400px] mx-auto flex items-center justify-between h-14 px-6">
+        <div class="max-w-[1400px] mx-auto flex items-center justify-between h-14 px-4 md:px-6">
             <div class="flex items-center">
-                <h1 class="font-logo text-lg md:text-xl text-[var(--text-main)] uppercase tracking-tighter whitespace-nowrap leading-none pt-0.5">Monthly City Pop</h1>
-                <div class="hidden lg:block w-px h-3 bg-gray-200 mx-4"></div>
-                <div class="hidden lg:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em]">Curated Archive</div>
+                <h1 class="font-logo text-lg md:text-2xl text-[var(--text-main)] uppercase tracking-tighter whitespace-nowrap leading-none pt-0.5">Monthly City Pop</h1>
+                <div class="hidden sm:block w-px h-3 bg-gray-200 mx-4"></div>
+                <div class="hidden sm:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em]">Curated Archive</div>
             </div>
 
             <div class="flex items-center">
                 <div class="dropdown relative cursor-pointer" id="dropdown-toggle" onclick="window.toggleDropdown(event)">
-                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all">
-                        <div class="w-1 h-1 rounded-full bg-[#5F4B8B] animate-pulse"></div>
-                        <span id="nav-month" class="font-mono text-[10px] font-bold uppercase tracking-widest text-gray-800 pt-0.5">---</span>
-                        <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm">
+                        <div class="w-1 h-1 rounded-full bg-black"></div>
+                        <span id="nav-month" class="font-mono text-[9px] font-black uppercase tracking-widest text-gray-800 pt-0.5">---</span>
+                        <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
-                    <div id="month-list" class="dropdown-menu mt-2 p-2">
-                        <!-- Months injected via JS -->
-                    </div>
+                    <div id="month-list" class="dropdown-menu mt-2 p-2"></div>
                 </div>
             </div>
         </div>
     </header>
 
     <main class="max-w-[1400px] mx-auto w-full">
-        <!-- Hero Section -->
-        <section class="animate-snap relative bg-white border-b border-gray-100 overflow-hidden">
-            <div id="theme-watermark" class="absolute right-0 bottom-0 text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4">--</div>
+        <section class="animate-snap relative bg-white overflow-hidden border-y border-black">
+            <div id="theme-watermark" class="absolute right-0 bottom-0 text-[10rem] md:text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4">--</div>
 
             <div class="grid md:grid-cols-12 relative z-10 items-stretch">
-                <div class="md:col-span-4 lg:col-span-3 p-4 md:p-6 lg:p-8 flex items-center justify-center bg-gray-50 border-b md:border-b-0 md:border-r border-gray-100">
-                    <div class="w-full max-w-[280px] aspect-square relative overflow-hidden shadow-xl border border-gray-200 rounded-sm bg-white">
-                        <img id="theme-img" src="" alt="Theme Image" class="absolute inset-0 w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700">
+                <div class="md:col-span-4 lg:col-span-3 p-6 md:p-8 flex items-center justify-center bg-gray-50/50 border-b md:border-b-0 md:border-r border-black">
+                    <div class="hero-img-box shadow-2xl rounded-sm">
+                        <img id="theme-img" src="" alt="" class="absolute inset-0 w-full h-full object-cover grayscale-[5%] hover:grayscale-0 transition-all duration-1000">
                     </div>
                 </div>
                 
-                <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center bg-white/40 backdrop-blur-[1px]">
-                    <div class="px-6 py-8 md:px-10 lg:px-14 relative z-20">
-                        <div class="flex items-center gap-3 mb-4">
-                            <span class="w-6 h-0.5 bg-[#5F4B8B]"></span>
-                            <span id="theme-vol-label" class="font-mono text-[11px] font-black text-[#5F4B8B] uppercase tracking-[0.4em]">Volume --</span>
+                <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center">
+                    <div class="px-6 py-10 md:px-12 relative z-20">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-10 h-[2px] bg-[#111111]"></span>
+                            <span id="theme-vol-label" class="font-mono text-[10px] md:text-[11px] font-black text-black uppercase tracking-[0.4em]">Volume --</span>
                         </div>
-                        <h2 id="theme-title" class="text-4xl md:text-5xl lg:text-[5.5rem] font-black tracking-tighter leading-[0.8] uppercase text-black mb-6 break-keep"></h2>
-                        <div class="max-w-2xl">
-                            <p id="theme-intro" class="text-sm md:text-lg text-gray-500 leading-relaxed font-medium italic"></p>
+                        <h2 id="theme-title" class="mb-6 max-w-4xl break-keep"></h2>
+                        <div class="max-w-xl">
+                            <p id="theme-intro" class="text-sm md:text-base text-gray-500 leading-relaxed font-medium italic border-l-[3px] border-black pl-5"></p>
                         </div>
                     </div>
-                    <div class="mt-auto w-full bg-[var(--ticker-bg)] text-white font-mono text-[8px] md:text-[9px] uppercase tracking-[0.5em] overflow-hidden py-3 border-t border-[var(--ticker-bg)]">
+                    <div class="mt-auto ticker-wrap">
                         <div class="animate-marquee flex gap-12 whitespace-nowrap">
-                            <span>* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span>
-                            <span>* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span>
+                            <span class="marquee-text">* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span>
+                            <span class="marquee-text">* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Track Grid -->
         <section class="p-6 md:p-10 lg:p-14 bg-white animate-snap">
-            <div class="mb-10 flex items-center justify-between">
-                <h3 class="font-logo text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tighter text-[var(--text-main)]">Collection</h3>
-                <div class="flex-1 h-px bg-gray-100 ml-8 hidden md:block"></div>
+            <div class="mb-10 md:mb-14 flex items-end justify-between">
+                <div>
+                    <h3 class="font-logo text-lg md:text-xl font-black uppercase tracking-tighter text-black leading-none">Collection</h3>
+                </div>
+                <div class="flex-1 h-px bg-gray-100 ml-8 md:ml-12 hidden sm:block mb-1"></div>
             </div>
-            <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12 lg:gap-y-20 items-start"></div>
+            <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 md:gap-x-12 gap-y-16 items-start"></div>
         </section>
     </main>
 
-    <!-- Footer: Spacing adjusted by 50% (gap-5 -> gap-2.5) -->
-    <footer class="bg-white py-8 border-t border-gray-50 text-center flex flex-col items-center gap-2.5">
+    <footer class="bg-white py-8 border-t border-gray-100 text-center flex flex-col items-center gap-2.5">
         <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" alt="MCP Logo" class="footer-logo">
-        <div class="flex flex-col items-center gap-1.5">
-            <p class="font-mono text-[9px] font-black uppercase tracking-[0.35em] text-[var(--text-main)]">Midnight with Groove Archive Project</p>
+        <div class="flex flex-col items-center gap-1">
+            <p class="font-mono text-[9px] font-black uppercase tracking-[0.3em] text-black">Midnight with Groove Archive Project</p>
             <p class="font-mono text-[8px] font-bold uppercase tracking-[0.1em] text-gray-300">© 2026. All rights reserved.</p>
         </div>
     </footer>
@@ -175,14 +239,16 @@
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), (snap) => {
-                        if (snap.exists()) {
-                            archiveData = snap.data();
+                        if (snap.exists() && Object.keys(snap.data()).length > 0) { 
+                            archiveData = snap.data(); 
                             const keys = Object.keys(archiveData).sort().reverse();
                             if (!currentMonth && keys.length > 0) currentMonth = keys[0];
                             if (currentMonth) renderMonth(currentMonth); 
                             renderSelector();
                         }
-                    }, (error) => console.error("Firestore Sync Error:", error));
+                    }, (error) => {
+                        console.error("Firestore Error:", error);
+                    });
                 }
             });
         };
@@ -193,12 +259,22 @@
             document.getElementById('nav-month').innerText = month;
             document.getElementById('theme-vol-label').innerText = `Volume ${issueNo}`;
             document.getElementById('theme-watermark').innerText = issueNo;
-            document.getElementById('theme-intro').innerText = data.intro;
-            document.getElementById('theme-img').src = data.themeImg;
-            
-            const words = (data.theme || "Untitled").split(' ');
-            const first = words.shift() || "New";
-            document.getElementById('theme-title').innerHTML = `<span class="block title-outline leading-none mb-4">${first}</span><span class="block leading-[0.8]">${words.join(' ')}</span>`;
+            document.getElementById('theme-intro').innerText = data.intro || "";
+            document.getElementById('theme-img').src = data.themeImg || "";
+
+            const fullTheme = data.theme || "";
+            const words = fullTheme.split(' ');
+            let titleHTML = "";
+
+            if (words.length >= 3) {
+                const splitIndex = Math.ceil(words.length / 2);
+                const line1 = words.slice(0, splitIndex).join(' ');
+                const line2 = words.slice(splitIndex).join(' ');
+                titleHTML = `<span class="block">${line1}</span><span class="block">${line2}</span>`;
+            } else {
+                titleHTML = `<span class="block">${fullTheme}</span>`;
+            }
+            document.getElementById('theme-title').innerHTML = titleHTML;
 
             const grid = document.getElementById('grid-container');
             grid.innerHTML = '';
@@ -206,23 +282,18 @@
                 const div = document.createElement('div');
                 div.className = 'album-card group flex flex-col animate-snap';
                 div.innerHTML = `
-                    <div class="cover-box w-full aspect-square mb-4 bg-gray-50 overflow-hidden relative rounded-sm shadow-sm">
-                        <div class="absolute top-3 left-3 bg-black text-[#5F4B8B] font-mono text-[8px] font-bold px-1.5 py-0.5 z-10 tracking-widest uppercase">T-${String(idx+1).padStart(2,'0')}</div>
-                        <img src="${album.img || ''}" alt="${album.title}" class="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-1000">
+                    <div class="cover-box w-full aspect-square mb-5 md:mb-6 bg-gray-50 relative rounded-sm">
+                        <div class="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white font-mono text-[9px] font-black px-1.5 md:px-2 py-0.5 z-10 tracking-widest uppercase">#${String(idx+1).padStart(2,'0')}</div>
+                        <img src="${album.img || ''}" alt="${album.title}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700">
                     </div>
-                    <div class="flex-1 flex flex-col relative">
-                        <h3 class="album-title font-black text-xs lg:text-sm uppercase tracking-tight truncate mb-0.5 text-[var(--text-main)]">${album.title || 'No Title'}</h3>
-                        <p class="font-mono text-[9px] text-gray-400 uppercase tracking-[0.1em] truncate mb-2">${album.artist || 'Unknown'}</p>
-                        <div class="memo-container mt-auto">
-                            <div class="memo-content">
-                                <div class="bg-[var(--memo-bg)] p-3 border-l-2 border-gray-200 mb-3 shadow-sm relative">
-                                    <div class="memo-scroll max-h-40 overflow-y-auto pr-1">
-                                        <p class="text-[10px] md:text-[11px] text-gray-600 leading-relaxed font-medium">${album.desc || ''}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button onclick="window.toggleMemo(this)" class="w-fit font-mono text-[9px] font-black text-[#5F4B8B] hover:text-black tracking-widest uppercase transition-colors">+ READ NOTES</button>
+                    <div class="flex-1 flex flex-col">
+                        <h3 class="font-black text-sm md:text-base uppercase tracking-tight truncate text-black mb-1 leading-none">${album.title || ''}</h3>
+                        <p class="font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest truncate mb-4">${album.artist || ''}</p>
+                        
+                        <button onclick='openModal("${(album.title || "").replace(/"/g, '&quot;')}", "${(album.artist || "").replace(/"/g, '&quot;')}", "${(album.desc || "").replace(/"/g, '&quot;')}")' class="w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 group-hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 group/btn">
+                            <span class="w-4 h-px bg-black/10 group-hover/btn:bg-black transition-all"></span>
+                            NOTES
+                        </button>
                     </div>`;
                 grid.appendChild(div);
             });
@@ -233,7 +304,7 @@
             list.innerHTML = '';
             Object.keys(archiveData).sort().reverse().forEach(m => {
                 const btn = document.createElement('button');
-                btn.className = `w-full text-left px-3 py-2.5 font-mono text-[10px] font-bold tracking-widest uppercase rounded-lg mb-1 flex justify-between items-center ${m === currentMonth ? 'bg-[#5F4B8B]/10 text-[#5F4B8B]' : 'hover:bg-gray-50 text-gray-500'}`;
+                btn.className = `w-full text-left px-4 py-3 font-mono text-[10px] font-black tracking-widest uppercase rounded-lg mb-1 flex justify-between items-center transition-all ${m === currentMonth ? 'bg-black text-white shadow-xl shadow-black/20' : 'hover:bg-gray-50 text-gray-400 hover:text-black'}`;
                 btn.innerHTML = `<span>${m}</span>`;
                 btn.onclick = () => { currentMonth = m; renderMonth(m); document.getElementById('dropdown-toggle').classList.remove('active'); };
                 list.appendChild(btn);
@@ -241,14 +312,23 @@
         };
 
         window.toggleDropdown = (e) => { e.stopPropagation(); document.getElementById('dropdown-toggle').classList.toggle('active'); };
-        window.toggleMemo = (btn) => {
-            const container = btn.closest('.album-card').querySelector('.memo-container');
-            const isExpanded = container.classList.contains('expanded');
-            container.classList.toggle('expanded');
-            btn.innerHTML = isExpanded ? `+ READ NOTES` : `- CLOSE NOTES`;
+        
+        window.openModal = (title, artist, desc) => {
+            const modal = document.getElementById('note-modal');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-artist').innerText = artist;
+            document.getElementById('modal-desc').innerText = desc || "No liner notes available.";
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; 
         };
-        document.addEventListener('click', () => document.getElementById('dropdown-toggle').classList.remove('active'));
 
+        window.closeModal = () => {
+            const modal = document.getElementById('note-modal');
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        };
+
+        document.addEventListener('click', () => document.getElementById('dropdown-toggle').classList.remove('active'));
         init();
     </script>
 </body>
