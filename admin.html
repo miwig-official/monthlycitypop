@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCP | 관리자 페이지</title>
+    <title>MCP | 관리자 페이지 (무료 모드)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
@@ -16,27 +16,25 @@
         .btn-secondary { background-color: #f1f5f9; color: #475569; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; }
         .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 800; text-transform: uppercase; }
         .loading-overlay { position: fixed; inset: 0; background: white; z-index: 100; flex-direction: column; align-items: center; justify-content: center; display: flex; }
+        .file-upload-btn { @apply text-[10px] font-bold text-[#5F4B8B] bg-[#5F4B8B]/5 px-3 py-1.5 rounded border border-[#5F4B8B]/20 hover:bg-[#5F4B8B]/10 transition-all cursor-pointer inline-block; }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
     <div id="loading-overlay" class="loading-overlay">
         <div class="w-10 h-10 border-4 border-gray-100 border-t-[#5F4B8B] rounded-full animate-spin mb-4"></div>
-        <p class="font-mono text-xs text-gray-400 tracking-widest uppercase text-center">Connecting to Your Database...<br><span class="text-[8px] mt-2 block opacity-50">Monthly City Pop Project</span></p>
+        <p class="font-mono text-xs text-gray-400 tracking-widest uppercase text-center">Connecting to Database...</p>
     </div>
 
     <div class="max-w-4xl mx-auto">
         <header class="flex items-center justify-between mb-10">
             <div>
                 <h1 class="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Admin Console</h1>
-                <p class="text-sm text-slate-500 font-medium italic mt-2">Personal Archive Control Panel</p>
+                <p class="text-sm text-slate-500 font-medium italic mt-2">Zero-Storage Archive Management</p>
             </div>
             <div class="flex items-center gap-4">
                 <div id="auth-status" class="status-badge bg-gray-100 text-gray-400">Offline</div>
-                <button id="save-btn" class="btn-primary flex items-center gap-2 shadow-lg shadow-[#5F4B8B]/20">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                    저장하기
-                </button>
+                <button id="save-btn" class="btn-primary flex items-center gap-2 shadow-lg shadow-[#5F4B8B]/20">저장하기</button>
             </div>
         </header>
 
@@ -45,50 +43,37 @@
                 <div class="card sticky top-10">
                     <h2 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Volume History</h2>
                     <div id="month-list" class="space-y-2 mb-6"></div>
-                    <button id="add-month-btn" class="w-full py-4 border-2 border-dashed border-slate-100 rounded-xl text-slate-300 font-bold text-xs hover:border-[#5F4B8B] hover:text-[#5F4B8B] transition-all group">
-                        <span class="block group-hover:scale-110 transition-transform">+ NEW VOLUME</span>
-                    </button>
+                    <button id="add-month-btn" class="w-full py-4 border-2 border-dashed border-slate-100 rounded-xl text-slate-300 font-bold text-xs hover:border-[#5F4B8B] hover:text-[#5F4B8B] transition-all">+ NEW VOLUME</button>
                 </div>
             </div>
 
             <div class="md:col-span-2">
-                <div id="editor-container" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div id="editor-container" class="hidden">
                     <div class="card">
-                        <h2 class="text-sm font-black text-slate-900 mb-6 flex items-center gap-2">
-                            <span class="w-1.5 h-4 bg-[#5F4B8B] rounded-full"></span>
-                            Theme Header
-                        </h2>
+                        <h2 class="text-sm font-black text-slate-900 mb-6 flex items-center gap-2"><span class="w-1.5 h-4 bg-[#5F4B8B] rounded-full"></span>Theme Header</h2>
                         <div class="space-y-4">
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Title</label><input type="text" id="theme-title" class="input-field" oninput="updateThemeData('theme', this.value)"></div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Title</label>
-                                <input type="text" id="theme-title" class="input-field" placeholder="예: Midnight Urban Drive" oninput="updateThemeData('theme', this.value)">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Image</label>
+                                <div class="flex gap-2 items-center">
+                                    <input type="text" id="theme-img" class="input-field font-mono text-xs flex-1" placeholder="URL 또는 이미지 파일 선택" oninput="updateThemeData('themeImg', this.value)">
+                                    <label class="file-upload-btn">파일 선택<input type="file" class="hidden" accept="image/*" onchange="handleFileAsBase64(this, 'theme-img', 'themeImg')"></label>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Image URL (1:1 Square)</label>
-                                <input type="text" id="theme-img" class="input-field font-mono text-xs" placeholder="https://..." oninput="updateThemeData('themeImg', this.value)">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Intro Text</label>
-                                <textarea id="theme-intro" class="input-field h-24" placeholder="테마 설명을 입력하세요." oninput="updateThemeData('intro', this.value)"></textarea>
-                            </div>
+                            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Intro Text</label><textarea id="theme-intro" class="input-field h-24" oninput="updateThemeData('intro', this.value)"></textarea></div>
                         </div>
                     </div>
 
                     <div class="card">
                         <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-sm font-black text-slate-900 flex items-center gap-2">
-                                <span class="w-1.5 h-4 bg-[#5F4B8B] rounded-full"></span>
-                                Track Catalog
-                            </h2>
-                            <button id="add-track-btn" class="btn-secondary transition-all active:scale-95">+ ADD TRACK</button>
+                            <h2 class="text-sm font-black text-slate-900 flex items-center gap-2"><span class="w-1.5 h-4 bg-[#5F4B8B] rounded-full"></span>Track Catalog</h2>
+                            <button id="add-track-btn" class="btn-secondary">+ ADD TRACK</button>
                         </div>
                         <div id="tracks-container" class="space-y-6"></div>
                     </div>
                 </div>
-                
                 <div id="no-selection" class="card flex flex-col items-center justify-center py-32 text-slate-300">
-                    <svg class="w-16 h-16 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    <p class="font-bold tracking-widest text-xs uppercase">Select a volume to start archiving</p>
+                    <p class="font-bold tracking-widest text-xs uppercase text-center px-6">Select a volume to start editing.<br>Images will be saved directly to DB (No extra cost).</p>
                 </div>
             </div>
         </div>
@@ -99,9 +84,6 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ==========================================================
-        // 🛠️ WITH GROOVE님의 파이어베이스 설정 적용 완료
-        // ==========================================================
         const firebaseConfig = {
             apiKey: "AIzaSyDXMTDaE76mqn6S6w2F5s4qHhdFphNULg8",
             authDomain: "monthly-city-pop.firebaseapp.com",
@@ -115,61 +97,33 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = 'monthly-city-pop';
-
-        let archiveData = {};
-        let selectedMonth = "";
-
-        const hideLoading = () => {
-            const overlay = document.getElementById('loading-overlay');
-            if (overlay) overlay.style.display = 'none';
-        };
+        let archiveData = {}; let selectedMonth = "";
 
         const init = async () => {
-            try {
-                await signInAnonymously(auth);
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        const badge = document.getElementById('auth-status');
-                        badge.innerText = "Online";
-                        badge.className = "status-badge bg-green-50 text-green-600";
-                        await loadData();
-                    } else {
-                        hideLoading();
-                    }
-                });
-            } catch (err) {
-                console.error("Auth Init Error:", err);
-                hideLoading();
-                alert("인증 실패! 파이어베이스 콘솔에서 '익명 로그인'을 켰는지 확인하세요.");
-            }
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    document.getElementById('auth-status').innerText = "Online";
+                    document.getElementById('auth-status').className = "status-badge bg-green-50 text-green-600";
+                    await loadData();
+                } else document.getElementById('loading-overlay').style.display = 'none';
+            });
         };
 
         const loadData = async () => {
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive');
-                const snap = await getDoc(docRef);
-                if (snap.exists()) {
-                    archiveData = snap.data();
-                } else {
-                    archiveData = { "2026.04": { theme: "New Theme", themeImg: "", intro: "", albums: [] } };
-                }
-                renderSidebar();
-            } catch (err) {
-                console.error("Data Load Error:", err);
-            } finally {
-                hideLoading();
-            }
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master');
+            const snap = await getDoc(docRef);
+            archiveData = snap.exists() ? snap.data() : { "2026.04": { theme: "New Theme", themeImg: "", intro: "", albums: [] } };
+            renderSidebar();
+            document.getElementById('loading-overlay').style.display = 'none';
         };
 
         const renderSidebar = () => {
-            const container = document.getElementById('month-list');
-            container.innerHTML = '';
+            const container = document.getElementById('month-list'); container.innerHTML = '';
             Object.keys(archiveData).sort().reverse().forEach(m => {
                 const btn = document.createElement('button');
-                const isSelected = m === selectedMonth;
-                btn.className = `w-full text-left px-4 py-3 rounded-lg text-xs font-bold transition-all ${isSelected ? 'bg-[#5F4B8B] text-white shadow-lg' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`;
-                btn.innerText = m;
-                btn.onclick = () => selectMonth(m);
+                btn.className = `w-full text-left px-4 py-3 rounded-lg text-xs font-bold transition-all ${m === selectedMonth ? 'bg-[#5F4B8B] text-white shadow-lg' : 'bg-slate-50 text-slate-600'}`;
+                btn.innerText = m; btn.onclick = () => selectMonth(m);
                 container.appendChild(btn);
             });
         };
@@ -187,42 +141,42 @@
         };
 
         const renderTracks = (albums) => {
-            const container = document.getElementById('tracks-container');
-            container.innerHTML = '';
+            const container = document.getElementById('tracks-container'); container.innerHTML = '';
             albums.forEach((album, idx) => {
-                const div = document.createElement('div');
-                div.className = 'p-5 border border-slate-100 rounded-xl relative bg-slate-50/30';
-                div.innerHTML = `
-                    <div class="absolute top-4 left-4 text-[10px] font-black text-[#5F4B8B]">TRACK ${idx+1}</div>
-                    <button onclick="removeTrack(${idx})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Album Title</label>
-                            <input type="text" value="${album.title || ''}" oninput="updateTrackData(${idx}, 'title', this.value)" class="input-field" placeholder="제목">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Artist</label>
-                            <input type="text" value="${album.artist || ''}" oninput="updateTrackData(${idx}, 'artist', this.value)" class="input-field" placeholder="가수명">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Cover Image URL</label>
-                            <input type="text" value="${album.img || ''}" oninput="updateTrackData(${idx}, 'img', this.value)" class="input-field font-mono text-xs" placeholder="https://...">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-[9px] font-bold text-slate-400 mb-1 uppercase">Liner Notes</label>
-                            <textarea oninput="updateTrackData(${idx}, 'desc', this.value)" class="input-field h-24" placeholder="상세 해설">${album.desc || ''}</textarea>
-                        </div>
-                    </div>
-                `;
+                const div = document.createElement('div'); div.className = 'p-5 border border-slate-100 rounded-xl relative bg-slate-50/30';
+                div.innerHTML = `<div class="absolute top-4 left-4 text-[10px] font-black text-[#5F4B8B]">TRACK ${idx+1}</div><button onclick="removeTrack(${idx})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8"><input type="text" value="${album.title || ''}" oninput="updateTrackData(${idx}, 'title', this.value)" class="input-field" placeholder="제목"><input type="text" value="${album.artist || ''}" oninput="updateTrackData(${idx}, 'artist', this.value)" class="input-field" placeholder="가수"><div class="md:col-span-2 flex gap-2 items-center"><input type="text" id="track-img-${idx}" value="${album.img || ''}" oninput="updateTrackData(${idx}, 'img', this.value)" class="input-field font-mono text-xs flex-1" placeholder="커버 이미지 URL"><label class="file-upload-btn">업로드<input type="file" class="hidden" accept="image/*" onchange="handleTrackFileAsBase64(this, ${idx})"></label></div><textarea oninput="updateTrackData(${idx}, 'desc', this.value)" class="input-field md:col-span-2 h-24" placeholder="상세 해설">${album.desc || ''}</textarea></div>`;
                 container.appendChild(div);
             });
         };
 
+        // --- NEW: Storage-Free File Processing ---
+        window.handleFileAsBase64 = (input, displayId, dataKey) => {
+            const file = input.files[0]; if (!file) return;
+            if (file.size > 1024 * 1024) { alert("파일이 너무 큽니다 (1MB 이하 권장)."); return; }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64Data = e.target.result;
+                document.getElementById(displayId).value = base64Data;
+                archiveData[selectedMonth][dataKey] = base64Data;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.handleTrackFileAsBase64 = (input, idx) => {
+            const file = input.files[0]; if (!file) return;
+            if (file.size > 800 * 1024) { alert("파일이 너무 큽니다. 가로세로 500px 정도의 이미지를 권장합니다."); return; }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64Data = e.target.result;
+                document.getElementById(`track-img-${idx}`).value = base64Data;
+                archiveData[selectedMonth].albums[idx].img = base64Data;
+            };
+            reader.readAsDataURL(file);
+        };
+
         window.updateThemeData = (field, value) => { if (selectedMonth) archiveData[selectedMonth][field] = value; };
         window.updateTrackData = (idx, field, value) => { if (selectedMonth) archiveData[selectedMonth].albums[idx][field] = value; };
-        window.removeTrack = (idx) => { if (confirm("이 트랙을 삭제하시겠습니까?")) { archiveData[selectedMonth].albums.splice(idx, 1); renderTracks(archiveData[selectedMonth].albums); } };
+        window.removeTrack = (idx) => { if (confirm("삭제하시겠습니까?")) { archiveData[selectedMonth].albums.splice(idx, 1); renderTracks(archiveData[selectedMonth].albums); } };
 
         document.getElementById('add-track-btn').onclick = () => {
             if (!selectedMonth) return;
@@ -235,26 +189,22 @@
             const nextMonth = prompt("새로운 호 입력 (예: 2026.05)");
             if (nextMonth && !archiveData[nextMonth]) {
                 archiveData[nextMonth] = { theme: "New Theme", themeImg: "", intro: "", albums: [] };
-                renderSidebar();
-                selectMonth(nextMonth);
+                renderSidebar(); selectMonth(nextMonth);
             }
         };
 
         document.getElementById('save-btn').onclick = async () => {
-            if (!auth.currentUser) return;
             const btn = document.getElementById('save-btn');
             btn.disabled = true; btn.innerText = "Saving...";
             try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'archive'), archiveData);
-                alert("성공적으로 저장되었습니다! 이제 메인 페이지(index.html)에서 확인하세요.");
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), archiveData);
+                alert("성공적으로 저장되었습니다! (Firestore에 직접 저장 완료)");
             } catch (e) {
-                alert("저장 실패: " + e.message);
-            } finally {
-                btn.disabled = false; btn.innerText = "저장하기";
-            }
+                alert("저장 실패 (데이터 용량이 너무 클 수 있습니다): " + e.message);
+            } finally { btn.disabled = false; btn.innerText = "저장하기"; }
         };
 
-        window.addEventListener('load', init);
+        init();
     </script>
 </body>
 </html>
