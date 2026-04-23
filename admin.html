@@ -11,12 +11,18 @@
         .input-field { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.875rem; transition: border-color 0.2s; }
         .input-field:focus { border-color: #5F4B8B; outline: none; }
         .card { background: white; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .btn-primary { background-color: #5F4B8B; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; transition: opacity 0.2s; }
-        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary { background-color: #5F4B8B; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; transition: all 0.2s; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-secondary { background-color: #f1f5f9; color: #475569; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; }
+        .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 800; text-transform: uppercase; }
     </style>
 </head>
 <body class="p-4 md:p-10">
+
+    <div id="loading-overlay" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+        <div class="w-10 h-10 border-4 border-gray-100 border-t-[#5F4B8B] rounded-full animate-spin mb-4"></div>
+        <p class="font-mono text-xs text-gray-400 tracking-widest uppercase">Connecting to Database...</p>
+    </div>
 
     <div class="max-w-4xl mx-auto">
         <header class="flex items-center justify-between mb-10">
@@ -24,10 +30,13 @@
                 <h1 class="text-3xl font-black text-slate-900 tracking-tighter uppercase">Admin Console</h1>
                 <p class="text-sm text-slate-500 font-medium">Monthly City Pop Archive Management</p>
             </div>
-            <button id="save-btn" class="btn-primary flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                저장하기
-            </button>
+            <div class="flex items-center gap-4">
+                <div id="auth-status" class="status-badge bg-gray-100 text-gray-400">Offline</div>
+                <button id="save-btn" class="btn-primary flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    저장하기
+                </button>
+            </div>
         </header>
 
         <div class="grid md:grid-cols-3 gap-6">
@@ -98,6 +107,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Firebase Config (Provided by environment)
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -108,22 +118,38 @@
         let selectedMonth = "";
 
         const init = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+            // Rule 3: Auth Before Queries
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
             }
 
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
+                    document.getElementById('auth-status').innerText = "Connected";
+                    document.getElementById('auth-status').className = "status-badge bg-green-50 text-green-600";
+                    
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive');
                     const snap = await getDoc(docRef);
                     if (snap.exists()) {
                         archiveData = snap.data();
                     } else {
-                        // 초기 데이터 세팅
-                        archiveData = { "2026.04": { theme: "New Theme", themeImg: "", intro: "", albums: [] } };
+                        // Initial Default Data
+                        archiveData = { 
+                            "2026.04": { 
+                                theme: "Midnight Urban Drive", 
+                                themeImg: "https://images.unsplash.com/photo-1493225457224-ca2e6fc737c6?q=80&w=1000", 
+                                intro: "차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들.", 
+                                albums: [] 
+                            } 
+                        };
                     }
+                    document.getElementById('loading-overlay').style.display = 'none';
                     renderSidebar();
                 }
             });
@@ -163,31 +189,46 @@
                 const div = document.createElement('div');
                 div.className = 'p-4 border border-slate-100 rounded-lg relative bg-slate-50/50';
                 div.innerHTML = `
-                    <div class="absolute top-4 left-4 text-[10px] font-black text-[#5F4B8B]">T-${String(idx+1).padStart(2,'0')}</div>
-                    <button onclick="removeTrack(${idx})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                        <input type="text" value="${album.title}" onchange="updateAlbum(${idx}, 'title', this.value)" class="input-field" placeholder="Album Title">
-                        <input type="text" value="${album.artist}" onchange="updateAlbum(${idx}, 'artist', this.value)" class="input-field" placeholder="Artist">
-                        <input type="text" value="${album.img}" onchange="updateAlbum(${idx}, 'img', this.value)" class="input-field md:col-span-2" placeholder="Cover Image URL">
-                        <textarea onchange="updateAlbum(${idx}, 'desc', this.value)" class="input-field md:col-span-2 h-20" placeholder="Album Description">${album.desc}</textarea>
+                    <div class="absolute top-4 left-4 text-[10px] font-black text-[#5F4B8B]">TRACK ${idx+1}</div>
+                    <button onclick="removeTrack(${idx})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1">ALBUM TITLE</label>
+                            <input type="text" value="${album.title || ''}" oninput="updateTrackData(${idx}, 'title', this.value)" class="input-field" placeholder="Album Title">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1">ARTIST</label>
+                            <input type="text" value="${album.artist || ''}" oninput="updateTrackData(${idx}, 'artist', this.value)" class="input-field" placeholder="Artist">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1">COVER IMAGE URL (1:1)</label>
+                            <input type="text" value="${album.img || ''}" oninput="updateTrackData(${idx}, 'img', this.value)" class="input-field" placeholder="Cover Image URL">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[9px] font-bold text-slate-400 mb-1">LINER NOTES (DESCRIPTION)</label>
+                            <textarea oninput="updateTrackData(${idx}, 'desc', this.value)" class="input-field h-24" placeholder="Album Description">${album.desc || ''}</textarea>
+                        </div>
                     </div>
                 `;
                 container.appendChild(div);
             });
         };
 
-        // UI Event Handlers
-        window.updateAlbum = (idx, field, value) => {
+        // Window Globals
+        window.updateTrackData = (idx, field, value) => {
+            if (!archiveData[selectedMonth]) return;
             archiveData[selectedMonth].albums[idx][field] = value;
         };
 
         window.removeTrack = (idx) => {
+            if (!confirm("이 트랙을 삭제하시겠습니까?")) return;
             archiveData[selectedMonth].albums.splice(idx, 1);
             renderTracks(archiveData[selectedMonth].albums);
         };
 
         document.getElementById('add-track-btn').onclick = () => {
             if (!selectedMonth) return;
+            if (!archiveData[selectedMonth].albums) archiveData[selectedMonth].albums = [];
             archiveData[selectedMonth].albums.push({ title: "", artist: "", img: "", desc: "" });
             renderTracks(archiveData[selectedMonth].albums);
         };
@@ -198,25 +239,36 @@
                 archiveData[nextMonth] = { theme: "New Theme", themeImg: "", intro: "", albums: [] };
                 renderSidebar();
                 selectMonth(nextMonth);
+            } else if (archiveData[nextMonth]) {
+                alert("이미 존재하는 월호입니다.");
             }
         };
 
         document.getElementById('save-btn').onclick = async () => {
             if (!auth.currentUser) return;
             
-            // Sync inputs to data object for the theme part
+            // Sync Current Theme Form
             if (selectedMonth) {
                 archiveData[selectedMonth].theme = document.getElementById('theme-title').value;
                 archiveData[selectedMonth].themeImg = document.getElementById('theme-img').value;
                 archiveData[selectedMonth].intro = document.getElementById('theme-intro').value;
             }
 
+            const btn = document.getElementById('save-btn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerText = "저장 중...";
+
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive');
             try {
                 await setDoc(docRef, archiveData);
                 alert("성공적으로 저장되었습니다.");
             } catch (e) {
-                alert("저장 중 오류 발생: " + e.message);
+                console.error("Save Error:", e);
+                alert("저장 실패: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         };
 
