@@ -114,9 +114,9 @@
         }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Hero Image Container - DEFINITIVE FIX & MOBILE BOX REMOVAL */
+        /* Hero Image Container - DEFINITIVE WIDTH FIX */
         .hero-img-box {
-            width: 100%;
+            width: 100% !important; /* Force take up full grid container width */
             aspect-ratio: 1 / 1;
             position: relative;
             overflow: hidden;
@@ -127,7 +127,7 @@
         
         @media (min-width: 768px) {
             .hero-img-box {
-                max-width: 280px;
+                max-width: 280px; /* Only constrain on desktop */
                 background: #f1f1f1;
                 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
                 border-radius: 0.125rem;
@@ -194,14 +194,13 @@
     </header>
 
     <main class="max-w-[1400px] mx-auto w-full">
-        <!-- Hero Section: Box removed for Mobile -->
         <section class="animate-snap relative bg-white overflow-hidden border-y border-black">
             <div id="theme-watermark" class="absolute right-0 bottom-0 text-[10rem] md:text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4">--</div>
 
             <div class="grid md:grid-cols-12 relative z-10 items-stretch">
-                <!-- Image Side: Box decorations removed for mobile -->
+                <!-- Image Side: Box decorations removed for mobile, full width forced -->
                 <div class="md:col-span-4 lg:col-span-3 p-0 md:p-8 flex items-center justify-center bg-transparent md:bg-gray-50/50 border-b md:border-b-0 md:border-r border-black overflow-hidden">
-                    <div class="hero-img-box">
+                    <div class="hero-img-box w-full">
                         <img id="theme-img" src="" alt="Theme Cover" class="grayscale-[5%] hover:grayscale-0 transition-all duration-1000">
                     </div>
                 </div>
@@ -299,7 +298,7 @@
             document.getElementById('theme-watermark').innerText = issueNo;
             document.getElementById('theme-intro').innerText = data.intro || "";
             
-            // Goal 2: Fix theme image rendering with direct src update
+            // Goal 2: Fix theme image rendering with direct src update and visibility
             const themeImgEl = document.getElementById('theme-img');
             if(data.themeImg) {
                 themeImgEl.src = data.themeImg;
