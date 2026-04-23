@@ -126,10 +126,11 @@
             align-items: center;
             justify-content: center;
         }
-        .hero-img-box img {
+        #theme-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
         }
 
         /* Support for newlines */
@@ -161,16 +162,17 @@
 
     <!-- Header: Height and Padding optimized for mobile breathing room -->
     <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-[1400px] mx-auto flex items-center justify-between h-16 md:h-14 px-5 md:px-6">
-            <div class="flex items-center">
-                <h1 class="font-logo text-lg md:text-2xl text-[var(--text-main)] uppercase tracking-tighter whitespace-nowrap leading-none pt-0.5">Monthly City Pop</h1>
-                <div class="hidden sm:block w-px h-3 bg-gray-200 mx-4"></div>
-                <div class="hidden sm:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em]">Curated Archive</div>
+        <div class="max-w-[1400px] mx-auto flex items-center justify-between h-16 md:h-14 px-4 md:px-6 overflow-hidden">
+            <div class="flex items-center min-w-0 mr-4">
+                <!-- 가변형 텍스트 크기 적용 (text-base ~ text-2xl) -->
+                <h1 class="font-logo text-base xs:text-lg sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-tighter whitespace-nowrap leading-none pt-0.5 flex-shrink truncate">Monthly City Pop</h1>
+                <div class="hidden sm:block w-px h-3 bg-gray-200 mx-4 flex-shrink-0"></div>
+                <div class="hidden lg:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em] flex-shrink-0">Curated Archive</div>
             </div>
 
-            <div class="flex items-center">
+            <div class="flex items-center flex-shrink-0">
                 <div class="dropdown relative cursor-pointer" id="dropdown-toggle" onclick="window.toggleDropdown(event)">
-                    <div class="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm">
+                    <div class="flex items-center gap-2 px-3 py-1.5 md:py-2 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm">
                         <div class="w-1.5 h-1.5 rounded-full bg-black"></div>
                         <span id="nav-month" class="font-mono text-[9px] font-black uppercase tracking-widest text-gray-800 pt-0.5">---</span>
                         <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
@@ -189,7 +191,6 @@
                 <!-- Image Side -->
                 <div class="md:col-span-4 lg:col-span-3 p-6 md:p-8 flex items-center justify-center bg-gray-50/50 border-b md:border-b-0 md:border-r border-black">
                     <div class="hero-img-box shadow-2xl rounded-sm">
-                        <!-- Img tag ensured to be present and updated by JS -->
                         <img id="theme-img" src="" alt="" class="grayscale-[5%] hover:grayscale-0 transition-all duration-1000">
                     </div>
                 </div>
@@ -282,13 +283,13 @@
             document.getElementById('theme-watermark').innerText = issueNo;
             document.getElementById('theme-intro').innerText = data.intro || "";
             
-            // Set image src correctly
+            // Set image src correctly and ensure visible
             const themeImgEl = document.getElementById('theme-img');
             if(data.themeImg) {
                 themeImgEl.src = data.themeImg;
-                themeImgEl.style.display = 'block';
+                themeImgEl.classList.remove('hidden');
             } else {
-                themeImgEl.style.display = 'none';
+                themeImgEl.classList.add('hidden');
             }
 
             document.getElementById('theme-title').innerText = data.theme || "";
