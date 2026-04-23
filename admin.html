@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP | 관리자 페이지</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .input-field { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.875rem; transition: border-color 0.2s; }
+        .input-field:focus { border-color: #5F4B8B; outline: none; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .btn-primary { background-color: #5F4B8B; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; transition: opacity 0.2s; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background-color: #f1f5f9; color: #475569; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="flex items-center justify-between mb-10">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 tracking-tighter uppercase">Admin Console</h1>
+                <p class="text-sm text-slate-500 font-medium">Monthly City Pop Archive Management</p>
+            </div>
+            <button id="save-btn" class="btn-primary flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                저장하기
+            </button>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- Sidebar: Month Selector -->
+            <div class="md:col-span-1">
+                <div class="card sticky top-10">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Volume Selector</h2>
+                    <div id="month-list" class="space-y-2 mb-6">
+                        <!-- Months list -->
+                    </div>
+                    <button id="add-month-btn" class="w-full py-3 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 font-bold text-xs hover:border-[#5F4B8B] hover:text-[#5F4B8B] transition-all">
+                        + 새로운 호 추가
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content: Editor -->
+            <div class="md:col-span-2">
+                <div id="editor-container" class="hidden">
+                    <!-- Theme Edit -->
+                    <div class="card">
+                        <h2 class="text-sm font-black text-slate-900 mb-6 flex items-center gap-2">
+                            <span class="w-1.5 h-4 bg-[#5F4B8B] rounded-full"></span>
+                            Theme Header
+                        </h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Title</label>
+                                <input type="text" id="theme-title" class="input-field" placeholder="예: Midnight Urban Drive">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Theme Image URL (1:1)</label>
+                                <input type="text" id="theme-img" class="input-field" placeholder="Unsplash 등 이미지 주소">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Intro Text</label>
+                                <textarea id="theme-intro" class="input-field h-24" placeholder="테마에 대한 짧은 설명을 입력하세요."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Album List Edit -->
+                    <div class="card">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                <span class="w-1.5 h-4 bg-[#5F4B8B] rounded-full"></span>
+                                Track Catalog
+                            </h2>
+                            <button id="add-track-btn" class="btn-secondary">+ 트랙 추가</button>
+                        </div>
+                        <div id="tracks-container" class="space-y-8">
+                            <!-- Track forms injected here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="no-selection" class="card flex flex-col items-center justify-center py-20 text-slate-400">
+                    <svg class="w-12 h-12 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <p class="font-bold">편집할 Volume을 선택하거나 새로 만드세요.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'citypop-archive';
+
+        let archiveData = {};
+        let selectedMonth = "";
+
+        const init = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive');
+                    const snap = await getDoc(docRef);
+                    if (snap.exists()) {
+                        archiveData = snap.data();
+                    } else {
+                        // 초기 데이터 세팅
+                        archiveData = { "2026.04": { theme: "New Theme", themeImg: "", intro: "", albums: [] } };
+                    }
+                    renderSidebar();
+                }
+            });
+        };
+
+        const renderSidebar = () => {
+            const container = document.getElementById('month-list');
+            container.innerHTML = '';
+            Object.keys(archiveData).sort().reverse().forEach(m => {
+                const btn = document.createElement('button');
+                const isSelected = m === selectedMonth;
+                btn.className = `w-full text-left px-4 py-3 rounded-lg text-xs font-bold transition-all ${isSelected ? 'bg-[#5F4B8B] text-white shadow-lg' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`;
+                btn.innerText = m;
+                btn.onclick = () => selectMonth(m);
+                container.appendChild(btn);
+            });
+        };
+
+        const selectMonth = (month) => {
+            selectedMonth = month;
+            document.getElementById('editor-container').classList.remove('hidden');
+            document.getElementById('no-selection').classList.add('hidden');
+            
+            const data = archiveData[month];
+            document.getElementById('theme-title').value = data.theme || "";
+            document.getElementById('theme-img').value = data.themeImg || "";
+            document.getElementById('theme-intro').value = data.intro || "";
+            
+            renderTracks(data.albums || []);
+            renderSidebar();
+        };
+
+        const renderTracks = (albums) => {
+            const container = document.getElementById('tracks-container');
+            container.innerHTML = '';
+            albums.forEach((album, idx) => {
+                const div = document.createElement('div');
+                div.className = 'p-4 border border-slate-100 rounded-lg relative bg-slate-50/50';
+                div.innerHTML = `
+                    <div class="absolute top-4 left-4 text-[10px] font-black text-[#5F4B8B]">T-${String(idx+1).padStart(2,'0')}</div>
+                    <button onclick="removeTrack(${idx})" class="absolute top-4 right-4 text-slate-300 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <input type="text" value="${album.title}" onchange="updateAlbum(${idx}, 'title', this.value)" class="input-field" placeholder="Album Title">
+                        <input type="text" value="${album.artist}" onchange="updateAlbum(${idx}, 'artist', this.value)" class="input-field" placeholder="Artist">
+                        <input type="text" value="${album.img}" onchange="updateAlbum(${idx}, 'img', this.value)" class="input-field md:col-span-2" placeholder="Cover Image URL">
+                        <textarea onchange="updateAlbum(${idx}, 'desc', this.value)" class="input-field md:col-span-2 h-20" placeholder="Album Description">${album.desc}</textarea>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        };
+
+        // UI Event Handlers
+        window.updateAlbum = (idx, field, value) => {
+            archiveData[selectedMonth].albums[idx][field] = value;
+        };
+
+        window.removeTrack = (idx) => {
+            archiveData[selectedMonth].albums.splice(idx, 1);
+            renderTracks(archiveData[selectedMonth].albums);
+        };
+
+        document.getElementById('add-track-btn').onclick = () => {
+            if (!selectedMonth) return;
+            archiveData[selectedMonth].albums.push({ title: "", artist: "", img: "", desc: "" });
+            renderTracks(archiveData[selectedMonth].albums);
+        };
+
+        document.getElementById('add-month-btn').onclick = () => {
+            const nextMonth = prompt("새로운 호 입력 (예: 2026.06)");
+            if (nextMonth && !archiveData[nextMonth]) {
+                archiveData[nextMonth] = { theme: "New Theme", themeImg: "", intro: "", albums: [] };
+                renderSidebar();
+                selectMonth(nextMonth);
+            }
+        };
+
+        document.getElementById('save-btn').onclick = async () => {
+            if (!auth.currentUser) return;
+            
+            // Sync inputs to data object for the theme part
+            if (selectedMonth) {
+                archiveData[selectedMonth].theme = document.getElementById('theme-title').value;
+                archiveData[selectedMonth].themeImg = document.getElementById('theme-img').value;
+                archiveData[selectedMonth].intro = document.getElementById('theme-intro').value;
+            }
+
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive');
+            try {
+                await setDoc(docRef, archiveData);
+                alert("성공적으로 저장되었습니다.");
+            } catch (e) {
+                alert("저장 중 오류 발생: " + e.message);
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>
