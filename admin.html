@@ -41,7 +41,6 @@
         </header>
 
         <div class="grid md:grid-cols-3 gap-6">
-            <!-- Sidebar -->
             <div class="md:col-span-1">
                 <div class="card sticky top-10">
                     <h2 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Volume History</h2>
@@ -52,7 +51,6 @@
                 </div>
             </div>
 
-            <!-- Editor -->
             <div class="md:col-span-2">
                 <div id="editor-container" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div class="card">
@@ -96,7 +94,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -117,8 +114,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // 고유 프로젝트 ID
         const appId = 'monthly-city-pop';
 
         let archiveData = {};
@@ -131,9 +126,7 @@
 
         const init = async () => {
             try {
-                // 인증 시도 (익명 로그인 활성화 필요)
                 await signInAnonymously(auth);
-
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         const badge = document.getElementById('auth-status');
@@ -147,7 +140,7 @@
             } catch (err) {
                 console.error("Auth Init Error:", err);
                 hideLoading();
-                alert("인증에 실패했습니다. Firebase 콘솔에서 '익명 로그인'이 사용 설정되어 있는지 확인하세요.");
+                alert("인증 실패! 파이어베이스 콘솔에서 '익명 로그인'을 켰는지 확인하세요.");
             }
         };
 
@@ -250,17 +243,14 @@
         document.getElementById('save-btn').onclick = async () => {
             if (!auth.currentUser) return;
             const btn = document.getElementById('save-btn');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerText = "Saving...";
+            btn.disabled = true; btn.innerText = "Saving...";
             try {
                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'archive'), archiveData);
-                alert("성공적으로 저장되었습니다! 이제 메인 페이지를 확인하세요.");
+                alert("성공적으로 저장되었습니다! 이제 메인 페이지(index.html)에서 확인하세요.");
             } catch (e) {
                 alert("저장 실패: " + e.message);
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
+                btn.disabled = false; btn.innerText = "저장하기";
             }
         };
 
