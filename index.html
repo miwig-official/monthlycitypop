@@ -3,275 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MONTHLY CITY POP ARCHIVE</title>
+    <title>MONTHLY CITY POP</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;700;900&family=Montserrat:wght@900&family=Noto+Serif+KR:wght@300;700&display=swap');
-
         :root {
-            --bg-vintage: #F6F4F0; 
-            --ultra-violet: #5F4B8B; 
-            --neon-violet: #8A2BE2;
-            --zinc-900: #18181b;
+            --uv: #5F4B8B; /* Ultra Violet */
+            --bg: #ffffff;
+            --text-dark: #111111;
+            --text-muted: #888888;
         }
 
         body {
-            background-color: var(--bg-vintage);
-            color: var(--zinc-900);
-            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
             word-break: keep-all;
         }
 
-        .font-serif { font-family: 'Playfair Display', serif; }
-        .font-retro { font-family: 'Montserrat', sans-serif; }
-
-        /* 80s Grain Texture */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.06;
-            z-index: 9999;
-            pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-
-        /* Side Vertical Line Decor */
-        .vertical-deco {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-        }
-
-        /* Album Card */
-        .album-wrapper {
-            position: relative;
-            aspect-ratio: 1 / 1;
-            overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.08);
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .album-card:hover .album-wrapper {
+        /* 드롭다운 메뉴 */
+        .dropdown-menu {
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+            opacity: 0;
+            visibility: hidden;
             transform: translateY(-10px);
-            box-shadow: 15px 15px 0px var(--ultra-violet);
+        }
+        .dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
         }
 
-        /* Custom Dropdown */
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
-            background-color: #fff;
-            min-width: 180px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            z-index: 100;
-            border-top: 3px solid var(--ultra-violet);
+        /* 앨범 커버 호버 효과 (부드러운 확대) */
+        .cover-wrap {
+            overflow: hidden;
+            border-radius: 4px;
+            background-color: #f5f5f5;
         }
-        .dropdown:hover .dropdown-content { display: block; }
+        .cover-wrap img {
+            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .album-card:hover .cover-wrap img {
+            transform: scale(1.04);
+        }
 
-        @keyframes reveal {
+        /* 텍스트 줄임 (말줄임표) */
+        .truncate-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;  
+            overflow: hidden;
+        }
+
+        /* 스크롤바 숨김 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 등장 애니메이션 */
+        @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .reveal { animation: reveal 1s ease-out forwards; }
+        .animate-fade-up {
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
-<body class="antialiased">
+<body class="antialiased selection:bg-[#5F4B8B] selection:text-white">
 
-    <!-- Top Navigation Bar -->
-    <header class="fixed top-0 left-0 w-full z-50 bg-[#F6F4F0]/90 backdrop-blur-md border-b border-black/10">
-        <div class="max-w-[1800px] mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <div class="bg-[var(--ultra-violet)] text-white px-2 py-0.5 text-[10px] font-retro font-black uppercase">Archive</div>
-                <h1 class="font-retro text-sm tracking-tighter uppercase font-black border-l border-black/20 pl-4">Monthly City Pop</h1>
-            </div>
+    <!-- Global Header -->
+    <header class="fixed top-0 left-0 w-full z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-[1600px] mx-auto px-6 h-16 md:h-20 flex justify-between items-center">
+            <h1 class="text-sm md:text-base font-black tracking-tighter uppercase">Monthly City Pop</h1>
             
-            <div class="dropdown relative group">
-                <button class="flex items-center space-x-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:text-[var(--ultra-violet)] transition-colors">
-                    <span id="active-month-label">April 2026</span>
+            <!-- Archive Dropdown -->
+            <div class="dropdown relative">
+                <button onclick="toggleDropdown(event)" class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest hover:text-[var(--uv)] transition-colors">
+                    <span id="nav-month">April 2026</span>
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
-                <div class="dropdown-content mt-2 py-3">
-                    <a href="#" onclick="updateView('2026.05')" class="block px-6 py-2 hover:bg-[var(--ultra-violet)] hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest">May 2026</a>
-                    <a href="#" onclick="updateView('2026.04')" class="block px-6 py-2 bg-zinc-100 text-[var(--ultra-violet)] text-[10px] font-bold uppercase tracking-widest">Apr 2026</a>
-                    <div class="h-px bg-zinc-100 my-1 mx-4"></div>
-                    <a href="#" class="block px-6 py-2 opacity-30 text-[10px] font-bold uppercase tracking-widest pointer-events-none">Coming Soon</a>
+                <div class="dropdown-menu absolute right-0 top-full mt-4 w-40 bg-white border border-gray-100 shadow-xl rounded-md overflow-hidden z-50">
+                    <button onclick="loadMonth('2026.05')" class="w-full text-left px-5 py-3 text-xs font-semibold tracking-widest hover:bg-gray-50 transition-colors uppercase">May 2026</button>
+                    <button onclick="loadMonth('2026.04')" class="w-full text-left px-5 py-3 text-xs font-semibold tracking-widest text-[var(--uv)] bg-gray-50 uppercase">Apr 2026</button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Side Bar Decor (PC Only) -->
-    <div class="hidden lg:flex fixed left-8 top-1/2 -translate-y-1/2 flex-col items-center space-y-12 z-10">
-        <span class="vertical-deco text-[8px] font-retro font-black uppercase tracking-[0.8em] text-zinc-300">Stylus Chungmuro Editorial</span>
-        <div class="w-px h-24 bg-zinc-200"></div>
-        <span class="vertical-deco text-[8px] font-retro font-black uppercase tracking-[0.8em] text-[var(--ultra-violet)]">Curation Archive</span>
-    </div>
-
-    <main class="pt-28 md:pt-40 pb-24 max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24">
+    <main class="pt-32 pb-32 max-w-[1600px] mx-auto px-6">
         
-        <!-- Editorial Header Section -->
-        <section id="header-section" class="mb-20 md:mb-32 reveal">
-            <div class="grid md:grid-cols-12 gap-8 items-start border-b-2 border-black pb-12">
-                <div class="md:col-span-8">
-                    <div class="flex items-center space-x-4 mb-6">
-                        <span id="issue-no" class="font-retro text-[11px] font-black uppercase text-white bg-black px-3 py-1">Issue 04</span>
-                        <span id="header-date" class="text-[11px] font-bold tracking-[0.4em] uppercase text-zinc-400">April 2026 Selection</span>
-                    </div>
-                    <h2 id="theme-title" class="font-serif text-5xl md:text-[6.5rem] font-black leading-[0.95] tracking-tighter italic text-[var(--ultra-violet)] mb-10">
-                        Midnight Urban Drive
-                    </h2>
-                    <div class="max-w-2xl border-l-4 border-[var(--ultra-violet)] pl-8 ml-1">
-                        <p id="theme-intro" class="text-xl md:text-3xl font-light leading-snug text-zinc-500 italic">
-                            "차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들. 도심의 불빛을 뒤로하고 달리는 드라이브의 동반자가 되어줄 10곡의 레코드."
-                        </p>
-                    </div>
-                </div>
-                <div class="md:col-span-4 flex flex-col md:items-end justify-between h-full pt-2">
-                    <div class="text-right">
-                        <p class="font-serif italic text-2xl mb-1">Curation Program</p>
-                        <p class="text-[10px] font-retro font-black uppercase tracking-[0.3em] text-zinc-400">Monthly City Pop</p>
-                    </div>
-                    <div class="hidden md:block mt-20">
-                        <!-- Decorative Barcode -->
-                        <div class="flex space-x-0.5 h-12 opacity-20">
-                            <div class="w-1 bg-black"></div><div class="w-2 bg-black"></div><div class="w-1 bg-black"></div><div class="w-0.5 bg-black"></div><div class="w-3 bg-black"></div><div class="w-1 bg-black"></div><div class="w-1.5 bg-black"></div><div class="w-0.5 bg-black"></div>
-                        </div>
-                        <p class="text-[8px] font-retro font-bold mt-2 opacity-30 tracking-[0.5em] text-right uppercase">Seoul Archive</p>
-                    </div>
-                </div>
+        <!-- Theme Header -->
+        <section id="theme-section" class="mb-20 md:mb-32 animate-fade-up">
+            <div class="max-w-4xl">
+                <p id="theme-date" class="text-xs font-bold text-[var(--uv)] tracking-[0.2em] uppercase mb-4">Volume 04 / April 2026</p>
+                <h2 id="theme-title" class="text-4xl md:text-7xl font-bold tracking-tight leading-tight mb-8">
+                    Midnight Urban Drive
+                </h2>
+                <p id="theme-intro" class="text-lg md:text-xl text-gray-500 font-light leading-relaxed">
+                    차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들. 도심의 불빛을 뒤로하고 달리는 드라이브의 동반자가 되어줄 10곡의 아카이브.
+                </p>
             </div>
         </section>
 
-        <!-- Grid Section -->
-        <section class="reveal" style="animation-delay: 0.2s;">
-            <div class="flex items-center justify-between mb-16 px-1">
-                <div class="flex items-center space-x-4">
-                    <span class="font-retro text-[11px] uppercase tracking-widest font-black">Archive Collection</span>
-                    <span class="text-[11px] text-zinc-300">/</span>
-                    <span class="font-serif italic text-sm text-[var(--ultra-violet)]">10 Selected Disks</span>
-                </div>
-                <div class="h-px flex-1 bg-black/5 mx-8"></div>
-                <p class="hidden md:block text-[9px] font-bold uppercase tracking-widest text-zinc-400">Total Curated: 120 (Yearly)</p>
-            </div>
-            
-            <div id="main-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-16 md:gap-x-12 md:gap-y-24">
-                <!-- Albums go here -->
+        <!-- Albums Grid (Responsive: 2 cols on mobile, 5 on PC) -->
+        <section class="animate-fade-up" style="animation-delay: 0.1s;">
+            <div id="grid-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-12 md:gap-x-8 md:gap-y-16">
+                <!-- Data is injected here -->
             </div>
         </section>
+
     </main>
 
-    <!-- Detailed Modal View -->
-    <div id="album-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-8 hidden">
-        <div class="absolute inset-0 bg-[#F6F4F0]/95 backdrop-blur-xl" onclick="closeModal()"></div>
+    <!-- Detail Modal -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-white/95 backdrop-blur-sm" onclick="closeModal()"></div>
         
-        <div class="relative bg-white w-full h-full md:h-auto md:max-w-6xl md:max-h-[85vh] overflow-y-auto md:overflow-hidden rounded-none shadow-2xl flex flex-col md:flex-row border border-black/5">
-            <button onclick="closeModal()" class="absolute top-8 right-8 text-3xl font-thin z-20 hover:text-[var(--ultra-violet)] transition-colors">&times;</button>
+        <!-- Modal Content -->
+        <div class="relative w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-full md:h-auto max-h-[90vh]">
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
             
-            <div class="w-full md:w-1/2 bg-[#EBE9E4] p-10 md:p-20 flex items-center justify-center">
-                <img id="modal-img" src="" alt="Album" class="w-full aspect-square object-cover shadow-2xl border-8 border-white">
+            <!-- Cover Image -->
+            <div class="w-full md:w-1/2 bg-gray-50 flex items-center justify-center p-8 md:p-16">
+                <img id="modal-img" src="" alt="Album Cover" class="w-full aspect-square object-cover rounded-md shadow-lg">
             </div>
             
-            <div class="w-full md:w-1/2 p-10 md:p-20 flex flex-col justify-center">
-                <div class="flex items-center space-x-3 mb-6">
-                    <div class="w-10 h-0.5 bg-[var(--ultra-violet)]"></div>
-                    <span class="text-[var(--ultra-violet)] font-retro font-black text-[10px] tracking-[0.4em] uppercase">Liner Note</span>
-                </div>
-                <h3 id="modal-title" class="font-serif text-4xl md:text-6xl font-black tracking-tighter mb-4 leading-tight italic">Album Title</h3>
-                <p id="modal-artist" class="text-xl text-zinc-400 italic mb-12">Artist Name</p>
+            <!-- Details -->
+            <div class="w-full md:w-1/2 p-8 md:p-16 overflow-y-auto flex flex-col justify-center">
+                <span class="inline-block px-3 py-1 bg-[#5F4B8B]/10 text-[var(--uv)] text-[10px] font-bold tracking-widest rounded-full uppercase mb-6 w-max">Track Details</span>
                 
-                <div class="text-zinc-600 font-medium leading-relaxed text-sm md:text-lg border-t border-zinc-100 pt-10 italic">
-                    <p id="modal-desc">앨범에 대한 상세 정보가 들어갑니다.</p>
-                </div>
+                <h3 id="modal-title" class="text-3xl md:text-5xl font-bold tracking-tight mb-2">Album Title</h3>
+                <p id="modal-artist" class="text-lg md:text-xl text-gray-500 font-medium mb-8">Artist Name</p>
                 
-                <div class="mt-12 flex space-x-10">
-                    <a id="modal-link-1" href="#" target="_blank" class="text-[10px] font-retro font-black uppercase tracking-widest border-b-2 border-[var(--ultra-violet)] pb-1 hover:bg-[var(--ultra-violet)] hover:text-white transition-all px-2">YouTube</a>
-                    <a id="modal-link-2" href="#" target="_blank" class="text-[10px] font-retro font-black uppercase tracking-widest border-b-2 border-zinc-200 pb-1 hover:border-black transition-all px-2">References</a>
+                <p id="modal-desc" class="text-gray-600 leading-relaxed font-light mb-12 text-sm md:text-base">
+                    앨범에 대한 상세 설명이 들어갑니다.
+                </p>
+                
+                <div class="flex flex-wrap gap-4 mt-auto">
+                    <a id="modal-link-listen" href="#" target="_blank" class="px-6 py-3 bg-[var(--uv)] text-white text-xs font-bold uppercase tracking-widest rounded-md hover:bg-[#4a3a6e] transition-colors">Listen</a>
+                    <a id="modal-link-ref" href="#" target="_blank" class="px-6 py-3 bg-gray-100 text-gray-700 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-gray-200 transition-colors">Reference</a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="px-6 py-24 border-t-2 border-black">
-        <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center">
-            <div class="mb-12 md:mb-0">
-                <h4 class="font-retro font-black uppercase text-xl md:text-2xl tracking-tighter text-[var(--ultra-violet)] italic">Monthly City Pop</h4>
-                <p class="text-[10px] font-bold text-zinc-400 tracking-[0.4em] mt-2 uppercase">Selection Archive for Urban Nostalgia</p>
-            </div>
-            <div class="flex flex-col md:items-end space-y-4">
-                <div class="flex space-x-12 text-[10px] font-retro font-black uppercase tracking-[0.3em] text-zinc-500">
-                    <a href="#" class="hover:text-[var(--ultra-violet)] transition-colors">Instagram</a>
-                    <a href="#" class="hover:text-[var(--ultra-violet)] transition-colors">Spotify</a>
-                    <a href="#" class="hover:text-[var(--ultra-violet)] transition-colors">Archive</a>
-                </div>
-                <p class="text-[9px] tracking-[0.3em] text-zinc-300 uppercase">© 2026 STYLUS CHUNGMURO. All Rights Reserved.</p>
+    <footer class="py-12 border-t border-gray-100">
+        <div class="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">© Monthly City Pop Archive</p>
+            <div class="flex gap-6 text-[10px] font-bold tracking-widest uppercase text-gray-400">
+                <a href="#" class="hover:text-[var(--uv)] transition-colors">Instagram</a>
+                <a href="#" class="hover:text-[var(--uv)] transition-colors">Spotify</a>
             </div>
         </div>
     </footer>
 
     <script>
-        const archiveData = {
+        // Database Mock (JSON format)
+        const db = {
             "2026.04": {
                 theme: "Midnight Urban Drive",
-                issue: "04",
-                intro: "\"차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들. 도심의 불빛을 뒤로하고 달리는 드라이브의 동반자가 되어줄 10곡의 레코드.\"",
+                intro: "차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들. 도심의 불빛을 뒤로하고 달리는 드라이브의 동반자가 되어줄 10곡의 아카이브.",
                 albums: [
-                    { title: "Pacific Breeze", artist: "Various Artists", img: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000", desc: "시티팝 컴필레이션의 정석이라 불리는 앨범입니다. 70~80년대 일본의 번영과 도시적인 감성이 완벽하게 녹아들어 있습니다.", links: ["#", "#"] },
-                    { title: "Sunshower", artist: "Taeko Onuki", img: "https://images.unsplash.com/photo-1514525253344-f814d0c9e48d?q=80&w=1000", desc: "타에코 오누키의 명반입니다. 세련된 편곡과 몽환적인 보컬이 일품이며 시티팝의 고전으로 평가받습니다.", links: ["#", "#"] },
-                    { title: "After 5 Clash", artist: "Toshiki Kadomatsu", img: "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=1000", desc: "퇴근 후의 도시 야경이 떠오르는 앨범입니다. 펑키한 베이스 라인과 화려한 브라스 세션이 돋보입니다.", links: ["#", "#"] },
-                    { title: "Timely!!", artist: "Anri", img: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=1000", desc: "여름, 바다, 그리고 질주하는 자동차. 안리의 시원한 목소리가 여름 시티팝의 정수를 보여줍니다.", links: ["#", "#"] },
-                    { title: "Adventure", artist: "Momoko Kikuchi", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000", desc: "몽환적인 신시사이저 사운드와 모모코 키쿠치의 부드러운 음색이 어우러진 명작입니다.", links: ["#", "#"] },
-                    { title: "Magical", artist: "Junko Ohashi", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000", desc: "준코 오하시의 폭발적인 가창력과 세련된 어반 사운드가 조화를 이루는 명반입니다.", links: ["#", "#"] },
-                    { title: "First Light", artist: "Akira Terao", img: "https://images.unsplash.com/photo-1420133965216-7ca77d2466e4?q=80&w=1000", desc: "중후한 매력이 돋보이는 앨범입니다. 차분하면서도 세련된 연주가 특징입니다.", links: ["#", "#"] },
-                    { title: "Love Trip", artist: "Takako Mamiya", img: "https://images.unsplash.com/photo-1496293455970-f8581aae0e3c?q=80&w=1000", desc: "마미야 타카코의 유일한 명반. 시티팝 매니아라면 반드시 소장해야 할 아이템입니다.", links: ["#", "#"] },
-                    { title: "Variety", artist: "Mariya Takeuchi", img: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=1000", desc: "전설적인 'Plastic Love'가 수록된 앨범입니다. 타케우치 마리야의 세련된 감각이 돋보입니다.", links: ["#", "#"] },
-                    { title: "Ride on Time", artist: "Tatsuro Yamashita", img: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1000", desc: "시티팝의 왕 야마시타 타츠로의 대표작. 완벽한 프로듀싱의 정점을 보여줍니다.", links: ["#", "#"] }
+                    { title: "Pacific Breeze", artist: "Various Artists", img: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000", desc: "시티팝 컴필레이션의 정석. 70~80년대 일본의 번영과 도시적인 감성이 완벽하게 녹아들어 있습니다." },
+                    { title: "Sunshower", artist: "Taeko Onuki", img: "https://images.unsplash.com/photo-1514525253344-f814d0c9e48d?q=80&w=1000", desc: "타에코 오누키의 명반입니다. 세련된 편곡과 몽환적인 보컬이 일품이며 시티팝의 고전으로 평가받습니다." },
+                    { title: "After 5 Clash", artist: "Toshiki Kadomatsu", img: "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=1000", desc: "퇴근 후의 도시 야경이 떠오르는 앨범입니다. 펑키한 베이스 라인과 화려한 브라스 세션이 돋보입니다." },
+                    { title: "Timely!!", artist: "Anri", img: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=1000", desc: "여름, 바다, 그리고 질주하는 자동차. 안리의 시원한 목소리가 여름 시티팝의 정수를 보여줍니다." },
+                    { title: "Adventure", artist: "Momoko Kikuchi", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000", desc: "몽환적인 신시사이저 사운드와 모모코 키쿠치의 부드러운 음색이 어우러진 명작입니다." },
+                    { title: "Magical", artist: "Junko Ohashi", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000", desc: "준코 오하시의 폭발적인 가창력과 세련된 어반 사운드가 조화를 이루는 명반입니다." },
+                    { title: "First Light", artist: "Akira Terao", img: "https://images.unsplash.com/photo-1420133965216-7ca77d2466e4?q=80&w=1000", desc: "중후한 매력이 돋보이는 앨범입니다. 차분하면서도 세련된 연주가 특징입니다." },
+                    { title: "Love Trip", artist: "Takako Mamiya", img: "https://images.unsplash.com/photo-1496293455970-f8581aae0e3c?q=80&w=1000", desc: "마미야 타카코의 유일한 명반. 시티팝 매니아라면 반드시 소장해야 할 아이템입니다." },
+                    { title: "Variety", artist: "Mariya Takeuchi", img: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=1000", desc: "전설적인 'Plastic Love'가 수록된 앨범입니다. 타케우치 마리야의 세련된 감각이 돋보입니다." },
+                    { title: "Ride on Time", artist: "Tatsuro Yamashita", img: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1000", desc: "시티팝의 왕 야마시타 타츠로의 대표작. 완벽한 프로듀싱의 정점을 보여줍니다." }
                 ]
             },
             "2026.05": {
-                theme: "Neon Sunset Memories",
-                issue: "05",
-                intro: "\"분홍빛 구름 사이로 흐르는 부드러운 선율들. 해 질 녘의 나른함과 보랏빛 공기를 담은 10곡의 아카이브.\"",
+                theme: "Sunset Memories",
+                intro: "해 질 녘의 나른함과 보랏빛 공기를 담은 플레이리스트. 하루를 마무리하는 시간에 어울리는 10장의 레코드.",
                 albums: [
-                    { title: "Summer Breeze", artist: "Piper", img: "https://images.unsplash.com/photo-1619983081563-430f63602796?q=80&w=1000", desc: "5월의 큐레이션 샘플입니다.", links: ["#", "#"] },
-                    { title: "Aqua City", artist: "Kiyotaka Sugiyama", img: "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=1000", desc: "청량한 바닷바람이 느껴지는 사운드.", links: ["#", "#"] },
+                    { title: "Summer Breeze", artist: "Piper", img: "https://images.unsplash.com/photo-1619983081563-430f63602796?q=80&w=1000", desc: "5월 큐레이션 데이터 예시입니다." },
+                    { title: "Aqua City", artist: "Kiyotaka Sugiyama", img: "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=1000", desc: "청량한 바닷바람이 느껴지는 사운드." }
                 ]
             }
         };
 
-        const grid = document.getElementById('main-grid');
-        const modal = document.getElementById('album-modal');
+        const grid = document.getElementById('grid-container');
+        const modal = document.getElementById('modal');
+        const dropdown = document.querySelector('.dropdown');
 
-        function updateView(month) {
-            const data = archiveData[month];
+        // 드롭다운 토글 (모바일에서도 잘 작동하도록 click 이벤트 사용)
+        function toggleDropdown(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+        }
+
+        // 바탕 클릭 시 드롭다운 닫기
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // 데이터 렌더링
+        function loadMonth(monthKey) {
+            dropdown.classList.remove('active');
+            const data = db[monthKey];
             if(!data) return;
 
-            // UI Refresh
-            document.getElementById('active-month-label').innerText = month === '2026.04' ? 'April 2026' : 'May 2026';
-            document.getElementById('header-date').innerText = `${month === '2026.04' ? 'April' : 'May'} 2026 Collection`;
-            document.getElementById('issue-no').innerText = `Issue ${data.issue}`;
+            // Update UI Texts
+            document.getElementById('nav-month').innerText = monthKey === '2026.04' ? 'April 2026' : 'May 2026';
+            document.getElementById('theme-date').innerText = `Volume ${monthKey.split('.')[1]} / ${monthKey === '2026.04' ? 'April' : 'May'} 2026`;
             document.getElementById('theme-title').innerText = data.theme;
             document.getElementById('theme-intro').innerText = data.intro;
 
+            // Render Grid
             grid.innerHTML = '';
-            data.albums.forEach((album, idx) => {
-                const card = document.createElement('div');
+            data.albums.forEach((album) => {
+                const card = document.createElement('article');
                 card.className = 'album-card cursor-pointer group';
                 card.onclick = () => openModal(album);
+                
+                // 심플하고 모던한 카드 구조
                 card.innerHTML = `
-                    <div class="album-wrapper mb-6 bg-zinc-100">
-                        <img src="${album.img}" alt="${album.title}" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700">
-                        <div class="absolute bottom-3 right-3 bg-white px-2 py-1 text-[9px] font-retro font-black border border-black/10 opacity-0 group-hover:opacity-100 transition-opacity">DISK 0${idx+1}</div>
+                    <div class="cover-wrap mb-4">
+                        <img src="${album.img}" alt="${album.title}" class="w-full h-full object-cover aspect-square">
                     </div>
-                    <div class="px-1 text-center md:text-left">
-                        <h4 class="font-serif italic text-base md:text-lg font-black tracking-tight truncate mb-1 group-hover:text-[var(--ultra-violet)] transition-colors">${album.title}</h4>
-                        <p class="text-[10px] text-zinc-400 font-retro font-bold uppercase tracking-widest">${album.artist}</p>
+                    <div>
+                        <h3 class="font-bold text-sm md:text-base text-gray-900 truncate group-hover:text-[var(--uv)] transition-colors">${album.title}</h3>
+                        <p class="text-xs text-gray-500 mt-1">${album.artist}</p>
                     </div>
                 `;
                 grid.appendChild(card);
             });
+
+            // 화면 최상단으로 이동 애니메이션
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function openModal(album) {
@@ -279,16 +249,18 @@
             document.getElementById('modal-title').innerText = album.title;
             document.getElementById('modal-artist').innerText = album.artist;
             document.getElementById('modal-desc').innerText = album.desc;
+            
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
         }
 
         function closeModal() {
             modal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = 'auto'; // 배경 스크롤 복구
         }
 
-        window.onload = () => updateView('2026.04');
+        // 초기 로드
+        window.onload = () => loadMonth('2026.04');
     </script>
 </body>
 </html>
