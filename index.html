@@ -114,21 +114,21 @@
         }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Hero Image Container - DEFINITIVE WIDTH FIX */
+        /* Hero Image Container - Mobile Full Width & PC Boxed */
         .hero-img-box {
-            width: 100% !important; /* Force take up full grid container width */
+            width: 100% !important;
             aspect-ratio: 1 / 1;
             position: relative;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: #f1f1f1;
         }
         
         @media (min-width: 768px) {
             .hero-img-box {
-                max-width: 280px; /* Only constrain on desktop */
-                background: #f1f1f1;
+                max-width: 280px;
                 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
                 border-radius: 0.125rem;
             }
@@ -138,7 +138,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block;
+            display: none; /* JS에서 데이터 로드 시 block으로 변경 */
         }
 
         /* Support for newlines */
@@ -168,9 +168,9 @@
         </div>
     </div>
 
-    <!-- Header: Two-line Title on Mobile -->
+    <!-- Header: Dynamic height to prevent overlap on mobile -->
     <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div class="max-w-[1400px] mx-auto flex items-center justify-between h-20 md:h-14 px-4 md:px-6">
+        <div class="max-w-[1400px] mx-auto flex items-center justify-between min-h-[70px] md:h-14 px-4 md:px-6 py-2 md:py-0">
             <div class="flex items-center min-w-0">
                 <h1 class="font-logo text-[1.1rem] sm:text-xl md:text-2xl text-[var(--text-main)] uppercase tracking-tighter leading-[0.95] pt-0.5 flex flex-col sm:flex-row">
                     <span>Monthly</span>
@@ -198,9 +198,9 @@
             <div id="theme-watermark" class="absolute right-0 bottom-0 text-[10rem] md:text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4">--</div>
 
             <div class="grid md:grid-cols-12 relative z-10 items-stretch">
-                <!-- Image Side: Box decorations removed for mobile, full width forced -->
+                <!-- Image Side: Mobile decorations simplified -->
                 <div class="md:col-span-4 lg:col-span-3 p-0 md:p-8 flex items-center justify-center bg-transparent md:bg-gray-50/50 border-b md:border-b-0 md:border-r border-black overflow-hidden">
-                    <div class="hero-img-box w-full">
+                    <div class="hero-img-box">
                         <img id="theme-img" src="" alt="Theme Cover" class="grayscale-[5%] hover:grayscale-0 transition-all duration-1000">
                     </div>
                 </div>
@@ -227,7 +227,6 @@
             </div>
         </section>
 
-        <!-- Track Grid -->
         <section class="p-6 md:p-10 lg:p-14 bg-white animate-snap">
             <div class="mb-10 md:mb-14 flex items-end justify-between">
                 <div>
@@ -268,49 +267,70 @@
         let archiveData = {}; let currentMonth = "";
 
         const init = async () => {
-            await signInAnonymously(auth);
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), (snap) => {
-                        if (snap.exists()) { 
-                            archiveData = snap.data(); 
-                            const keys = Object.keys(archiveData).sort().reverse();
-                            if (!currentMonth && keys.length > 0) currentMonth = keys[0];
-                            if (currentMonth) renderMonth(currentMonth); 
-                            renderSelector();
-                        }
-                    }, (error) => {
-                        console.error("Firestore Error:", error);
-                    });
-                }
-            });
+            try {
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), (snap) => {
+                            if (snap.exists()) { 
+                                archiveData = snap.data(); 
+                                const keys = Object.keys(archiveData).sort().reverse();
+                                if (!currentMonth && keys.length > 0) currentMonth = keys[0];
+                                if (currentMonth) renderMonth(currentMonth); 
+                                renderSelector();
+                            }
+                        }, (error) => {
+                            console.error("Firestore Error:", error);
+                        });
+                    }
+                });
+            } catch (err) {
+                console.error("Auth Error:", err);
+            }
         };
 
         const renderMonth = (month) => {
-            const data = archiveData[month]; if (!data) return;
+            const data = archiveData[month]; 
+            if (!data) return;
+
             const issueNo = month.split('.')[1] || "--";
-            document.getElementById('nav-month').innerText = month;
             
-            // Goal 3: 2026/04 format
-            const formattedVol = month.replace('.', '/');
-            document.getElementById('theme-vol-label').innerText = `VOL. ${formattedVol}`;
+            // Header Month Update
+            const navMonthEl = document.getElementById('nav-month');
+            if(navMonthEl) navMonthEl.innerText = month;
             
-            document.getElementById('theme-watermark').innerText = issueNo;
-            document.getElementById('theme-intro').innerText = data.intro || "";
+            // VOL Label Update (2026/04 format)
+            const volLabelEl = document.getElementById('theme-vol-label');
+            if(volLabelEl) volLabelEl.innerText = `VOL. ${month.replace('.', '/')}`;
             
-            // Goal 2: Fix theme image rendering with direct src update and visibility
+            // Watermark Update
+            const watermarkEl = document.getElementById('theme-watermark');
+            if(watermarkEl) watermarkEl.innerText = issueNo;
+
+            // Theme Intro Update
+            const introEl = document.getElementById('theme-intro');
+            if(introEl) introEl.innerText = data.intro || "";
+            
+            // Theme Title Update
+            const titleEl = document.getElementById('theme-title');
+            if(titleEl) titleEl.innerText = data.theme || "";
+            
+            // Theme Image Rendering Fix
             const themeImgEl = document.getElementById('theme-img');
-            if(data.themeImg) {
-                themeImgEl.src = data.themeImg;
-                themeImgEl.style.display = 'block';
-            } else {
-                themeImgEl.src = "";
-                themeImgEl.style.display = 'none';
+            if(themeImgEl) {
+                if(data.themeImg) {
+                    themeImgEl.src = data.themeImg;
+                    themeImgEl.style.display = 'block';
+                } else {
+                    themeImgEl.src = "";
+                    themeImgEl.style.display = 'none';
+                }
             }
 
-            document.getElementById('theme-title').innerText = data.theme || "";
-
+            // Album Grid Rendering
             const grid = document.getElementById('grid-container');
+            if(!grid) return;
+            
             grid.innerHTML = '';
             (data.albums || []).forEach((album, idx) => {
                 const div = document.createElement('div');
@@ -320,7 +340,7 @@
                 div.innerHTML = `
                     <div class="cover-box w-full aspect-square mb-5 md:mb-6 bg-gray-50 relative rounded-sm" onclick='openModal(${modalParams})'>
                         <div class="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white font-mono text-[9px] font-black px-1.5 md:px-2 py-0.5 z-10 tracking-widest uppercase">#${String(idx+1).padStart(2,'0')}</div>
-                        <img src="${album.img || ''}" alt="${album.title}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700">
+                        <img src="${album.img || ''}" alt="${album.title}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700" onerror="this.src='https://via.placeholder.com/500?text=No+Cover'">
                     </div>
                     <div class="flex-1 flex flex-col">
                         <h3 class="font-black text-sm md:text-base uppercase tracking-tight truncate text-black mb-1 leading-none">${album.title || ''}</h3>
@@ -337,6 +357,8 @@
 
         const renderSelector = () => {
             const list = document.getElementById('month-list');
+            if(!list) return;
+            
             list.innerHTML = '';
             Object.keys(archiveData).sort().reverse().forEach(m => {
                 const btn = document.createElement('button');
@@ -347,10 +369,16 @@
             });
         };
 
-        window.toggleDropdown = (e) => { e.stopPropagation(); document.getElementById('dropdown-toggle').classList.toggle('active'); };
+        window.toggleDropdown = (e) => { 
+            if(e) e.stopPropagation(); 
+            const toggle = document.getElementById('dropdown-toggle');
+            if(toggle) toggle.classList.toggle('active'); 
+        };
         
         window.openModal = (title, artist, desc) => {
             const modal = document.getElementById('note-modal');
+            if(!modal) return;
+            
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-artist').innerText = artist;
             document.getElementById('modal-desc').innerText = desc || "No liner notes available.";
@@ -360,11 +388,15 @@
 
         window.closeModal = () => {
             const modal = document.getElementById('note-modal');
-            modal.style.display = 'none';
+            if(modal) modal.style.display = 'none';
             document.body.style.overflow = '';
         };
 
-        document.addEventListener('click', () => document.getElementById('dropdown-toggle').classList.remove('active'));
+        document.addEventListener('click', () => {
+            const toggle = document.getElementById('dropdown-toggle');
+            if(toggle) toggle.classList.remove('active');
+        });
+
         init();
     </script>
 </body>
