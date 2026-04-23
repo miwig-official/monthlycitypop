@@ -9,9 +9,6 @@
     <style>
         body { font-family: 'Pretendard', sans-serif; background-color: #f1f5f9; color: #1e293b; }
         
-        /* Typography & Spacing */
-        .tracking-tight-custom { tracking-tighter: -0.05em; }
-        
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -40,7 +37,6 @@
             background: transparent;
         }
 
-        /* Premium File Upload Button */
         .file-upload-trigger {
             display: flex;
             align-items: center;
@@ -56,12 +52,7 @@
             transition: all 0.2s;
             white-space: nowrap;
         }
-        .file-upload-trigger:hover { 
-            background: #4a3a6e; 
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(95, 75, 139, 0.2);
-        }
-        .file-upload-trigger:active { transform: translateY(0); }
+        .file-upload-trigger:hover { background: #4a3a6e; transform: translateY(-1px); }
 
         /* Card & Layout */
         .card { 
@@ -80,7 +71,7 @@
             font-size: 0.875rem;
             transition: all 0.2s;
         }
-        .btn-main:hover { background: #0f172a; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .btn-main:hover { background: #0f172a; transform: translateY(-2px); }
         
         .btn-save {
             background: #5F4B8B;
@@ -94,26 +85,31 @@
         .btn-save:hover { transform: scale(1.05); background: #4a3a6e; }
 
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        
+        /* Admin Logo Styling */
+        .admin-brand-logo { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
     </style>
 </head>
 <body class="selection:bg-[#5F4B8B] selection:text-white antialiased">
 
-    <div id="loading-overlay" class="loading-overlay">
+    <div id="loading-overlay" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
         <div class="flex flex-col items-center">
             <div class="w-12 h-12 border-[3px] border-slate-100 border-t-[#5F4B8B] rounded-full animate-spin"></div>
-            <p class="mt-6 font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Vault Authorization...</p>
+            <p class="mt-6 font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">System Initializing...</p>
         </div>
     </div>
 
     <div class="max-w-5xl mx-auto min-h-screen flex flex-col">
-        <header class="flex items-end justify-between pt-12 pb-10 px-4">
-            <div>
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="status-dot bg-slate-300" id="auth-dot"></span>
-                    <span id="auth-status" class="text-[10px] font-black uppercase tracking-widest text-slate-400">Connection Pending</span>
+        <header class="flex items-center justify-between pt-12 pb-10 px-4">
+            <div class="flex items-center gap-5">
+                <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" alt="MCP Logo" class="admin-brand-logo shadow-lg shadow-black/5">
+                <div>
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="status-dot bg-slate-300" id="auth-dot"></span>
+                        <span id="auth-status" class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 pt-0.5">Disconnected</span>
+                    </div>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Management Center</h1>
                 </div>
-                <h1 class="text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">Management Center</h1>
-                <p class="text-xs text-slate-400 font-bold mt-2 uppercase tracking-wide">Monthly City Pop Archive Project</p>
             </div>
             <button id="save-btn" class="btn-save flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
@@ -139,7 +135,6 @@
             <!-- Editor -->
             <div class="md:col-span-8 lg:col-span-9 px-4">
                 <div id="editor-container" class="hidden space-y-6">
-                    <!-- Theme Edit -->
                     <div class="card animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div class="flex items-center gap-3 mb-8">
                             <div class="w-1 h-6 bg-[#5F4B8B] rounded-full"></div>
@@ -148,12 +143,13 @@
                         <div class="space-y-6">
                             <div class="group">
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest group-focus-within:text-[#5F4B8B] transition-colors">Theme Concept Title</label>
-                                <input type="text" id="theme-title" class="input-field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:border-[#5F4B8B] focus:ring-4 focus:ring-[#5F4B8B]/5 transition-all outline-none" placeholder="예: Midnight Urban Drive" oninput="updateThemeData('theme', this.value)">
+                                <!-- Multi-line support for Title -->
+                                <textarea id="theme-title" class="input-field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:border-[#5F4B8B] focus:ring-4 focus:ring-[#5F4B8B]/5 transition-all outline-none min-h-[60px]" placeholder="예: Midnight Urban Drive" oninput="updateThemeData('theme', this.value)"></textarea>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Master Cover Image</label>
                                 <div class="input-group">
-                                    <input type="text" id="theme-img" class="input-field-bare font-mono text-xs text-slate-500" placeholder="직접 URL을 입력하거나 파일을 선택하세요" oninput="updateThemeData('themeImg', this.value)">
+                                    <input type="text" id="theme-img" class="input-field-bare font-mono text-xs text-slate-500" placeholder="URL 입력 또는 파일 업로드" oninput="updateThemeData('themeImg', this.value)">
                                     <label class="file-upload-trigger">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                         UPLOAD
@@ -163,17 +159,16 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Introduction Passage</label>
-                                <textarea id="theme-intro" class="input-field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium min-h-[120px] focus:border-[#5F4B8B] focus:ring-4 focus:ring-[#5F4B8B]/5 transition-all outline-none leading-relaxed" placeholder="테마에 대한 짧은 설명을 입력하세요." oninput="updateThemeData('intro', this.value)"></textarea>
+                                <textarea id="theme-intro" class="input-field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium min-h-[120px] focus:border-[#5F4B8B] outline-none transition-all leading-relaxed" placeholder="테마 설명을 입력하세요." oninput="updateThemeData('intro', this.value)"></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Album List -->
                     <div class="card animate-in fade-in slide-in-from-bottom-6 duration-700">
                         <div class="flex items-center justify-between mb-10">
                             <div class="flex items-center gap-3">
                                 <div class="w-1 h-6 bg-[#5F4B8B] rounded-full"></div>
-                                <h2 class="text-lg font-black text-slate-900 tracking-tight uppercase pt-0.5 text-nowrap">Curation Catalog</h2>
+                                <h2 class="text-lg font-black text-slate-900 tracking-tight uppercase pt-0.5">Curation Catalog</h2>
                             </div>
                             <button id="add-track-btn" class="btn-main flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
@@ -183,12 +178,8 @@
                         <div id="tracks-container" class="space-y-10"></div>
                     </div>
                 </div>
-                
-                <div id="no-selection" class="card flex flex-col items-center justify-center py-40 text-slate-300">
-                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-                        <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    </div>
-                    <p class="font-black tracking-widest text-[10px] uppercase text-center px-6 leading-relaxed">Select a volume to manage the collection</p>
+                <div id="no-selection" class="card flex flex-col items-center justify-center py-40 text-slate-300 text-center">
+                    <p class="font-black tracking-widest text-[10px] uppercase px-6">Select a volume to start editing</p>
                 </div>
             </div>
         </div>
@@ -219,7 +210,7 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     document.getElementById('auth-dot').className = "status-dot bg-green-500 animate-pulse";
-                    document.getElementById('auth-status').innerText = "Database Connected";
+                    document.getElementById('auth-status').innerText = "Connected";
                     document.getElementById('auth-status').classList.replace('text-slate-400', 'text-green-600');
                     await loadData();
                 } else document.getElementById('loading-overlay').style.display = 'none';
@@ -261,9 +252,9 @@
             const container = document.getElementById('tracks-container'); container.innerHTML = '';
             albums.forEach((album, idx) => {
                 const div = document.createElement('div'); 
-                div.className = 'group p-8 border border-slate-100 rounded-3xl relative bg-white hover:border-[#5F4B8B]/30 hover:shadow-2xl hover:shadow-slate-200 transition-all duration-300';
+                div.className = 'group p-8 border border-slate-100 rounded-3xl relative bg-white hover:border-[#5F4B8B]/30 hover:shadow-2xl transition-all duration-300';
                 div.innerHTML = `
-                    <div class="absolute top-8 left-8 text-[10px] font-black text-[#5F4B8B] tracking-widest flex items-center gap-2">
+                    <div class="absolute top-8 left-8 text-[10px] font-black text-[#5F4B8B] tracking-widest flex items-center gap-2 uppercase">
                         <span class="w-4 h-[2px] bg-[#5F4B8B]"></span> TRACK ${String(idx+1).padStart(2,'0')}
                     </div>
                     <button onclick="removeTrack(${idx})" class="absolute top-8 right-8 text-slate-200 hover:text-red-500 transition-colors">
@@ -272,7 +263,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 mt-10">
                         <div>
                             <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Album Title</label>
-                            <input type="text" value="${album.title || ''}" oninput="updateTrackData(${idx}, 'title', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold focus:border-[#5F4B8B] outline-none transition-all" placeholder="Title">
+                            <textarea oninput="updateTrackData(${idx}, 'title', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold focus:border-[#5F4B8B] outline-none transition-all min-h-[46px] resize-none">${album.title || ''}</textarea>
                         </div>
                         <div>
                             <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Artist Name</label>
@@ -291,7 +282,7 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Liner Notes</label>
-                            <textarea oninput="updateTrackData(${idx}, 'desc', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-medium min-h-[100px] focus:border-[#5F4B8B] outline-none transition-all leading-relaxed" placeholder="Album backstory...">${album.desc || ''}</textarea>
+                            <textarea oninput="updateTrackData(${idx}, 'desc', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-medium min-h-[100px] focus:border-[#5F4B8B] outline-none transition-all leading-relaxed" placeholder="backstory...">${album.desc || ''}</textarea>
                         </div>
                     </div>`;
                 container.appendChild(div);
@@ -324,7 +315,7 @@
 
         window.updateThemeData = (field, value) => { if (selectedMonth) archiveData[selectedMonth][field] = value; };
         window.updateTrackData = (idx, field, value) => { if (selectedMonth) archiveData[selectedMonth].albums[idx][field] = value; };
-        window.removeTrack = (idx) => { if (confirm("이 트랙을 아카이브에서 영구적으로 삭제하시겠습니까?")) { archiveData[selectedMonth].albums.splice(idx, 1); renderTracks(archiveData[selectedMonth].albums); } };
+        window.removeTrack = (idx) => { if (confirm("삭제하시겠습니까?")) { archiveData[selectedMonth].albums.splice(idx, 1); renderTracks(archiveData[selectedMonth].albums); } };
 
         document.getElementById('add-track-btn').onclick = () => {
             if (!selectedMonth) return;
@@ -334,11 +325,11 @@
         };
 
         document.getElementById('add-month-btn').onclick = () => {
-            const nextMonth = prompt("새로운 호의 연도와 월을 입력하세요 (예: 2026.05)");
+            const nextMonth = prompt("새로운 호 입력 (예: 2026.05)");
             if (nextMonth && !archiveData[nextMonth]) {
                 archiveData[nextMonth] = { theme: "새로운 테마", themeImg: "", intro: "", albums: [] };
                 renderSidebar(); selectMonth(nextMonth);
-            } else if (archiveData[nextMonth]) { alert("이미 존재하는 월호입니다."); }
+            }
         };
 
         document.getElementById('save-btn').onclick = async () => {
@@ -353,7 +344,7 @@
                     alert("✨ 데이터베이스 동기화가 완료되었습니다.");
                 }, 500);
             } catch (e) {
-                alert("동기화 실패 (용량 초과 가능성): " + e.message);
+                alert("동기화 실패: " + e.message);
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
