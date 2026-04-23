@@ -3,170 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MONTHLY CITY POP</title>
+    <title>MONTHLY CITY POP | ARCHIVE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@800&display=swap');
+
         :root {
-            --uv: #5F4B8B; /* Ultra Violet */
+            --uv: #5F4B8B;
             --bg: #ffffff;
-            --text-dark: #111111;
-            --text-muted: #888888;
+            --grid-line: #efefef;
+            --text-main: #000000;
         }
 
         body {
             background-color: var(--bg);
-            color: var(--text-dark);
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            color: var(--text-main);
+            font-family: 'Pretendard', 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
-            word-break: keep-all;
         }
 
-        /* 드롭다운 메뉴 */
+        .font-mono { font-family: 'Space Mono', monospace; }
+        .font-logo { font-family: 'Syne', sans-serif; }
+
+        /* 드롭다운 스타일 */
         .dropdown-menu {
-            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-10px);
+            transform: translateY(10px);
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--bg);
+            border: 1px solid var(--grid-line);
+            border-radius: 12px;
+            min-width: 180px;
+            z-index: 50;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .dropdown.active .dropdown-menu {
+        .dropdown.active .dropdown-menu { 
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
 
-        /* 앨범 커버 호버 효과 (부드러운 확대) */
-        .cover-wrap {
-            overflow: hidden;
-            border-radius: 4px;
-            background-color: #f5f5f5;
+        /* 앨범 카드 호버 */
+        .album-card .cover-box {
+            border: 1px solid var(--grid-line);
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .cover-wrap img {
-            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        .album-card:hover .cover-box {
+            border-color: var(--text-main);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
         }
-        .album-card:hover .cover-wrap img {
-            transform: scale(1.04);
-        }
-
-        /* 텍스트 줄임 (말줄임표) */
-        .truncate-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;  
-            overflow: hidden;
+        .album-card:hover .album-title {
+            color: var(--uv);
         }
 
-        /* 스크롤바 숨김 */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* 등장 애니메이션 */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
+        /* 애니메이션 */
+        @keyframes snapIn {
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-up {
-            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .animate-snap {
+            animation: snapIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 35s linear infinite;
+        }
+
+        /* 타이틀 외곽선 효과 */
+        .title-outline {
+            -webkit-text-stroke: 1px var(--text-main);
+            color: transparent;
         }
     </style>
 </head>
-<body class="antialiased selection:bg-[#5F4B8B] selection:text-white">
+<body class="selection:bg-[#5F4B8B] selection:text-white">
 
-    <!-- Global Header -->
-    <header class="fixed top-0 left-0 w-full z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div class="max-w-[1600px] mx-auto px-6 h-16 md:h-20 flex justify-between items-center">
-            <h1 class="text-sm md:text-base font-black tracking-tighter uppercase">Monthly City Pop</h1>
-            
-            <!-- Archive Dropdown -->
-            <div class="dropdown relative">
-                <button onclick="toggleDropdown(event)" class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest hover:text-[var(--uv)] transition-colors">
-                    <span id="nav-month">April 2026</span>
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div class="dropdown-menu absolute right-0 top-full mt-4 w-40 bg-white border border-gray-100 shadow-xl rounded-md overflow-hidden z-50">
-                    <button onclick="loadMonth('2026.05')" class="w-full text-left px-5 py-3 text-xs font-semibold tracking-widest hover:bg-gray-50 transition-colors uppercase">May 2026</button>
-                    <button onclick="loadMonth('2026.04')" class="w-full text-left px-5 py-3 text-xs font-semibold tracking-widest text-[var(--uv)] bg-gray-50 uppercase">Apr 2026</button>
+    <!-- Header -->
+    <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-between h-14 md:h-16 px-6">
+            <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded-full bg-black flex items-center justify-center overflow-hidden shrink-0">
+                    <span class="font-mono text-[7px] font-bold text-white leading-none">MCP</span>
+                </div>
+                <h1 class="font-logo text-lg md:text-xl text-black uppercase tracking-tighter whitespace-nowrap leading-none mt-0.5">Monthly City Pop</h1>
+                <div class="hidden lg:block w-px h-3 bg-gray-200 mx-2"></div>
+                <div class="hidden lg:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap mt-0.5">
+                    Curated Archive
+                </div>
+            </div>
+
+            <div class="flex items-center">
+                <div class="dropdown relative cursor-pointer" onclick="toggleDropdown(event)">
+                    <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-gray-100 bg-gray-50 hover:bg-white hover:border-gray-300 transition-all">
+                        <div class="w-1.5 h-1.5 rounded-full bg-[var(--uv)] animate-pulse"></div>
+                        <span id="nav-month" class="font-mono text-[10px] font-bold uppercase tracking-widest text-gray-800 pt-0.5">2026.04</span>
+                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="dropdown-menu mt-2 p-2">
+                        <button onclick="loadMonth('2026.05')" class="dropdown-btn w-full text-left px-3 py-2.5 font-mono text-[10px] font-bold tracking-widest hover:bg-gray-50 hover:text-[var(--uv)] transition-colors uppercase rounded-lg mb-1 flex justify-between items-center text-gray-600">
+                            <span>2026.05</span>
+                            <span class="text-[8px] opacity-40">MAY</span>
+                        </button>
+                        <button onclick="loadMonth('2026.04')" class="dropdown-btn w-full text-left px-3 py-2.5 font-mono text-[10px] font-bold tracking-widest bg-[var(--uv)]/5 text-[var(--uv)] uppercase rounded-lg flex justify-between items-center">
+                            <span>2026.04</span>
+                            <span class="text-[8px] opacity-60">APR</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <main class="pt-32 pb-32 max-w-[1600px] mx-auto px-6">
+    <main class="max-w-[1600px] mx-auto w-full">
         
-        <!-- Theme Header -->
-        <section id="theme-section" class="mb-20 md:mb-32 animate-fade-up">
-            <div class="max-w-4xl">
-                <p id="theme-date" class="text-xs font-bold text-[var(--uv)] tracking-[0.2em] uppercase mb-4">Volume 04 / April 2026</p>
-                <h2 id="theme-title" class="text-4xl md:text-7xl font-bold tracking-tight leading-tight mb-8">
-                    Midnight Urban Drive
-                </h2>
-                <p id="theme-intro" class="text-lg md:text-xl text-gray-500 font-light leading-relaxed">
-                    차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들. 도심의 불빛을 뒤로하고 달리는 드라이브의 동반자가 되어줄 10곡의 아카이브.
-                </p>
+        <!-- Hero Section: Compact & Square Image -->
+        <section class="animate-snap relative bg-white border-b border-gray-100 overflow-hidden">
+            <!-- Background Number (Repositioned and dimmed) -->
+            <div id="theme-watermark" class="absolute right-10 top-1/2 -translate-y-1/2 text-[15rem] lg:text-[22rem] font-black text-gray-50/70 leading-none select-none z-0 tracking-tighter pointer-events-none">04</div>
+
+            <div class="grid md:grid-cols-12 relative z-10">
+                
+                <!-- Image Side: Fixed Square -->
+                <div class="md:col-span-4 lg:col-span-3 p-6 md:p-10 flex items-center justify-center bg-gray-50 border-b md:border-b-0 md:border-r border-gray-100">
+                    <div class="w-full aspect-square relative overflow-hidden shadow-xl border border-gray-200 rounded-sm">
+                        <img id="theme-img" src="" alt="Theme Image" class="absolute inset-0 w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700">
+                    </div>
+                </div>
+                
+                <!-- Content Side: Compact -->
+                <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center bg-white/40 backdrop-blur-[1px]">
+                    <div class="px-8 py-10 md:px-12 lg:px-16 relative z-20">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="w-8 h-0.5 bg-[var(--uv)]"></span>
+                            <span id="theme-vol-label" class="font-mono text-[11px] font-black text-[var(--uv)] uppercase tracking-[0.4em]">Volume 04</span>
+                        </div>
+
+                        <h2 id="theme-title" class="text-5xl md:text-6xl lg:text-[6.5rem] font-black tracking-tighter leading-[0.8] uppercase text-black mb-8">
+                            <!-- Title injected via JS -->
+                        </h2>
+
+                        <div class="max-w-xl">
+                            <p id="theme-intro" class="text-base md:text-lg text-gray-500 leading-relaxed font-medium italic">
+                                <!-- Intro injected via JS -->
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Ticker: Slimmer -->
+                    <div class="mt-auto w-full bg-black text-white font-mono text-[9px] uppercase tracking-[0.4em] overflow-hidden py-3 border-t border-black">
+                        <div class="animate-marquee flex gap-12 whitespace-nowrap">
+                            <span>* MONTHLY CITY POP ARCHIVE // URBAN SOUND // 2026 // *</span>
+                            <span>* MONTHLY CITY POP ARCHIVE // URBAN SOUND // 2026 // *</span>
+                            <span>* MONTHLY CITY POP ARCHIVE // URBAN SOUND // 2026 // *</span>
+                            <span>* MONTHLY CITY POP ARCHIVE // URBAN SOUND // 2026 // *</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Albums Grid (Responsive: 2 cols on mobile, 5 on PC) -->
-        <section class="animate-fade-up" style="animation-delay: 0.1s;">
-            <div id="grid-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-12 md:gap-x-8 md:gap-y-16">
-                <!-- Data is injected here -->
+        <!-- Track Grid -->
+        <section class="p-8 md:p-12 lg:p-16 bg-white animate-snap" style="animation-delay: 0.1s;">
+            <div class="flex items-center justify-between mb-12 border-b border-gray-100 pb-6">
+                <div class="flex items-center gap-4">
+                    <h3 class="font-mono text-[11px] font-bold tracking-[0.3em] uppercase text-black">Collection</h3>
+                    <div class="w-8 h-px bg-gray-200"></div>
+                    <span id="theme-date-catalog" class="font-mono text-[10px] text-gray-400 uppercase tracking-widest">April 2026</span>
+                </div>
+            </div>
+            
+            <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-16 lg:gap-y-24">
+                <!-- Items injected here -->
             </div>
         </section>
 
     </main>
 
-    <!-- Detail Modal -->
-    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 hidden">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-white/95 backdrop-blur-sm" onclick="closeModal()"></div>
-        
-        <!-- Modal Content -->
-        <div class="relative w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-full md:h-auto max-h-[90vh]">
-            <!-- Close Button -->
-            <button onclick="closeModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors z-10">
-                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity" onclick="closeModal()"></div>
+        <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 md:inset-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-5xl bg-white shadow-2xl flex flex-col md:flex-row max-h-[85vh] rounded-2xl overflow-hidden">
+            <button onclick="closeModal()" class="absolute top-6 right-6 w-12 h-12 bg-black text-white flex items-center justify-center hover:bg-[var(--uv)] transition-all z-10 rounded-full">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             
-            <!-- Cover Image -->
-            <div class="w-full md:w-1/2 bg-gray-50 flex items-center justify-center p-8 md:p-16">
-                <img id="modal-img" src="" alt="Album Cover" class="w-full aspect-square object-cover rounded-md shadow-lg">
+            <div class="w-full md:w-1/2 p-10 lg:p-16 bg-gray-50 flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-100">
+                <div class="w-full aspect-square relative shadow-2xl overflow-hidden rounded-lg">
+                    <img id="modal-img" src="" alt="Album Cover" class="w-full h-full object-cover">
+                </div>
             </div>
             
-            <!-- Details -->
-            <div class="w-full md:w-1/2 p-8 md:p-16 overflow-y-auto flex flex-col justify-center">
-                <span class="inline-block px-3 py-1 bg-[#5F4B8B]/10 text-[var(--uv)] text-[10px] font-bold tracking-widest rounded-full uppercase mb-6 w-max">Track Details</span>
-                
-                <h3 id="modal-title" class="text-3xl md:text-5xl font-bold tracking-tight mb-2">Album Title</h3>
-                <p id="modal-artist" class="text-lg md:text-xl text-gray-500 font-medium mb-8">Artist Name</p>
-                
-                <p id="modal-desc" class="text-gray-600 leading-relaxed font-light mb-12 text-sm md:text-base">
-                    앨범에 대한 상세 설명이 들어갑니다.
-                </p>
-                
-                <div class="flex flex-wrap gap-4 mt-auto">
-                    <a id="modal-link-listen" href="#" target="_blank" class="px-6 py-3 bg-[var(--uv)] text-white text-xs font-bold uppercase tracking-widest rounded-md hover:bg-[#4a3a6e] transition-colors">Listen</a>
-                    <a id="modal-link-ref" href="#" target="_blank" class="px-6 py-3 bg-gray-100 text-gray-700 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-gray-200 transition-colors">Reference</a>
+            <div class="w-full md:w-1/2 flex flex-col bg-white p-10 lg:p-16">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-2 h-2 rounded-full bg-[var(--uv)]"></div>
+                        <span id="modal-track-no" class="font-mono text-[10px] font-bold text-gray-400 tracking-[0.3em] uppercase">TRK-01</span>
+                    </div>
+                    <h3 id="modal-title" class="text-4xl lg:text-5xl font-black tracking-tighter mb-4 uppercase leading-[0.9] text-black">Title</h3>
+                    <p id="modal-artist" class="font-mono text-sm text-[var(--uv)] font-bold uppercase tracking-widest mb-8">Artist Name</p>
+                    <p id="modal-desc" class="text-gray-500 leading-relaxed font-medium text-sm lg:text-base mb-10">Description...</p>
+                    <a id="modal-link-listen" href="#" target="_blank" class="inline-block px-8 py-4 text-center font-mono text-[10px] font-bold uppercase tracking-[0.2em] bg-black text-white hover:bg-[var(--uv)] transition-all rounded-full shadow-lg">Open Archive</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="py-12 border-t border-gray-100">
-        <div class="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">© Monthly City Pop Archive</p>
-            <div class="flex gap-6 text-[10px] font-bold tracking-widest uppercase text-gray-400">
+    <footer class="bg-white py-24 border-t border-gray-100">
+        <div class="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+            <div class="mb-10 md:mb-0">
+                <h4 class="font-logo text-lg lg:text-2xl font-black uppercase tracking-tighter text-black">Monthly City Pop</h4>
+                <p class="font-mono text-[9px] text-gray-400 mt-2 uppercase tracking-[0.3em]">Independent Digital Archive</p>
+            </div>
+            <div class="flex gap-12 items-center font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">
                 <a href="#" class="hover:text-[var(--uv)] transition-colors">Instagram</a>
-                <a href="#" class="hover:text-[var(--uv)] transition-colors">Spotify</a>
+                <a href="#" class="hover:text-black transition-colors underline decoration-[var(--uv)] underline-offset-8">Spotify</a>
             </div>
         </div>
     </footer>
 
     <script>
-        // Database Mock (JSON format)
         const db = {
             "2026.04": {
                 theme: "Midnight Urban Drive",
+                themeImg: "https://images.unsplash.com/photo-1493225457224-ca2e6fc737c6?q=80&w=1000",
                 intro: "차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들. 도심의 불빛을 뒤로하고 달리는 드라이브의 동반자가 되어줄 10곡의 아카이브.",
                 albums: [
                     { title: "Pacific Breeze", artist: "Various Artists", img: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000", desc: "시티팝 컴필레이션의 정석. 70~80년대 일본의 번영과 도시적인 감성이 완벽하게 녹아들어 있습니다." },
@@ -183,10 +254,10 @@
             },
             "2026.05": {
                 theme: "Sunset Memories",
+                themeImg: "https://images.unsplash.com/photo-1523730205978-59fd1b2965e3?q=80&w=1000",
                 intro: "해 질 녘의 나른함과 보랏빛 공기를 담은 플레이리스트. 하루를 마무리하는 시간에 어울리는 10장의 레코드.",
                 albums: [
-                    { title: "Summer Breeze", artist: "Piper", img: "https://images.unsplash.com/photo-1619983081563-430f63602796?q=80&w=1000", desc: "5월 큐레이션 데이터 예시입니다." },
-                    { title: "Aqua City", artist: "Kiyotaka Sugiyama", img: "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=1000", desc: "청량한 바닷바람이 느껴지는 사운드." }
+                    { title: "Summer Breeze", artist: "Piper", img: "https://images.unsplash.com/photo-1619983081563-430f63602796?q=80&w=1000", desc: "5월 큐레이션 데이터 예시입니다." }
                 ]
             }
         };
@@ -195,71 +266,84 @@
         const modal = document.getElementById('modal');
         const dropdown = document.querySelector('.dropdown');
 
-        // 드롭다운 토글 (모바일에서도 잘 작동하도록 click 이벤트 사용)
         function toggleDropdown(e) {
             e.stopPropagation();
             dropdown.classList.toggle('active');
         }
 
-        // 바탕 클릭 시 드롭다운 닫기
         document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target)) {
-                dropdown.classList.remove('active');
-            }
+            if (!dropdown.contains(e.target)) dropdown.classList.remove('active');
         });
 
-        // 데이터 렌더링
         function loadMonth(monthKey) {
             dropdown.classList.remove('active');
             const data = db[monthKey];
             if(!data) return;
 
-            // Update UI Texts
-            document.getElementById('nav-month').innerText = monthKey === '2026.04' ? 'April 2026' : 'May 2026';
-            document.getElementById('theme-date').innerText = `Volume ${monthKey.split('.')[1]} / ${monthKey === '2026.04' ? 'April' : 'May'} 2026`;
-            document.getElementById('theme-title').innerText = data.theme;
-            document.getElementById('theme-intro').innerText = data.intro;
+            const issueNo = monthKey.split('.')[1];
+            const monthName = monthKey === '2026.04' ? 'April 2026' : 'May 2026';
+            
+            document.getElementById('nav-month').innerText = monthKey;
+            document.getElementById('theme-vol-label').innerText = `Volume ${issueNo}`;
+            document.getElementById('theme-watermark').innerText = issueNo;
+            document.getElementById('theme-date-catalog').innerText = monthName;
 
-            // Render Grid
+            const words = data.theme.split(' ');
+            const firstWord = words.shift();
+            const restWords = words.join(' ');
+            document.getElementById('theme-title').innerHTML = `
+                <span class="block title-outline leading-none mb-4">${firstWord}</span>
+                <span class="block leading-[0.8]">${restWords}</span>
+            `;
+            
+            document.getElementById('theme-intro').innerText = data.intro;
+            document.getElementById('theme-img').src = data.themeImg;
+
+            document.querySelectorAll('.dropdown-btn').forEach(btn => {
+                if(btn.innerText.includes(monthKey)) {
+                    btn.classList.add('bg-[var(--uv)]/10', 'text-[var(--uv)]');
+                } else {
+                    btn.classList.remove('bg-[var(--uv)]/10', 'text-[var(--uv)]');
+                }
+            });
+
             grid.innerHTML = '';
-            data.albums.forEach((album) => {
+            data.albums.forEach((album, index) => {
+                const trackNum = String(index + 1).padStart(2, '0');
                 const card = document.createElement('article');
-                card.className = 'album-card cursor-pointer group';
-                card.onclick = () => openModal(album);
-                
-                // 심플하고 모던한 카드 구조
+                card.className = 'album-card cursor-pointer group flex flex-col';
+                card.onclick = () => openModal(album, trackNum);
                 card.innerHTML = `
-                    <div class="cover-wrap mb-4">
-                        <img src="${album.img}" alt="${album.title}" class="w-full h-full object-cover aspect-square">
+                    <div class="cover-box w-full aspect-square mb-6 bg-gray-50 overflow-hidden relative rounded-sm">
+                        <div class="absolute top-3 left-3 bg-black text-white font-mono text-[8px] font-bold px-1.5 py-0.5 z-10 tracking-widest">T-${trackNum}</div>
+                        <img src="${album.img}" alt="${album.title}" class="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700">
                     </div>
                     <div>
-                        <h3 class="font-bold text-sm md:text-base text-gray-900 truncate group-hover:text-[var(--uv)] transition-colors">${album.title}</h3>
-                        <p class="text-xs text-gray-500 mt-1">${album.artist}</p>
+                        <h3 class="album-title font-black text-xs lg:text-base uppercase tracking-tight truncate transition-colors duration-300 mb-1.5 text-black">${album.title}</h3>
+                        <p class="font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em] truncate">${album.artist}</p>
                     </div>
                 `;
                 grid.appendChild(card);
             });
 
-            // 화면 최상단으로 이동 애니메이션
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function openModal(album) {
+        function openModal(album, trackNum) {
             document.getElementById('modal-img').src = album.img;
+            document.getElementById('modal-track-no').innerText = `CATALOG TRK-${trackNum}`;
             document.getElementById('modal-title').innerText = album.title;
             document.getElementById('modal-artist').innerText = album.artist;
             document.getElementById('modal-desc').innerText = album.desc;
-            
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
+            document.body.style.overflow = 'hidden'; 
         }
 
         function closeModal() {
             modal.classList.add('hidden');
-            document.body.style.overflow = 'auto'; // 배경 스크롤 복구
+            document.body.style.overflow = 'auto'; 
         }
 
-        // 초기 로드
         window.onload = () => loadMonth('2026.04');
     </script>
 </body>
