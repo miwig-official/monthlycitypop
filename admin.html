@@ -88,6 +88,20 @@
         
         /* Admin Logo Styling */
         .admin-brand-logo { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
+
+        /* Image Preview Box */
+        .img-preview-box {
+            width: 100px;
+            height: 100px;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            background-size: cover;
+            background-position: center;
+            display: none;
+            margin-top: 1rem;
+        }
+        .img-preview-box.active { display: block; }
     </style>
 </head>
 <body class="selection:bg-[#5F4B8B] selection:text-white antialiased">
@@ -100,7 +114,8 @@
     </div>
 
     <div class="max-w-5xl mx-auto min-h-screen flex flex-col">
-        <header class="flex items-center justify-between pt-12 pb-10 px-4">
+        <!-- Header: Mobile Spacing Fixed -->
+        <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-8 pb-6 md:pt-12 md:pb-10 px-6 gap-6 sm:gap-0">
             <div class="flex items-center gap-5">
                 <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" alt="MCP Logo" class="admin-brand-logo shadow-lg shadow-black/5">
                 <div>
@@ -108,18 +123,18 @@
                         <span class="status-dot bg-slate-300" id="auth-dot"></span>
                         <span id="auth-status" class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 pt-0.5">Disconnected</span>
                     </div>
-                    <h1 class="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Management Center</h1>
+                    <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Management Center</h1>
                 </div>
             </div>
-            <button id="save-btn" class="btn-save flex items-center gap-2">
+            <button id="save-btn" class="btn-save flex items-center gap-2 w-full sm:w-auto justify-center">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                 저장하기
             </button>
         </header>
 
-        <div class="grid md:grid-cols-12 gap-8 flex-1 pb-20">
-            <!-- Sidebar -->
-            <div class="md:col-span-4 lg:col-span-3 px-4">
+        <div class="grid md:grid-cols-12 gap-8 flex-1 pb-20 px-4 md:px-0">
+            <!-- Sidebar: Mobile spacing adjusted -->
+            <div class="md:col-span-4 lg:col-span-3">
                 <div class="sticky top-8">
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                         <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Archive Index</h2>
@@ -133,7 +148,7 @@
             </div>
 
             <!-- Editor -->
-            <div class="md:col-span-8 lg:col-span-9 px-4">
+            <div class="md:col-span-8 lg:col-span-9">
                 <div id="editor-container" class="hidden space-y-6">
                     <div class="card animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div class="flex items-center gap-3 mb-8">
@@ -143,19 +158,20 @@
                         <div class="space-y-6">
                             <div class="group">
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest group-focus-within:text-[#5F4B8B] transition-colors">Theme Concept Title</label>
-                                <!-- Multi-line support for Title -->
                                 <textarea id="theme-title" class="input-field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:border-[#5F4B8B] focus:ring-4 focus:ring-[#5F4B8B]/5 transition-all outline-none min-h-[60px]" placeholder="예: Midnight Urban Drive" oninput="updateThemeData('theme', this.value)"></textarea>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Master Cover Image</label>
                                 <div class="input-group">
-                                    <input type="text" id="theme-img" class="input-field-bare font-mono text-xs text-slate-500" placeholder="URL 입력 또는 파일 업로드" oninput="updateThemeData('themeImg', this.value)">
+                                    <input type="text" id="theme-img" class="input-field-bare font-mono text-xs text-slate-500" placeholder="URL 입력 또는 파일 업로드" oninput="updateThemeData('themeImg', this.value); updatePreview('theme-preview', this.value)">
                                     <label class="file-upload-trigger">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                         UPLOAD
-                                        <input type="file" class="hidden" accept="image/*" onchange="handleFileAsBase64(this, 'theme-img', 'themeImg')">
+                                        <input type="file" class="hidden" accept="image/*" onchange="handleFileAsBase64(this, 'theme-img', 'themeImg', 'theme-preview')">
                                     </label>
                                 </div>
+                                <!-- Image Preview for Theme -->
+                                <div id="theme-preview" class="img-preview-box"></div>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Introduction Passage</label>
@@ -244,8 +260,20 @@
             document.getElementById('theme-title').value = data.theme || "";
             document.getElementById('theme-img').value = data.themeImg || "";
             document.getElementById('theme-intro').value = data.intro || "";
+            
+            updatePreview('theme-preview', data.themeImg || "");
             renderTracks(data.albums || []);
             renderSidebar();
+        };
+
+        const updatePreview = (id, url) => {
+            const el = document.getElementById(id);
+            if(url && url.length > 5) {
+                el.style.backgroundImage = `url(${url})`;
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
         };
 
         const renderTracks = (albums) => {
@@ -272,13 +300,14 @@
                         <div class="md:col-span-2">
                             <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Cover Source</label>
                             <div class="input-group">
-                                <input type="text" id="track-img-${idx}" value="${album.img || ''}" oninput="updateTrackData(${idx}, 'img', this.value)" class="input-field-bare font-mono text-[10px] text-slate-500" placeholder="https://...">
+                                <input type="text" id="track-img-${idx}" value="${album.img || ''}" oninput="updateTrackData(${idx}, 'img', this.value); updatePreview('preview-track-${idx}', this.value)" class="input-field-bare font-mono text-[10px] text-slate-500" placeholder="https://...">
                                 <label class="file-upload-trigger">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                                     UPLOAD
                                     <input type="file" class="hidden" accept="image/*" onchange="handleTrackFileAsBase64(this, ${idx})">
                                 </label>
                             </div>
+                            <div id="preview-track-${idx}" class="img-preview-box ${album.img ? 'active' : ''}" style="background-image: url(${album.img})"></div>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Liner Notes</label>
@@ -289,7 +318,7 @@
             });
         };
 
-        window.handleFileAsBase64 = (input, displayId, dataKey) => {
+        window.handleFileAsBase64 = (input, displayId, dataKey, previewId) => {
             const file = input.files[0]; if (!file) return;
             if (file.size > 1.2 * 1024 * 1024) { alert("파일이 너무 큽니다 (1MB 이하 권장)."); return; }
             const reader = new FileReader();
@@ -297,6 +326,7 @@
                 const base64Data = e.target.result;
                 document.getElementById(displayId).value = base64Data;
                 archiveData[selectedMonth][dataKey] = base64Data;
+                if(previewId) updatePreview(previewId, base64Data);
             };
             reader.readAsDataURL(file);
         };
@@ -309,6 +339,7 @@
                 const base64Data = e.target.result;
                 document.getElementById(`track-img-${idx}`).value = base64Data;
                 archiveData[selectedMonth].albums[idx].img = base64Data;
+                updatePreview(`preview-track-${idx}`, base64Data);
             };
             reader.readAsDataURL(file);
         };
