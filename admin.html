@@ -86,8 +86,12 @@
 
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
         
-        /* Admin Logo Styling */
-        .admin-brand-logo { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
+        /* Admin Logo Styling - 가로형 로고 비율 유지 */
+        .admin-brand-logo { 
+            height: 28px; 
+            width: auto; 
+            object-fit: contain; 
+        }
 
         /* Image Preview Box */
         .img-preview-box {
@@ -114,10 +118,10 @@
     </div>
 
     <div class="max-w-5xl mx-auto min-h-screen flex flex-col">
-        <!-- Header: Mobile Spacing Fixed -->
         <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-8 pb-6 md:pt-12 md:pb-10 px-6 gap-6 sm:gap-0">
             <div class="flex items-center gap-5">
-                <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" alt="MCP Logo" class="admin-brand-logo shadow-lg shadow-black/5">
+                <!-- 비율을 유지하는 로고 이미지 출력 -->
+                <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" onerror="this.src='https://via.placeholder.com/120x28/111111/ffffff?text=MCP+LOGO'" alt="MCP Logo" class="admin-brand-logo">
                 <div>
                     <div class="flex items-center gap-2 mb-0.5">
                         <span class="status-dot bg-slate-300" id="auth-dot"></span>
@@ -133,7 +137,7 @@
         </header>
 
         <div class="grid md:grid-cols-12 gap-8 flex-1 pb-20 px-4 md:px-0">
-            <!-- Sidebar: Mobile spacing adjusted -->
+            <!-- Sidebar -->
             <div class="md:col-span-4 lg:col-span-3">
                 <div class="sticky top-8">
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
@@ -170,7 +174,6 @@
                                         <input type="file" class="hidden" accept="image/*" onchange="handleFileAsBase64(this, 'theme-img', 'themeImg', 'theme-preview')">
                                     </label>
                                 </div>
-                                <!-- Image Preview for Theme -->
                                 <div id="theme-preview" class="img-preview-box"></div>
                             </div>
                             <div>
@@ -203,7 +206,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -222,21 +225,41 @@
         let archiveData = {}; let selectedMonth = "";
 
         const init = async () => {
-            await signInAnonymously(auth);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } catch (customTokenError) {
+                        await signInAnonymously(auth);
+                    }
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
+            }
+
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     document.getElementById('auth-dot').className = "status-dot bg-green-500 animate-pulse";
                     document.getElementById('auth-status').innerText = "Connected";
                     document.getElementById('auth-status').classList.replace('text-slate-400', 'text-green-600');
                     await loadData();
-                } else document.getElementById('loading-overlay').style.display = 'none';
+                } else {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                }
             });
         };
 
         const loadData = async () => {
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master');
-            const snap = await getDoc(docRef);
-            archiveData = snap.exists() ? snap.data() : { "2026.04": { theme: "New Theme", themeImg: "", intro: "", albums: [] } };
+            try {
+                const snap = await getDoc(docRef);
+                archiveData = snap.exists() ? snap.data() : { "2026.04": { theme: "New Theme", themeImg: "", intro: "", albums: [] } };
+            } catch (error) {
+                console.error("Load Error:", error);
+                archiveData = { "2026.04": { theme: "New Theme", themeImg: "", intro: "", albums: [] } };
+            }
             renderSidebar();
             document.getElementById('loading-overlay').style.display = 'none';
         };
@@ -276,18 +299,45 @@
             }
         };
 
+        const escapeForJS = (str) => {
+            if (!str) return "";
+            return str.replace(/\\/g, "\\\\")
+                      .replace(/'/g, "\\'")
+                      .replace(/"/g, '&quot;')
+                      .replace(/\n/g, '\\n')
+                      .replace(/\r/g, '');
+        };
+
         const renderTracks = (albums) => {
             const container = document.getElementById('tracks-container'); container.innerHTML = '';
             albums.forEach((album, idx) => {
                 const div = document.createElement('div'); 
                 div.className = 'group p-8 border border-slate-100 rounded-3xl relative bg-white hover:border-[#5F4B8B]/30 hover:shadow-2xl transition-all duration-300';
+                
+                const upBtnHTML = idx > 0 ? 
+                    `<button onclick="moveTrack(${idx}, -1)" class="p-1 text-slate-300 hover:text-[#5F4B8B] hover:bg-slate-50 rounded transition-all" title="위로 이동">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                    </button>` : `<div class="w-7"></div>`;
+                
+                const downBtnHTML = idx < albums.length - 1 ? 
+                    `<button onclick="moveTrack(${idx}, 1)" class="p-1 text-slate-300 hover:text-[#5F4B8B] hover:bg-slate-50 rounded transition-all" title="아래로 이동">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>` : `<div class="w-7"></div>`;
+
                 div.innerHTML = `
                     <div class="absolute top-8 left-8 text-[10px] font-black text-[#5F4B8B] tracking-widest flex items-center gap-2 uppercase">
                         <span class="w-4 h-[2px] bg-[#5F4B8B]"></span> TRACK ${String(idx+1).padStart(2,'0')}
                     </div>
-                    <button onclick="removeTrack(${idx})" class="absolute top-8 right-8 text-slate-200 hover:text-red-500 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
+                    
+                    <div class="absolute top-8 right-8 flex items-center gap-1">
+                        ${upBtnHTML}
+                        ${downBtnHTML}
+                        <div class="w-px h-4 bg-slate-200 mx-1.5"></div>
+                        <button onclick="removeTrack(${idx})" class="p-1 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded transition-colors" title="삭제">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 mt-10">
                         <div>
                             <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Album Title</label>
@@ -346,7 +396,25 @@
 
         window.updateThemeData = (field, value) => { if (selectedMonth) archiveData[selectedMonth][field] = value; };
         window.updateTrackData = (idx, field, value) => { if (selectedMonth) archiveData[selectedMonth].albums[idx][field] = value; };
-        window.removeTrack = (idx) => { if (confirm("삭제하시겠습니까?")) { archiveData[selectedMonth].albums.splice(idx, 1); renderTracks(archiveData[selectedMonth].albums); } };
+        
+        window.removeTrack = (idx) => { 
+            if (confirm("이 앨범을 삭제하시겠습니까?")) { 
+                archiveData[selectedMonth].albums.splice(idx, 1); 
+                renderTracks(archiveData[selectedMonth].albums); 
+            } 
+        };
+
+        window.moveTrack = (idx, direction) => {
+            if (!selectedMonth) return;
+            const albums = archiveData[selectedMonth].albums;
+            
+            if (direction === -1 && idx > 0) {
+                [albums[idx - 1], albums[idx]] = [albums[idx], albums[idx - 1]];
+            } else if (direction === 1 && idx < albums.length - 1) {
+                [albums[idx], albums[idx + 1]] = [albums[idx + 1], albums[idx]];
+            }
+            renderTracks(albums);
+        };
 
         document.getElementById('add-track-btn').onclick = () => {
             if (!selectedMonth) return;
