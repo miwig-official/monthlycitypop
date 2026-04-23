@@ -8,338 +8,144 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@800&display=swap');
-
-        :root {
-            --uv: #5F4B8B; /* Ultra Violet */
-            --bg: #ffffff;
-            --grid-line: #f3f4f6;
-            /* 리얼 블랙보다 감도 있는 오프 블랙 설정 */
-            --text-main: #18181b; 
-            --ticker-bg: #111111;
-            --memo-bg: #f5f3f7; /* Soft Violet Grey */
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Pretendard', 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            scroll-behavior: smooth;
-        }
-
+        :root { --uv: #5F4B8B; --bg: #ffffff; --grid-line: #f3f4f6; --text-main: #18181b; --ticker-bg: #111111; --memo-bg: #f5f3f7; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
         .font-mono { font-family: 'Space Mono', monospace; }
         .font-logo { font-family: 'Syne', sans-serif; }
-
-        /* 드롭다운 스타일 */
-        .dropdown-menu {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: var(--bg);
-            border: 1px solid var(--grid-line);
-            border-radius: 12px;
-            min-width: 180px;
-            z-index: 50;
-            box-shadow: 0 20px 40px rgba(95, 75, 139, 0.1);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .dropdown.active .dropdown-menu { 
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        /* 앨범 카드 애니메이션 */
-        .album-card .cover-box {
-            border: 1px solid var(--grid-line);
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .album-card:hover .cover-box {
-            border-color: var(--uv);
-            transform: translateY(-5px);
-        }
-
-        @keyframes snapIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-snap {
-            animation: snapIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-
-        @keyframes marquee {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marquee 40s linear infinite;
-        }
-
-        .title-outline {
-            -webkit-text-stroke: 1.5px var(--text-main);
-            color: transparent;
-        }
-
-        /* 라이너 노트 확장 애니메이션 */
-        .memo-container {
-            display: grid;
-            grid-template-rows: 0fr;
-            transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .memo-container.expanded {
-            grid-template-rows: 1fr;
-        }
-        .memo-content {
-            overflow: hidden;
-        }
-
-        /* 커스텀 스크롤바 */
+        .dropdown-menu { opacity: 0; visibility: hidden; transform: translateY(10px); position: absolute; top: 100%; right: 0; background: var(--bg); border: 1px solid var(--grid-line); border-radius: 12px; min-width: 180px; z-index: 50; box-shadow: 0 20px 40px rgba(95, 75, 139, 0.1); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .album-card .cover-box { border: 1px solid var(--grid-line); transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .album-card:hover .cover-box { border-color: var(--uv); transform: translateY(-5px); }
+        @keyframes snapIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-snap { animation: snapIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 40s linear infinite; }
+        .title-outline { -webkit-text-stroke: 1.5px var(--text-main); color: transparent; }
+        .memo-container { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .memo-container.expanded { grid-template-rows: 1fr; }
+        .memo-content { overflow: hidden; }
         .memo-scroll::-webkit-scrollbar { width: 3px; }
-        .memo-scroll::-webkit-scrollbar-track { background: transparent; }
         .memo-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
     </style>
 </head>
-<body class="selection:bg-[#5F4B8B] selection:text-white">
-
-    <!-- Header -->
+<body>
     <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
         <div class="max-w-[1400px] mx-auto flex items-center justify-between h-14 px-6">
             <div class="flex items-center gap-4">
-                <div class="w-7 h-7 rounded-full bg-[#5F4B8B] flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
-                    <span class="font-mono text-[7px] font-bold text-white leading-none pt-0.5">MCP</span>
-                </div>
+                <div class="w-7 h-7 rounded-full bg-[#5F4B8B] flex items-center justify-center overflow-hidden shrink-0 shadow-sm"><span class="font-mono text-[7px] font-bold text-white pt-0.5">MCP</span></div>
                 <h1 class="font-logo text-lg md:text-xl text-[var(--text-main)] uppercase tracking-tighter whitespace-nowrap leading-none">Monthly City Pop</h1>
-                <div class="hidden lg:block w-px h-3 bg-gray-200 mx-2"></div>
-                <div class="hidden lg:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">
-                    Curated Archive
-                </div>
             </div>
-
-            <div class="flex items-center">
-                <div class="dropdown relative cursor-pointer" onclick="toggleDropdown(event)">
-                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all">
-                        <div class="w-1 h-1 rounded-full bg-[#5F4B8B] animate-pulse"></div>
-                        <span id="nav-month" class="font-mono text-[10px] font-bold uppercase tracking-widest text-gray-800 pt-0.5">2026.04</span>
-                        <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                    <div class="dropdown-menu mt-2 p-2">
-                        <button onclick="loadMonth('2026.05')" class="dropdown-btn w-full text-left px-3 py-2.5 font-mono text-[10px] font-bold tracking-widest hover:bg-gray-50 hover:text-[#5F4B8B] transition-colors uppercase rounded-lg mb-1 flex justify-between items-center text-gray-500">
-                            <span>2026.05</span>
-                            <span class="text-[8px] opacity-40 font-bold">MAY</span>
-                        </button>
-                        <button onclick="loadMonth('2026.04')" class="dropdown-btn w-full text-left px-3 py-2.5 font-mono text-[10px] font-bold tracking-widest bg-[#5F4B8B]/10 text-[#5F4B8B] uppercase rounded-lg flex justify-between items-center">
-                            <span>2026.04</span>
-                            <span class="text-[8px] opacity-60 font-bold">APR</span>
-                        </button>
-                    </div>
+            <div class="dropdown relative cursor-pointer" id="dropdown-toggle" onclick="window.toggleDropdown(event)">
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all">
+                    <div class="w-1 h-1 rounded-full bg-[#5F4B8B] animate-pulse"></div>
+                    <span id="nav-month" class="font-mono text-[10px] font-bold uppercase tracking-widest text-gray-800 pt-0.5">---</span>
+                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
                 </div>
+                <div id="month-list" class="dropdown-menu mt-2 p-2"></div>
             </div>
         </div>
     </header>
 
     <main class="max-w-[1400px] mx-auto w-full">
-        
-        <!-- Hero Section -->
         <section class="animate-snap relative bg-white border-b border-gray-100 overflow-hidden">
-            <!-- Subtle Watermark -->
-            <div id="theme-watermark" class="absolute right-0 bottom-0 text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4">04</div>
-
+            <div id="theme-watermark" class="absolute right-0 bottom-0 text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4">--</div>
             <div class="grid md:grid-cols-12 relative z-10 items-stretch">
-                <!-- Image Side -->
-                <div class="md:col-span-4 lg:col-span-3 p-4 md:p-6 lg:p-8 flex items-center justify-center bg-gray-50 border-b md:border-b-0 md:border-r border-gray-100">
-                    <div class="w-full max-w-[280px] aspect-square relative overflow-hidden shadow-xl border border-gray-200 rounded-sm bg-white">
-                        <img id="theme-img" src="" alt="Theme Image" class="absolute inset-0 w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700">
+                <div class="md:col-span-4 lg:col-span-3 p-4 md:p-6 lg:p-8 flex items-center justify-center bg-gray-50 border-r border-gray-100">
+                    <div class="w-full max-w-[280px] aspect-square relative shadow-xl border border-gray-200 rounded-sm bg-white overflow-hidden">
+                        <img id="theme-img" src="" alt="" class="absolute inset-0 w-full h-full object-cover grayscale-[10%]">
                     </div>
                 </div>
-                
-                <!-- Content Side -->
-                <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center bg-white/40 backdrop-blur-[1px]">
-                    <div class="px-6 py-8 md:px-10 lg:px-14 relative z-20">
-                        <div class="flex items-center gap-3 mb-4">
-                            <span class="w-6 h-0.5 bg-[#5F4B8B]"></span>
-                            <span id="theme-vol-label" class="font-mono text-[11px] font-black text-[#5F4B8B] uppercase tracking-[0.4em]">Volume 04</span>
-                        </div>
-
-                        <h2 id="theme-title" class="text-4xl md:text-5xl lg:text-[5.5rem] font-black tracking-tighter leading-[0.8] uppercase text-[var(--text-main)] mb-6 break-keep">
-                            <!-- Title injected via JS -->
-                        </h2>
-
-                        <div class="max-w-2xl">
-                            <p id="theme-intro" class="text-sm md:text-lg text-gray-500 leading-relaxed font-medium italic">
-                                <!-- Intro injected via JS -->
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Rolling Ticker -->
-                    <div class="mt-auto w-full bg-[var(--ticker-bg)] text-white font-mono text-[8px] md:text-[9px] uppercase tracking-[0.5em] overflow-hidden py-3 border-t border-[var(--ticker-bg)]">
-                        <div class="animate-marquee flex gap-12 whitespace-nowrap">
-                            <span>* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span>
-                            <span>* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span>
-                        </div>
+                <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center px-6 py-8 md:px-14">
+                    <div class="flex items-center gap-3 mb-4"><span class="w-6 h-0.5 bg-[#5F4B8B]"></span><span id="theme-vol-label" class="font-mono text-[11px] font-black text-[#5F4B8B] uppercase tracking-[0.4em]">Volume --</span></div>
+                    <h2 id="theme-title" class="text-4xl md:text-5xl lg:text-[5.5rem] font-black tracking-tighter leading-[0.8] uppercase text-black mb-6"></h2>
+                    <p id="theme-intro" class="text-sm md:text-lg text-gray-500 italic max-w-2xl"></p>
+                    <div class="mt-12 w-full bg-[var(--ticker-bg)] text-white font-mono text-[8px] md:text-[9px] uppercase tracking-[0.5em] overflow-hidden py-3">
+                        <div class="animate-marquee flex gap-12 whitespace-nowrap"><span>* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span><span>* MONTHLY CITY POP ARCHIVE // INDEPENDENT SOUND CATALOG // CURATED URBAN GROOVE // DIGITAL INDEX // SINCE 2026 // *</span></div>
                     </div>
                 </div>
             </div>
         </section>
-
-        <!-- Track Grid -->
-        <section class="p-6 md:p-10 lg:p-14 bg-white animate-snap" style="animation-delay: 0.1s;">
-            <!-- Cleaned up Header: Removed Date -->
-            <div class="mb-10">
-                <h3 class="font-logo text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tighter text-[var(--text-main)]">
-                    Collection
-                </h3>
-            </div>
-            
-            <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12 lg:gap-y-20 items-start">
-                <!-- Items injected here -->
-            </div>
-        </section>
-
+        <section class="p-6 md:p-14 bg-white animate-snap"><h3 class="font-logo text-xl md:text-3xl font-black uppercase tracking-tighter text-[var(--text-main)] mb-10">Collection</h3><div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-14"></div></section>
     </main>
 
-    <!-- Super Slim Footer -->
-    <footer class="bg-white py-6 border-t border-gray-50">
-        <div class="max-w-[1400px] mx-auto px-6 text-center">
-            <h4 class="font-logo text-lg md:text-xl font-black uppercase tracking-tighter text-[var(--text-main)] leading-none">
-                Monthly City Pop
-            </h4>
-            <p class="font-mono text-[9px] font-bold uppercase tracking-[0.4em] text-[#5F4B8B] mt-1.5">
-                From MIDNIGHT WITH GROOVE
-            </p>
-        </div>
+    <footer class="bg-white py-6 border-t border-gray-50 text-center">
+        <h4 class="font-logo text-lg md:text-xl font-black uppercase tracking-tighter text-[var(--text-main)] leading-none">Monthly City Pop</h4>
+        <p class="font-mono text-[9px] font-bold uppercase tracking-[0.4em] text-[#5F4B8B] mt-1.5">From MIDNIGHT WITH GROOVE</p>
     </footer>
 
-    <script>
-        const db = {
-            "2026.04": {
-                theme: "Midnight Urban Drive",
-                themeImg: "https://images.unsplash.com/photo-1493225457224-ca2e6fc737c6?q=80&w=1000",
-                intro: "차가운 금속 질감의 신시사이저와 밤의 공기를 닮은 선율들. 도심의 불빛을 뒤로하고 달리는 드라이브의 동반자가 되어줄 10곡의 아카이브.",
-                albums: [
-                    { title: "Pacific Breeze", artist: "Various Artists", img: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000", desc: "시티팝 컴필레이션의 정석입니다. 70~80년대 일본의 번영과 도시적인 감성이 완벽하게 녹아들어 있습니다. 호소노 하루오미부터 타츠로 야마시타까지, 이 시대의 정수를 한곳에 모았습니다." },
-                    { title: "Sunshower", artist: "Taeko Onuki", img: "https://images.unsplash.com/photo-1514525253344-f814d0c9e48d?q=80&w=1000", desc: "타에코 오누키의 명반입니다. 세련된 편곡과 몽환적인 보컬이 일품이며 시티팝의 고전으로 평가받습니다. 류이치 사카모토가 편곡에 참여하여 더욱 특별한 사운드를 완성했습니다." },
-                    { title: "After 5 Clash", artist: "Toshiki Kadomatsu", img: "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=1000", desc: "퇴근 후의 도시 야경이 떠오르는 앨범입니다. 펑키한 베이스 라인과 화려한 브라스 세션이 돋보입니다. 80년대 어반 나이트의 화려함과 쓸쓸함을 동시에 담아내어, 시티팝 팬들 사이에서 필청반으로 꼽힙니다." },
-                    { title: "Timely!!", artist: "Anri", img: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=1000", desc: "여름, 바다, 그리고 질주하는 자동차. 안리의 시원한 목소리가 여름 시티팝의 정수를 보여줍니다. 카도마츠 토시키의 프로듀싱으로 더욱 세련된 팝 사운드를 완성했습니다." },
-                    { title: "Adventure", artist: "Momoko Kikuchi", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000", desc: "몽환적인 신시사이저 사운드와 모모코 키쿠치의 부드러운 음색이 어우러진 명작입니다. 마치 우주를 유영하는 듯한 분위기를 자아냅니다." },
-                    { title: "Magical", artist: "Junko Ohashi", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1000", desc: "준코 오하시의 폭발적인 가창력과 세련된 어반 사운드가 조화를 이루는 명반입니다. 그루비한 리듬감이 일품입니다." },
-                    { title: "First Light", artist: "Akira Terao", img: "https://images.unsplash.com/photo-1420133965216-7ca77d2466e4?q=80&w=1000", desc: "중후한 매력이 돋보이는 앨범입니다. 차분하면서도 세련된 연주가 특징입니다. 성숙한 어른의 시티팝을 보여줍니다." },
-                    { title: "Love Trip", artist: "Takako Mamiya", img: "https://images.unsplash.com/photo-1496293455970-f8581aae0e3c?q=80&w=1000", desc: "마미야 타카코의 유일한 명반. 시티팝 매니아라면 반드시 소장해야 할 아이템입니다. 시티팝 르네상스의 상징과도 같은 앨범입니다." },
-                    { title: "Variety", artist: "Mariya Takeuchi", img: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=1000", desc: "전설적인 'Plastic Love'가 수록된 앨범입니다. 타케우치 마리야의 세련된 감각과 야마시타 타츠로의 완벽한 프로듀싱이 만났습니다." },
-                    { title: "Ride on Time", artist: "Tatsuro Yamashita", img: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1000", desc: "시티팝의 왕 야마시타 타츠로의 대표작. 완벽한 프로듀싱의 정점을 보여줍니다. 화려한 코러스가 돋보입니다." }
-                ]
-            },
-            "2026.05": {
-                theme: "Sunset Memories",
-                themeImg: "https://images.unsplash.com/photo-1523730205978-59fd1b2965e3?q=80&w=1000",
-                intro: "해 질 녘의 나른함과 보랏빛 공기를 담은 플레이리스트. 하루를 마무리하는 시간에 어울리는 10장의 레코드.",
-                albums: [
-                    { title: "Summer Breeze", artist: "Piper", img: "https://images.unsplash.com/photo-1619983081563-430f63602796?q=80&w=1000", desc: "해변의 나른함과 리드미컬한 기타 라인이 돋보이는 앨범입니다." }
-                ]
-            }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDXMTDaE76mqn6S6w2F5s4qHhdFphNULg8",
+            authDomain: "monthly-city-pop.firebaseapp.com",
+            projectId: "monthly-city-pop",
+            storageBucket: "monthly-city-pop.firebasestorage.app",
+            messagingSenderId: "860318834352",
+            appId: "1:860318834352:web:f1b4d1c3212a41a9dde575"
         };
 
-        const grid = document.getElementById('grid-container');
-        const dropdown = document.querySelector('.dropdown');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'monthly-city-pop';
+        let archiveData = {}; let currentMonth = "";
 
-        function toggleDropdown(e) {
-            e.stopPropagation();
-            dropdown.classList.toggle('active');
-        }
-
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target)) dropdown.classList.remove('active');
-        });
-
-        function toggleMemo(btn) {
-            const container = btn.closest('.album-card').querySelector('.memo-container');
-            const isExpanded = container.classList.contains('expanded');
-            
-            if (isExpanded) {
-                container.classList.remove('expanded');
-                btn.innerHTML = `+ READ NOTES`;
-            } else {
-                container.classList.add('expanded');
-                btn.innerHTML = `- CLOSE NOTES`;
-            }
-        }
-
-        function loadMonth(monthKey) {
-            dropdown.classList.remove('active');
-            const data = db[monthKey];
-            if(!data) return;
-
-            const issueNo = monthKey.split('.')[1];
-            
-            document.getElementById('nav-month').innerText = monthKey;
-            document.getElementById('theme-vol-label').innerText = `Volume ${issueNo}`;
-            document.getElementById('theme-watermark').innerText = issueNo;
-
-            const words = data.theme.split(' ');
-            const firstWord = words.shift();
-            const restWords = words.join(' ');
-            document.getElementById('theme-title').innerHTML = `
-                <span class="block title-outline leading-none mb-2 md:mb-4">${firstWord}</span>
-                <span class="block leading-[0.8]">${restWords}</span>
-            `;
-            
-            document.getElementById('theme-intro').innerText = data.intro;
-            document.getElementById('theme-img').src = data.themeImg;
-
-            document.querySelectorAll('.dropdown-btn').forEach(btn => {
-                if(btn.innerText.includes(monthKey)) {
-                    btn.classList.add('bg-[#5F4B8B]/10', 'text-[#5F4B8B]');
-                    btn.classList.remove('text-gray-500');
-                } else {
-                    btn.classList.remove('bg-[#5F4B8B]/10', 'text-[#5F4B8B]');
-                    btn.classList.add('text-gray-500');
+        const init = async () => {
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // Corrected Path: 6 segments (Col/Doc/Col/Doc/Col/Doc)
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master');
+                    onSnapshot(docRef, (snap) => {
+                        if (snap.exists()) {
+                            archiveData = snap.data();
+                            if (!currentMonth) currentMonth = Object.keys(archiveData).sort().reverse()[0];
+                            renderMonth(currentMonth); renderSelector();
+                        }
+                    }, (error) => console.error("Firestore Sync Error:", error));
                 }
             });
+        };
 
-            grid.innerHTML = '';
-            data.albums.forEach((album, index) => {
-                const trackNum = String(index + 1).padStart(2, '0');
-                const card = document.createElement('article');
-                card.className = 'album-card group flex flex-col animate-snap';
-                card.style.animationDelay = `${index * 0.05}s`;
-                card.innerHTML = `
-                    <div class="cover-box w-full aspect-square mb-4 bg-gray-50 overflow-hidden relative rounded-sm shadow-sm">
-                        <div class="absolute top-3 left-3 bg-[var(--ticker-bg)] text-[#5F4B8B] font-mono text-[8px] font-bold px-1.5 py-0.5 z-10 tracking-widest uppercase">T-${trackNum}</div>
-                        <img src="${album.img}" alt="${album.title}" class="w-full h-full object-cover grayscale-[10%] transition-all duration-1000">
-                    </div>
-                    <div class="flex-1 flex flex-col relative text-left">
-                        <h3 class="album-title font-black text-xs lg:text-sm uppercase tracking-tight truncate transition-colors duration-300 mb-0.5 text-[var(--text-main)]">${album.title}</h3>
-                        <p class="font-mono text-[9px] text-gray-400 uppercase tracking-[0.1em] truncate mb-2">${album.artist}</p>
-                        
-                        <div class="memo-container mt-auto">
-                            <div class="memo-content">
-                                <div class="bg-[var(--memo-bg)] p-3 border-l-2 border-gray-200 mb-3 shadow-sm relative">
-                                    <div class="memo-scroll max-h-40 overflow-y-auto pr-1">
-                                        <p class="text-[10px] md:text-[11px] text-gray-600 leading-relaxed font-medium">
-                                            ${album.desc}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button onclick="toggleMemo(this)" class="w-fit font-mono text-[9px] font-black text-[#5F4B8B] hover:text-[var(--text-main)] tracking-widest uppercase transition-colors">
-                            + READ NOTES
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(card);
+        const renderMonth = (month) => {
+            const data = archiveData[month]; if (!data) return;
+            const issueNo = month.split('.')[1] || "--";
+            document.getElementById('nav-month').innerText = month;
+            document.getElementById('theme-vol-label').innerText = `Volume ${issueNo}`;
+            document.getElementById('theme-watermark').innerText = issueNo;
+            document.getElementById('theme-intro').innerText = data.intro;
+            document.getElementById('theme-img').src = data.themeImg;
+            const words = (data.theme || "New Theme").split(' ');
+            const first = words.shift();
+            document.getElementById('theme-title').innerHTML = `<span class="block title-outline leading-none mb-4">${first}</span><span class="block leading-[0.8]">${words.join(' ')}</span>`;
+            const grid = document.getElementById('grid-container'); grid.innerHTML = '';
+            (data.albums || []).forEach((album, idx) => {
+                const div = document.createElement('div'); div.className = 'album-card group flex flex-col animate-snap';
+                div.innerHTML = `<div class="cover-box w-full aspect-square mb-4 bg-gray-50 overflow-hidden relative rounded-sm shadow-sm"><div class="absolute top-3 left-3 bg-black text-[#5F4B8B] font-mono text-[8px] font-bold px-1.5 py-0.5 z-10">T-${String(idx+1).padStart(2,'0')}</div><img src="${album.img}" class="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"></div><div class="flex-1 flex flex-col"><h3 class="font-black text-xs uppercase truncate text-[var(--text-main)] mb-0.5">${album.title}</h3><p class="font-mono text-[9px] text-gray-400 uppercase truncate mb-2">${album.artist}</p><div class="memo-container mt-auto"><div class="memo-content"><div class="bg-[var(--memo-bg)] p-3 border-l-2 border-gray-200 mb-3 shadow-sm relative"><div class="memo-scroll max-h-40 overflow-y-auto pr-1"><p class="text-[10px] text-gray-600 leading-relaxed font-medium">${album.desc}</p></div></div></div></div><button onclick="window.toggleMemo(this)" class="w-fit font-mono text-[9px] font-black text-[#5F4B8B] hover:text-black tracking-widest uppercase transition-colors">+ READ NOTES</button></div>`;
+                grid.appendChild(div);
             });
+        };
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        const renderSelector = () => {
+            const list = document.getElementById('month-list'); list.innerHTML = '';
+            Object.keys(archiveData).sort().reverse().forEach(m => {
+                const btn = document.createElement('button'); btn.className = `w-full text-left px-3 py-2.5 font-mono text-[10px] font-bold tracking-widest uppercase rounded-lg mb-1 flex justify-between items-center ${m === currentMonth ? 'bg-[#5F4B8B]/10 text-[#5F4B8B]' : 'hover:bg-gray-50 text-gray-500'}`;
+                btn.innerHTML = `<span>${m}</span>`; btn.onclick = () => { currentMonth = m; renderMonth(m); document.getElementById('dropdown-toggle').classList.remove('active'); };
+                list.appendChild(btn);
+            });
+        };
 
-        window.onload = () => loadMonth('2026.04');
+        window.toggleDropdown = (e) => { e.stopPropagation(); document.getElementById('dropdown-toggle').classList.toggle('active'); };
+        window.toggleMemo = (btn) => {
+            const container = btn.closest('.album-card').querySelector('.memo-container');
+            const isExpanded = container.classList.contains('expanded');
+            container.classList.toggle('expanded'); btn.innerHTML = isExpanded ? `+ READ NOTES` : `- CLOSE NOTES`;
+        };
+        document.addEventListener('click', () => document.getElementById('dropdown-toggle').classList.remove('active'));
+        init();
     </script>
 </body>
 </html>
