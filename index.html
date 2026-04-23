@@ -114,10 +114,9 @@
         }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Hero Image Container - FLUID FOR MOBILE */
+        /* Hero Image Container - FLUID FOR MOBILE & RESIZING FIXED */
         .hero-img-box {
-            width: 100% !important;
-            max-width: 100%;
+            width: 100%;
             aspect-ratio: 1 / 1;
             position: relative;
             overflow: hidden;
@@ -139,7 +138,7 @@
             width: 100%;
             height: 100%;
             display: block;
-            object-fit: cover; /* Ensures aspect ratio is filled */
+            object-fit: cover;
         }
 
         /* Support for newlines */
@@ -199,7 +198,7 @@
             <div id="theme-watermark" class="absolute right-0 bottom-0 text-[10rem] md:text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4">--</div>
 
             <div class="grid md:grid-cols-12 relative z-10 items-stretch">
-                <!-- Image Side: Full Width Resizing on Mobile -->
+                <!-- Image Side: Resizing Fixed for Mobile (p-0) -->
                 <div class="md:col-span-4 lg:col-span-3 p-0 md:p-8 flex items-center justify-center bg-transparent md:bg-gray-50/50 border-b md:border-b-0 md:border-r border-black overflow-hidden">
                     <div class="hero-img-box w-full">
                         <img id="theme-img" src="" alt="Theme Cover" class="grayscale-[5%] hover:grayscale-0 transition-all duration-1000">
@@ -249,7 +248,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -265,29 +264,70 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = 'monthly-city-pop';
-        let archiveData = {}; let currentMonth = "";
+        let archiveData = {}; 
+        let currentMonth = "";
+
+        // 방어 로직: DB 최초 연결 전 빈 화면을 막기 위한 Fallback Data
+        const mockData = {
+            "2026.04": {
+                theme: "The Eternal Urban Horizon",
+                themeImg: "https://images.unsplash.com/photo-1571677422251-713bf27d7920?auto=format&fit=crop&q=80&w=1000",
+                intro: "시티팝 아카이브가 준비 중입니다.\n관리자 페이지에서 데이터를 동기화해주세요.",
+                albums: [
+                    { title: "Waiting for Data", artist: "SYSTEM", img: "", desc: "데이터베이스 연결을 대기 중입니다." }
+                ]
+            }
+        };
+
+        // 방어 로직: 인라인 이벤트 핸들러용 문자열 이스케이핑 (줄바꿈/따옴표 크래시 방지)
+        const escapeForJS = (str) => {
+            if (!str) return "";
+            return str.replace(/\\/g, "\\\\")
+                      .replace(/'/g, "\\'")
+                      .replace(/"/g, '&quot;')
+                      .replace(/\n/g, '\\n')
+                      .replace(/\r/g, '');
+        };
 
         const init = async () => {
             try {
-                await signInAnonymously(auth);
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), (snap) => {
-                            if (snap.exists()) { 
-                                archiveData = snap.data(); 
-                                const keys = Object.keys(archiveData).sort().reverse();
-                                if (!currentMonth && keys.length > 0) currentMonth = keys[0];
-                                if (currentMonth) renderMonth(currentMonth); 
-                                renderSelector();
-                            }
-                        }, (error) => {
-                            console.error("Firestore Error:", error);
-                        });
-                    }
-                });
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
             } catch (err) {
-                console.error("Auth Error:", err);
+                console.warn("Initial auth failed, retrying anonymously...");
+                await signInAnonymously(auth);
             }
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), (snap) => {
+                        // 데이터 무결성 검증 및 폴백
+                        if (snap.exists() && Object.keys(snap.data()).length > 0) { 
+                            archiveData = snap.data(); 
+                        } else {
+                            archiveData = mockData;
+                        }
+                        
+                        const keys = Object.keys(archiveData).sort().reverse();
+                        if (keys.length > 0) {
+                            // 현재 달이 삭제되었을 경우를 대비한 갱신 검증
+                            if (!currentMonth || !archiveData[currentMonth]) currentMonth = keys[0];
+                            renderMonth(currentMonth); 
+                            renderSelector();
+                        }
+                    }, (error) => {
+                        console.error("Firestore Error:", error);
+                        // 에러 시에도 빈 화면 방지
+                        archiveData = mockData;
+                        currentMonth = Object.keys(archiveData)[0];
+                        renderMonth(currentMonth);
+                        renderSelector();
+                    });
+                }
+            });
         };
 
         const renderMonth = (month) => {
@@ -296,27 +336,25 @@
 
             const issueNo = month.split('.')[1] || "--";
             
-            // Header Month Update
+            // Header Update
             const navMonthEl = document.getElementById('nav-month');
             if(navMonthEl) navMonthEl.innerText = month;
             
-            // VOL Label Update (2026/04 format)
+            // VOL Label (2026/04)
             const volLabelEl = document.getElementById('theme-vol-label');
             if(volLabelEl) volLabelEl.innerText = `VOL. ${month.replace('.', '/')}`;
             
-            // Watermark Update
+            // Watermark
             const watermarkEl = document.getElementById('theme-watermark');
             if(watermarkEl) watermarkEl.innerText = issueNo;
 
-            // Theme Intro Update
+            // Intro & Title
             const introEl = document.getElementById('theme-intro');
             if(introEl) introEl.innerText = data.intro || "";
-            
-            // Theme Title Update
             const titleEl = document.getElementById('theme-title');
             if(titleEl) titleEl.innerText = data.theme || "";
             
-            // Theme Image Rendering Fix for Resizing
+            // Theme Image Definitive Rendering
             const themeImgEl = document.getElementById('theme-img');
             if(themeImgEl) {
                 if(data.themeImg) {
@@ -328,7 +366,6 @@
                 }
             }
 
-            // Album Grid Rendering
             const grid = document.getElementById('grid-container');
             if(!grid) return;
             
@@ -336,10 +373,16 @@
             (data.albums || []).forEach((album, idx) => {
                 const div = document.createElement('div');
                 div.className = 'album-card group flex flex-col animate-snap';
-                const modalParams = `"${(album.title || "").replace(/"/g, '&quot;')}", "${(album.artist || "").replace(/"/g, '&quot;')}", "${(album.desc || "").replace(/"/g, '&quot;')}"`;
+                
+                // 크래시를 완벽히 방지하는 안전한 파라미터 생성
+                const safeTitle = escapeForJS(album.title);
+                const safeArtist = escapeForJS(album.artist);
+                const safeDesc = escapeForJS(album.desc);
+                const modalParams = `'${safeTitle}', '${safeArtist}', '${safeDesc}'`;
 
+                // HTML 속성 주입 시 쌍따옴표(")를 사용하여 내부 작은따옴표(')와 충돌 방지
                 div.innerHTML = `
-                    <div class="cover-box w-full aspect-square mb-5 md:mb-6 bg-gray-50 relative rounded-sm" onclick='openModal(${modalParams})'>
+                    <div class="cover-box w-full aspect-square mb-5 md:mb-6 bg-gray-50 relative rounded-sm" onclick="openModal(${modalParams})">
                         <div class="absolute top-3 left-3 md:top-4 md:left-4 bg-black text-white font-mono text-[9px] font-black px-1.5 md:px-2 py-0.5 z-10 tracking-widest uppercase">#${String(idx+1).padStart(2,'0')}</div>
                         <img src="${album.img || ''}" alt="${album.title}" class="w-full h-full object-cover grayscale-[5%] group-hover:grayscale-0 transition-all duration-700" onerror="this.src='https://via.placeholder.com/500?text=No+Cover'">
                     </div>
@@ -347,7 +390,7 @@
                         <h3 class="font-black text-sm md:text-base uppercase tracking-tight truncate text-black mb-1 leading-none">${album.title || ''}</h3>
                         <p class="font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest truncate mb-4">${album.artist || ''}</p>
                         
-                        <button onclick='openModal(${modalParams})' class="w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 group-hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 group/btn">
+                        <button onclick="openModal(${modalParams})" class="w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 group-hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 group/btn">
                             <span class="w-4 h-px bg-black/10 group-hover/btn:bg-black transition-all"></span>
                             NOTES
                         </button>
