@@ -136,7 +136,9 @@
     #theme-intro,
     #modal-title,
     #modal-artist,
-    #modal-desc {
+    #modal-desc,
+    #modal-pick-track,
+    #modal-pick-note {
       white-space: pre-wrap;
       word-break: break-word;
     }
@@ -178,6 +180,15 @@
       <p id="modal-year" class="font-mono text-xs font-black text-[var(--uv)] tracking-[0.3em] mb-8 md:mb-10"></p>
       <div class="w-12 h-px bg-black/10 mx-auto mb-8"></div>
       <div class="max-h-[50vh] overflow-y-auto px-2">
+        <!-- Editor's Pick block -->
+        <div id="modal-pick" class="hidden mb-8 p-5 md:p-6 border border-[var(--uv)]/25 rounded-xl bg-[var(--uv)]/5 text-left max-w-md mx-auto">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-[var(--uv)]"></span>
+            <span class="font-mono text-[9px] font-black tracking-[0.3em] uppercase text-[var(--uv)]">Editor's Pick</span>
+          </div>
+          <p id="modal-pick-track" class="text-lg md:text-xl font-black tracking-tight mb-3 leading-tight text-black"></p>
+          <p id="modal-pick-note" class="text-sm leading-relaxed text-gray-600 font-medium"></p>
+        </div>
         <p id="modal-desc" class="text-base text-gray-600 leading-relaxed font-medium max-w-md mx-auto text-left md:text-center"></p>
       </div>
       <button type="button" class="modal-close mt-12 md:mt-16 font-mono text-[10px] font-black tracking-widest uppercase border-b border-black pb-1 focus-ring">Close Window</button>
@@ -317,6 +328,9 @@
       modalArtist: $('modal-artist'),
       modalYear: $('modal-year'),
       modalDesc: $('modal-desc'),
+      modalPick: $('modal-pick'),
+      modalPickTrack: $('modal-pick-track'),
+      modalPickNote: $('modal-pick-note'),
     };
 
     // Image error fallback
@@ -432,6 +446,19 @@
       refs.modalArtist.textContent = album.artist || 'UNKNOWN';
       refs.modalYear.textContent = album.year ? `— ${String(album.year).slice(0, 4)} —` : '';
       refs.modalDesc.textContent = album.desc || 'No liner notes available.';
+
+      // Editor's Pick block — show only if either field has content
+      const hasPick = (album.pickTrack && album.pickTrack.trim()) || (album.pickNote && album.pickNote.trim());
+      if (hasPick) {
+        refs.modalPickTrack.textContent = album.pickTrack ? `▸ ${album.pickTrack}` : '';
+        refs.modalPickNote.textContent = album.pickNote || '';
+        refs.modalPickTrack.style.display = album.pickTrack ? '' : 'none';
+        refs.modalPickNote.style.display = album.pickNote ? '' : 'none';
+        refs.modalPick.classList.remove('hidden');
+      } else {
+        refs.modalPick.classList.add('hidden');
+      }
+
       refs.modal.classList.add('open');
       document.body.style.overflow = 'hidden';
     };
