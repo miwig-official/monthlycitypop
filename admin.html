@@ -1,459 +1,1052 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCP | 관리자 전용 대시보드</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-    <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #f1f5f9; color: #1e293b; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP | Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@800&display=swap">
+  <!-- SortableJS for drag & drop -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <style>
+    :root {
+      --uv: #5F4B8B;
+      --uv-deep: #4a3a6e;
+    }
 
-        /* Unified Input Styling */
-        .input-group { 
-            display: flex; 
-            align-items: center; 
-            background: #ffffff; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 0.75rem; 
-            overflow: hidden;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .input-group:focus-within { 
-            border-color: #5F4B8B; 
-            box-shadow: 0 0 0 3px rgba(95, 75, 139, 0.1); 
-        }
-        .input-field-bare { 
-            flex: 1; 
-            padding: 0.75rem 1rem; 
-            font-size: 0.875rem; 
-            outline: none;
-            background: transparent;
-        }
+    body {
+      font-family: 'Pretendard Variable', Pretendard, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+    .font-mono { font-family: 'Space Mono', monospace; }
+    .font-logo { font-family: 'Syne', sans-serif; }
 
-        .file-upload-trigger {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            margin: 0.25rem;
-            background: #5F4B8B;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 700;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-        .file-upload-trigger:hover { background: #4a3a6e; transform: translateY(-1px); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Card & Layout */
-        .card { 
-            background: white; 
-            border-radius: 1.25rem; 
-            padding: 2rem; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.02);
-            margin-bottom: 1.5rem;
-        }
-        .btn-main { 
-            background: #1e293b; 
-            color: white; 
-            padding: 0.75rem 1.5rem; 
-            border-radius: 0.75rem; 
-            font-weight: 800; 
-            font-size: 0.875rem;
-            transition: all 0.2s;
-        }
-        .btn-main:hover { background: #0f172a; transform: translateY(-2px); }
-        
-        .btn-save {
-            background: #5F4B8B;
-            color: white;
-            font-weight: 900;
-            padding: 0.75rem 2rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 20px rgba(95, 75, 139, 0.2);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .btn-save:hover { transform: scale(1.05); background: #4a3a6e; }
+    .input-group {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: .75rem;
+      overflow: hidden;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .input-group:focus-within {
+      border-color: var(--uv);
+      box-shadow: 0 0 0 3px rgba(95,75,139,.1);
+    }
+    .input-field-bare {
+      flex: 1;
+      padding: .75rem 1rem;
+      font-size: .875rem;
+      outline: none;
+      background: transparent;
+      min-width: 0;
+    }
+    .file-upload-trigger {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .5rem 1rem;
+      margin: .25rem;
+      background: var(--uv);
+      color: #fff;
+      font-size: .75rem;
+      font-weight: 700;
+      border-radius: .5rem;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+      white-space: nowrap;
+    }
+    .file-upload-trigger:hover { background: var(--uv-deep); transform: translateY(-1px); }
 
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        
-        /* Admin Logo Styling - 가로형 로고 비율 유지 */
-        .admin-brand-logo { 
-            height: 28px; 
-            width: auto; 
-            object-fit: contain; 
-        }
+    .card {
+      background: #fff;
+      border-radius: 1.25rem;
+      padding: 2rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.02);
+      margin-bottom: 1.5rem;
+    }
 
-        /* Image Preview Box */
-        .img-preview-box {
-            width: 100px;
-            height: 100px;
-            border-radius: 0.75rem;
-            border: 1px solid #e2e8f0;
-            background-color: #f8fafc;
-            background-size: cover;
-            background-position: center;
-            display: none;
-            margin-top: 1rem;
-        }
-        .img-preview-box.active { display: block; }
-    </style>
+    .btn-main {
+      background: #1e293b;
+      color: #fff;
+      padding: .75rem 1.5rem;
+      border-radius: .75rem;
+      font-weight: 800;
+      font-size: .875rem;
+      transition: background .2s, transform .2s;
+    }
+    .btn-main:hover { background: #0f172a; transform: translateY(-2px); }
+
+    .btn-save {
+      background: var(--uv);
+      color: #fff;
+      font-weight: 900;
+      padding: .75rem 2rem;
+      border-radius: .75rem;
+      box-shadow: 0 10px 20px rgba(95,75,139,.2);
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), background .2s;
+    }
+    .btn-save:hover { transform: scale(1.05); background: var(--uv-deep); }
+    .btn-save:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    /* Dirty indicator dot on save button */
+    .btn-save.dirty::after {
+      content: '';
+      position: absolute;
+      top: 4px; right: 4px;
+      width: 10px; height: 10px;
+      background: #fbbf24;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px #fff;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .6; transform: scale(.9); }
+    }
+
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .admin-brand-logo { height: 28px; width: auto; object-fit: contain; }
+
+    .img-preview-box {
+      width: 100%;
+      max-width: 200px;
+      aspect-ratio: 1;
+      border-radius: .75rem;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc center/cover no-repeat;
+      margin-top: 1rem;
+      display: none;
+      position: relative;
+    }
+    .img-preview-box.active { display: block; }
+    .img-preview-box.error::after {
+      content: 'Image failed to load';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fef2f2;
+      color: #ef4444;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border-radius: .75rem;
+    }
+
+    /* Sortable */
+    .sortable-ghost {
+      opacity: .3;
+      background: #f1f5f9 !important;
+    }
+    .sortable-drag {
+      opacity: .95;
+      box-shadow: 0 20px 40px rgba(0,0,0,.15) !important;
+    }
+    .drag-handle {
+      cursor: grab;
+      touch-action: none;
+    }
+    .drag-handle:active { cursor: grabbing; }
+
+    /* Toast */
+    #toast-host {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #111;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,.2);
+      animation: toast-in .3s ease;
+      max-width: 90vw;
+    }
+    .toast.success { background: #059669; }
+    .toast.error { background: #dc2626; }
+    .toast.warn { background: #d97706; }
+    .toast button {
+      background: rgba(255,255,255,.15);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .toast button:hover { background: rgba(255,255,255,.25); }
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Floating save (mobile) */
+    .floating-save {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 90;
+      display: none;
+    }
+    @media (max-width: 767px) {
+      .floating-save { display: block; }
+      .header-save { display: none; }
+    }
+
+    /* Modal */
+    .mcp-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(15,23,42,.5);
+      backdrop-filter: blur(6px);
+    }
+    .mcp-modal.open { display: flex; animation: toast-in .25s ease; }
+    .mcp-modal-body {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,.3);
+    }
+
+    .focus-ring:focus-visible {
+      outline: 2px solid var(--uv);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body class="selection:bg-[#5F4B8B] selection:text-white antialiased">
 
-    <div id="loading-overlay" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
-        <div class="flex flex-col items-center">
-            <div class="w-12 h-12 border-[3px] border-slate-100 border-t-[#5F4B8B] rounded-full animate-spin"></div>
-            <p class="mt-6 font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">System Initializing...</p>
-        </div>
-    </div>
+  <!-- Loading -->
+  <div id="loading-overlay" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
+    <div class="w-12 h-12 border-[3px] border-slate-100 border-t-[#5F4B8B] rounded-full animate-spin"></div>
+    <p class="mt-6 font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">System Initializing…</p>
+  </div>
 
-    <div class="max-w-5xl mx-auto min-h-screen flex flex-col">
-        <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-8 pb-6 md:pt-12 md:pb-10 px-6 gap-6 sm:gap-0">
-            <div class="flex items-center gap-5">
-                <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" onerror="this.src='https://via.placeholder.com/120x28/111111/ffffff?text=MCP+LOGO'" alt="MCP Logo" class="admin-brand-logo">
-                <div>
-                    <div class="flex items-center gap-2 mb-0.5">
-                        <span class="status-dot bg-slate-300" id="auth-dot"></span>
-                        <span id="auth-status" class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 pt-0.5">Disconnected</span>
-                    </div>
-                    <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Management Center</h1>
-                </div>
+  <!-- Toast host -->
+  <div id="toast-host"></div>
+
+  <!-- Modal host (new month / confirm) -->
+  <div id="modal-host" class="mcp-modal" role="dialog" aria-modal="true"></div>
+
+  <div class="max-w-5xl mx-auto min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-8 pb-6 md:pt-12 md:pb-10 px-6 gap-6 sm:gap-0">
+      <div class="flex items-center gap-5">
+        <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" alt="MCP Logo" class="admin-brand-logo" onerror="this.style.display='none'">
+        <div>
+          <div class="flex items-center gap-2 mb-0.5">
+            <span id="auth-dot" class="status-dot bg-slate-300"></span>
+            <span id="auth-status" class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 pt-0.5">Disconnected</span>
+          </div>
+          <h1 class="font-logo text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Admin<span class="text-[var(--uv)]">.</span></h1>
+        </div>
+      </div>
+      <button id="save-btn" class="btn-save header-save flex items-center gap-2 w-full sm:w-auto justify-center relative focus-ring">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+        <span>저장하기</span>
+        <span class="font-mono text-[9px] opacity-60 hidden md:inline">⌘S</span>
+      </button>
+    </header>
+
+    <div class="grid md:grid-cols-12 gap-8 flex-1 pb-24 px-4 md:px-0">
+
+      <!-- Sidebar -->
+      <aside class="md:col-span-4 lg:col-span-3">
+        <div class="sticky top-8">
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Archive</h2>
+              <span id="volume-count" class="font-mono text-[10px] font-black text-slate-300">0</span>
             </div>
-            <button id="save-btn" class="btn-save flex items-center gap-2 w-full sm:w-auto justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                저장하기
+            <div id="month-list" class="space-y-1.5 mb-6"></div>
+            <button id="add-month-btn" class="group w-full py-4 rounded-xl border-2 border-dashed border-slate-200 text-slate-300 hover:border-[var(--uv)] hover:text-[var(--uv)] transition-all flex flex-col items-center justify-center gap-1 focus-ring">
+              <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+              <span class="text-[10px] font-black uppercase">Add Volume</span>
             </button>
-        </header>
-
-        <div class="grid md:grid-cols-12 gap-8 flex-1 pb-20 px-4 md:px-0">
-            <!-- Sidebar -->
-            <div class="md:col-span-4 lg:col-span-3">
-                <div class="sticky top-8">
-                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Archive Index</h2>
-                        <div id="month-list" class="space-y-1.5 mb-6"></div>
-                        <button id="add-month-btn" class="group w-full py-4 rounded-xl border-2 border-dashed border-slate-200 text-slate-300 hover:border-[#5F4B8B] hover:text-[#5F4B8B] transition-all flex flex-col items-center justify-center gap-1">
-                            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                            <span class="text-[10px] font-black uppercase">Add Volume</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Editor -->
-            <div class="md:col-span-8 lg:col-span-9">
-                <div id="editor-container" class="hidden space-y-6">
-                    <div class="card animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div class="flex items-center gap-3 mb-8">
-                            <div class="w-1 h-6 bg-[#5F4B8B] rounded-full"></div>
-                            <h2 class="text-lg font-black text-slate-900 tracking-tight uppercase pt-0.5">Primary Theme</h2>
-                        </div>
-                        <div class="space-y-6">
-                            <div class="group">
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest group-focus-within:text-[#5F4B8B] transition-colors">Theme Concept Title</label>
-                                <textarea id="theme-title" class="input-field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:border-[#5F4B8B] focus:ring-4 focus:ring-[#5F4B8B]/5 transition-all outline-none min-h-[60px]" placeholder="예: Midnight Urban Drive" oninput="updateThemeData('theme', this.value)"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Master Cover Image</label>
-                                <div class="input-group">
-                                    <input type="text" id="theme-img" class="input-field-bare font-mono text-xs text-slate-500" placeholder="URL 입력 또는 파일 업로드" oninput="updateThemeData('themeImg', this.value); updatePreview('theme-preview', this.value)">
-                                    <label class="file-upload-trigger">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                        UPLOAD
-                                        <input type="file" class="hidden" accept="image/*" onchange="handleFileAsBase64(this, 'theme-img', 'themeImg', 'theme-preview')">
-                                    </label>
-                                </div>
-                                <div id="theme-preview" class="img-preview-box"></div>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Introduction Passage</label>
-                                <textarea id="theme-intro" class="input-field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium min-h-[120px] focus:border-[#5F4B8B] outline-none transition-all leading-relaxed" placeholder="테마 설명을 입력하세요." oninput="updateThemeData('intro', this.value)"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card animate-in fade-in slide-in-from-bottom-6 duration-700">
-                        <div class="flex items-center justify-between mb-10">
-                            <div class="flex items-center gap-3">
-                                <div class="w-1 h-6 bg-[#5F4B8B] rounded-full"></div>
-                                <h2 class="text-lg font-black text-slate-900 tracking-tight uppercase pt-0.5">Curation Catalog</h2>
-                            </div>
-                            <button id="add-track-btn" class="btn-main flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
-                                ADD TRACK
-                            </button>
-                        </div>
-                        <div id="tracks-container" class="space-y-10"></div>
-                    </div>
-                </div>
-                <div id="no-selection" class="card flex flex-col items-center justify-center py-40 text-slate-300 text-center">
-                    <p class="font-black tracking-widest text-[10px] uppercase px-6">Select a volume to start editing</p>
-                </div>
-            </div>
+          </div>
         </div>
+      </aside>
+
+      <!-- Editor -->
+      <main class="md:col-span-8 lg:col-span-9">
+
+        <!-- Theme -->
+        <div id="editor-container" class="hidden space-y-6">
+
+          <div class="card">
+            <div class="flex items-center justify-between mb-8">
+              <div class="flex items-center gap-3">
+                <div class="w-1 h-6 bg-[var(--uv)] rounded-full"></div>
+                <h2 class="text-lg font-black text-slate-900 tracking-tight uppercase pt-0.5">Primary Theme</h2>
+              </div>
+              <div class="flex items-center gap-2">
+                <a id="preview-link" href="#" target="_blank" class="text-[10px] font-black tracking-widest uppercase text-slate-400 hover:text-[var(--uv)] transition-colors flex items-center gap-1">
+                  Preview
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+                <button data-action="delete-volume" class="text-[10px] font-black tracking-widest uppercase text-slate-300 hover:text-red-500 transition-colors ml-2">
+                  Delete Vol.
+                </button>
+              </div>
+            </div>
+            <div class="space-y-6">
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Theme Concept Title</label>
+                <textarea id="theme-title" data-field="theme" class="field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:border-[var(--uv)] outline-none transition-all min-h-[60px] resize-y" placeholder="예: Midnight Urban Drive"></textarea>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Master Cover Image</label>
+                <div class="input-group">
+                  <input type="text" id="theme-img" data-field="themeImg" class="field input-field-bare font-mono text-xs text-slate-500" placeholder="URL 입력 또는 파일 업로드">
+                  <label class="file-upload-trigger">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    UPLOAD
+                    <input type="file" class="hidden" accept="image/*" data-upload="theme">
+                  </label>
+                </div>
+                <div id="theme-preview" class="img-preview-box"></div>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Introduction Passage</label>
+                <textarea id="theme-intro" data-field="intro" class="field w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium min-h-[120px] focus:border-[var(--uv)] outline-none transition-all leading-relaxed resize-y" placeholder="테마 설명을 입력하세요."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tracks -->
+          <div class="card">
+            <div class="flex items-center justify-between mb-10">
+              <div class="flex items-center gap-3">
+                <div class="w-1 h-6 bg-[var(--uv)] rounded-full"></div>
+                <h2 class="text-lg font-black text-slate-900 tracking-tight uppercase pt-0.5">Curation Catalog</h2>
+                <span id="track-count" class="font-mono text-[10px] font-black text-slate-300 ml-1">0</span>
+              </div>
+              <button id="add-track-btn" class="btn-main flex items-center gap-2 focus-ring">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                Add Track
+              </button>
+            </div>
+            <div id="tracks-container" class="space-y-6"></div>
+            <p class="font-mono text-[10px] text-slate-300 text-center mt-8 tracking-widest">— Drag the grip icon to reorder —</p>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="no-selection" class="card flex flex-col items-center justify-center py-40 text-slate-400 text-center gap-4">
+          <svg class="w-12 h-12 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-3 7 3z"/></svg>
+          <div>
+            <p class="font-black tracking-widest text-[10px] uppercase">Select a volume to start editing</p>
+            <p class="font-mono text-[10px] mt-2 text-slate-300">or create a new one from the sidebar</p>
+          </div>
+        </div>
+      </main>
     </div>
+  </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  <!-- Floating save (mobile only) -->
+  <button id="save-btn-mobile" class="btn-save floating-save relative focus-ring">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+  </button>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDXMTDaE76mqn6S6w2F5s4qHhdFphNULg8",
-            authDomain: "monthly-city-pop.firebaseapp.com",
-            projectId: "monthly-city-pop",
-            storageBucket: "monthly-city-pop.firebasestorage.app",
-            messagingSenderId: "860318834352",
-            appId: "1:860318834352:web:f1b4d1c3212a41a9dde575"
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /* ─── CONFIG ─── */
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXMTDaE76mqn6S6w2F5s4qHhdFphNULg8",
+      authDomain: "monthly-city-pop.firebaseapp.com",
+      projectId: "monthly-city-pop",
+      storageBucket: "monthly-city-pop.firebasestorage.app",
+      messagingSenderId: "860318834352",
+      appId: "1:860318834352:web:f1b4d1c3212a41a9dde575"
+    };
+    const APP_ID = 'monthly-city-pop';
+    const IMG_MAX_BYTES = 1024 * 1024;          // 1 MB
+    const IMG_TARGET_SIZE = 800;                // resize to this square
+    const IMG_JPEG_QUALITY = 0.78;
+
+    /* ─── STATE ─── */
+    const state = {
+      archive: {},
+      selectedMonth: '',
+      dirty: false,
+      lastSavedSnapshot: '',
+      trashStack: [],         // { type, month, index, album }
+    };
+
+    const defaultAlbum = () => ({ title: '', artist: '', year: String(new Date().getFullYear()), img: '', desc: '' });
+    const defaultVolume = (theme = '새로운 테마') => ({ theme, themeImg: '', intro: '', albums: [] });
+
+    /* ─── DOM ─── */
+    const $ = (id) => document.getElementById(id);
+    const refs = {
+      overlay: $('loading-overlay'),
+      authDot: $('auth-dot'),
+      authStatus: $('auth-status'),
+      saveBtn: $('save-btn'),
+      saveBtnMobile: $('save-btn-mobile'),
+      monthList: $('month-list'),
+      volumeCount: $('volume-count'),
+      editor: $('editor-container'),
+      empty: $('no-selection'),
+      themeTitle: $('theme-title'),
+      themeImg: $('theme-img'),
+      themeIntro: $('theme-intro'),
+      themePreview: $('theme-preview'),
+      tracks: $('tracks-container'),
+      trackCount: $('track-count'),
+      previewLink: $('preview-link'),
+      toastHost: $('toast-host'),
+      modalHost: $('modal-host'),
+      addTrackBtn: $('add-track-btn'),
+      addMonthBtn: $('add-month-btn'),
+    };
+
+    /* ─── FIREBASE ─── */
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const archiveDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'archive', 'master');
+
+    /* ─── TOAST ─── */
+    const toast = (msg, { type = '', action, timeout = 3000 } = {}) => {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      const span = document.createElement('span');
+      span.textContent = msg;
+      el.appendChild(span);
+      if (action) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = action.label;
+        btn.addEventListener('click', () => {
+          action.handler();
+          el.remove();
+        });
+        el.appendChild(btn);
+      }
+      refs.toastHost.appendChild(el);
+      if (timeout > 0) {
+        setTimeout(() => {
+          el.style.animation = 'toast-in .25s ease reverse';
+          setTimeout(() => el.remove(), 250);
+        }, timeout);
+      }
+      return el;
+    };
+
+    /* ─── MODAL (prompt / confirm) ─── */
+    const modal = ({ title, message, placeholder = '', defaultValue = '', confirmLabel = 'Confirm', cancelLabel = '취소', mode = 'prompt' }) => {
+      return new Promise((resolve) => {
+        refs.modalHost.innerHTML = '';
+        const body = document.createElement('div');
+        body.className = 'mcp-modal-body';
+        body.innerHTML = `
+          <h3 class="text-base font-black text-slate-900 mb-2 tracking-tight">${title || ''}</h3>
+          ${message ? `<p class="text-sm text-slate-500 mb-4 leading-relaxed">${message}</p>` : ''}
+          ${mode === 'prompt' ? `<input type="text" class="prompt-input w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg font-mono text-sm focus:border-[var(--uv)] outline-none mb-5 transition-colors" placeholder="${placeholder}" value="${defaultValue}" />` : ''}
+          <div class="flex justify-end gap-2">
+            <button type="button" class="cancel-btn px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">${cancelLabel}</button>
+            <button type="button" class="confirm-btn px-5 py-2 text-sm font-black text-white bg-[var(--uv)] hover:bg-[var(--uv-deep)] rounded-lg transition-colors">${confirmLabel}</button>
+          </div>
+        `;
+        refs.modalHost.appendChild(body);
+        refs.modalHost.classList.add('open');
+
+        const input = body.querySelector('.prompt-input');
+        const cancel = () => { refs.modalHost.classList.remove('open'); resolve(null); };
+        const confirm = () => {
+          refs.modalHost.classList.remove('open');
+          resolve(mode === 'prompt' ? (input?.value ?? '') : true);
         };
+        body.querySelector('.cancel-btn').addEventListener('click', cancel);
+        body.querySelector('.confirm-btn').addEventListener('click', confirm);
+        input?.addEventListener('keydown', (e) => { if (e.key === 'Enter') confirm(); });
+        refs.modalHost.addEventListener('click', (e) => { if (e.target === refs.modalHost) cancel(); }, { once: true });
+        document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { cancel(); document.removeEventListener('keydown', esc); } });
+        setTimeout(() => input?.focus(), 50);
+      });
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = 'monthly-city-pop';
-        let archiveData = {}; let selectedMonth = "";
+    /* ─── DIRTY TRACKING ─── */
+    const snapshotArchive = () => JSON.stringify(state.archive);
+    const markDirty = () => {
+      state.dirty = snapshotArchive() !== state.lastSavedSnapshot;
+      refs.saveBtn.classList.toggle('dirty', state.dirty);
+      refs.saveBtnMobile.classList.toggle('dirty', state.dirty);
+    };
+    window.addEventListener('beforeunload', (e) => {
+      if (state.dirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
 
-        // 이미지 미리보기를 전역 함수로 등록 (oninput 이벤트에서 호출 가능하게 함)
-        window.updatePreview = (id, url) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (url && url.length > 5) {
-                // 따옴표로 감싸서 URL 내 특수문자 크래시 방지
-                el.style.backgroundImage = `url('${url.replace(/'/g, "\\'")}')`;
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
-            }
+    /* ─── IMAGE RESIZE (reduces base64 bloat) ─── */
+    const resizeImage = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const size = IMG_TARGET_SIZE;
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+
+          // cover-crop (center)
+          const ratio = Math.max(size / img.width, size / img.height);
+          const w = img.width * ratio;
+          const h = img.height * ratio;
+          const x = (size - w) / 2;
+          const y = (size - h) / 2;
+          ctx.fillStyle = '#f1f1f1';
+          ctx.fillRect(0, 0, size, size);
+          ctx.drawImage(img, x, y, w, h);
+
+          canvas.toBlob((blob) => {
+            if (!blob) return reject(new Error('Blob creation failed'));
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(r.error);
+            r.readAsDataURL(blob);
+          }, 'image/jpeg', IMG_JPEG_QUALITY);
         };
+        img.onerror = () => reject(new Error('Image load failed'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
 
-        const init = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } catch (customTokenError) {
-                        await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Auth Error:", err);
-            }
+    const handleImageUpload = async (file, { onResult, previewEl }) => {
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) {
+        toast('파일이 너무 큽니다 (8MB 이하).', { type: 'error' });
+        return;
+      }
+      try {
+        const data = await resizeImage(file);
+        if (data.length > IMG_MAX_BYTES * 1.4) {
+          toast('리사이즈 후에도 용량이 큽니다. 다른 이미지를 사용해주세요.', { type: 'warn' });
+          return;
+        }
+        onResult(data);
+        if (previewEl) updatePreview(previewEl, data);
+        markDirty();
+      } catch (err) {
+        console.error(err);
+        toast('이미지 처리 실패: ' + err.message, { type: 'error' });
+      }
+    };
 
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    document.getElementById('auth-dot').className = "status-dot bg-green-500 animate-pulse";
-                    document.getElementById('auth-status').innerText = "Connected";
-                    document.getElementById('auth-status').classList.replace('text-slate-400', 'text-green-600');
-                    await loadData();
-                } else {
-                    document.getElementById('loading-overlay').style.display = 'none';
-                }
-            });
-        };
+    /* ─── PREVIEW ─── */
+    const updatePreview = (el, url) => {
+      if (!el) return;
+      if (url && url.length > 5) {
+        el.classList.add('active');
+        el.classList.remove('error');
+        el.style.backgroundImage = `url("${CSS.escape(url).replace(/\\"/g, '"')}")`;
+        // Basic URL validation for non-data URLs
+        if (!url.startsWith('data:')) {
+          const test = new Image();
+          test.onerror = () => el.classList.add('error');
+          test.onload = () => el.classList.remove('error');
+          test.src = url;
+        }
+      } else {
+        el.classList.remove('active', 'error');
+        el.style.backgroundImage = '';
+      }
+    };
 
-        const loadData = async () => {
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master');
-            try {
-                const snap = await getDoc(docRef);
-                archiveData = snap.exists() ? snap.data() : { "2026.04": { theme: "New Theme", themeImg: "", intro: "", albums: [] } };
-            } catch (error) {
-                console.error("Load Error:", error);
-                archiveData = { "2026.04": { theme: "New Theme", themeImg: "", intro: "", albums: [] } };
-            }
+    /* ─── SIDEBAR ─── */
+    const renderSidebar = () => {
+      const months = Object.keys(state.archive).sort().reverse();
+      refs.volumeCount.textContent = String(months.length).padStart(2, '0');
+
+      const frag = document.createDocumentFragment();
+      months.forEach((m) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.action = 'select-month';
+        btn.dataset.month = m;
+        const active = m === state.selectedMonth;
+        btn.className = `focus-ring w-full text-left px-5 py-4 rounded-xl text-xs font-black transition-all ${
+          active
+            ? 'bg-[var(--uv)] text-white shadow-xl shadow-[#5F4B8B]/20 scale-[1.02]'
+            : 'bg-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+        }`;
+        btn.textContent = m;
+        frag.appendChild(btn);
+      });
+      refs.monthList.replaceChildren(frag);
+    };
+
+    /* ─── EDITOR ─── */
+    const selectMonth = (month) => {
+      if (!state.archive[month]) return;
+      state.selectedMonth = month;
+      refs.editor.classList.remove('hidden');
+      refs.empty.classList.add('hidden');
+
+      const data = state.archive[month];
+      refs.themeTitle.value = data.theme || '';
+      refs.themeImg.value = data.themeImg || '';
+      refs.themeIntro.value = data.intro || '';
+      updatePreview(refs.themePreview, data.themeImg);
+
+      // preview link (점프)
+      refs.previewLink.href = `./index.html#${month}`;
+
+      renderTracks(data.albums || []);
+      renderSidebar();
+    };
+
+    /* ─── TRACKS ─── */
+    let sortable = null;
+
+    const createTrackCard = (album, idx) => {
+      const div = document.createElement('div');
+      div.className = 'track-card group p-6 md:p-8 border border-slate-100 rounded-3xl relative bg-white hover:border-[var(--uv)]/30 hover:shadow-lg transition-all';
+      div.dataset.idx = idx;
+
+      div.innerHTML = `
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <button type="button" class="drag-handle p-1.5 text-slate-300 hover:text-[var(--uv)] hover:bg-slate-50 rounded transition-colors" title="Drag to reorder" aria-label="드래그해서 순서 변경">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="9" cy="6" r="1.5" fill="currentColor"/><circle cx="15" cy="6" r="1.5" fill="currentColor"/>
+                <circle cx="9" cy="12" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="9" cy="18" r="1.5" fill="currentColor"/><circle cx="15" cy="18" r="1.5" fill="currentColor"/>
+              </svg>
+            </button>
+            <span class="track-idx text-[10px] font-black text-[var(--uv)] tracking-widest flex items-center gap-2 uppercase">
+              <span class="w-4 h-[2px] bg-[var(--uv)]"></span>
+              <span class="track-idx-text">Track ${String(idx+1).padStart(2,'0')}</span>
+            </span>
+          </div>
+          <button type="button" data-action="remove-track" class="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors focus-ring" title="삭제" aria-label="트랙 삭제">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-5">
+          <div class="md:col-span-12">
+            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Album Title</label>
+            <textarea data-track-field="title" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold focus:border-[var(--uv)] outline-none transition-all min-h-[46px] resize-y"></textarea>
+          </div>
+          <div class="md:col-span-8">
+            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Artist Name</label>
+            <input type="text" data-track-field="artist" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold focus:border-[var(--uv)] outline-none transition-all" placeholder="Artist">
+          </div>
+          <div class="md:col-span-4">
+            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Year <span class="text-slate-300 normal-case tracking-normal font-mono text-[10px]">YYYY</span></label>
+            <input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" data-track-field="year" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold focus:border-[var(--uv)] outline-none transition-all font-mono" placeholder="2026">
+          </div>
+          <div class="md:col-span-12">
+            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Cover Source</label>
+            <div class="input-group">
+              <input type="text" data-track-field="img" data-track-img class="input-field-bare font-mono text-[10px] text-slate-500" placeholder="https://…">
+              <label class="file-upload-trigger">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                UPLOAD
+                <input type="file" class="hidden" accept="image/*" data-upload="track">
+              </label>
+            </div>
+            <div class="track-preview img-preview-box"></div>
+          </div>
+          <div class="md:col-span-12">
+            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Liner Notes</label>
+            <textarea data-track-field="desc" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-medium min-h-[100px] focus:border-[var(--uv)] outline-none transition-all leading-relaxed resize-y" placeholder="backstory…"></textarea>
+          </div>
+        </div>
+      `;
+
+      // populate values via .value (safe from XSS)
+      div.querySelector('[data-track-field="title"]').value = album.title || '';
+      div.querySelector('[data-track-field="artist"]').value = album.artist || '';
+      div.querySelector('[data-track-field="year"]').value = album.year || '';
+      div.querySelector('[data-track-field="img"]').value = album.img || '';
+      div.querySelector('[data-track-field="desc"]').value = album.desc || '';
+      updatePreview(div.querySelector('.track-preview'), album.img);
+
+      return div;
+    };
+
+    const renderTracks = (albums) => {
+      refs.trackCount.textContent = String(albums.length).padStart(2, '0');
+      const frag = document.createDocumentFragment();
+      albums.forEach((album, idx) => frag.appendChild(createTrackCard(album, idx)));
+      refs.tracks.replaceChildren(frag);
+
+      // Initialize Sortable
+      if (sortable) sortable.destroy();
+      sortable = Sortable.create(refs.tracks, {
+        animation: 180,
+        handle: '.drag-handle',
+        ghostClass: 'sortable-ghost',
+        dragClass: 'sortable-drag',
+        onEnd: (evt) => {
+          if (evt.oldIndex === evt.newIndex) return;
+          const list = state.archive[state.selectedMonth].albums;
+          const [moved] = list.splice(evt.oldIndex, 1);
+          list.splice(evt.newIndex, 0, moved);
+          reindexTrackLabels();
+          markDirty();
+        }
+      });
+    };
+
+    const reindexTrackLabels = () => {
+      refs.tracks.querySelectorAll('.track-card').forEach((card, idx) => {
+        card.dataset.idx = idx;
+        card.querySelector('.track-idx-text').textContent = `Track ${String(idx+1).padStart(2,'0')}`;
+      });
+    };
+
+    const addTrack = () => {
+      if (!state.selectedMonth) return;
+      const vol = state.archive[state.selectedMonth];
+      vol.albums = vol.albums || [];
+      vol.albums.push(defaultAlbum());
+      renderTracks(vol.albums);
+      markDirty();
+      // scroll to and focus new track
+      requestAnimationFrame(() => {
+        const last = refs.tracks.lastElementChild;
+        last?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        last?.querySelector('[data-track-field="title"]')?.focus();
+      });
+    };
+
+    const removeTrack = (idx) => {
+      const vol = state.archive[state.selectedMonth];
+      if (!vol?.albums?.[idx]) return;
+      const removed = vol.albums.splice(idx, 1)[0];
+      state.trashStack.push({ type: 'track', month: state.selectedMonth, index: idx, album: removed });
+      renderTracks(vol.albums);
+      markDirty();
+      toast(`"${removed.title || 'Untitled'}" 삭제됨`, {
+        action: {
+          label: 'Undo',
+          handler: () => {
+            const entry = state.trashStack.pop();
+            if (!entry || entry.month !== state.selectedMonth) return;
+            const list = state.archive[entry.month].albums;
+            list.splice(entry.index, 0, entry.album);
+            renderTracks(list);
+            markDirty();
+          }
+        }
+      });
+    };
+
+    /* ─── VOLUME MGMT ─── */
+    const suggestNextMonth = () => {
+      const months = Object.keys(state.archive).sort().reverse();
+      if (!months.length) {
+        const now = new Date();
+        return `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}`;
+      }
+      const [y, m] = months[0].split('.').map(Number);
+      const next = new Date(y, m, 1); // m is already 1-indexed, so this advances
+      return `${next.getFullYear()}.${String(next.getMonth() + 1).padStart(2, '0')}`;
+    };
+
+    const addVolume = async () => {
+      const suggested = suggestNextMonth();
+      const input = await modal({
+        title: '새 호 추가',
+        message: 'YYYY.MM 형식으로 입력하세요. (예: 2026.05)',
+        placeholder: 'YYYY.MM',
+        defaultValue: suggested,
+        confirmLabel: '추가'
+      });
+      if (input === null) return;
+      const key = input.trim();
+      if (!/^\d{4}\.(0[1-9]|1[0-2])$/.test(key)) {
+        toast('형식이 올바르지 않습니다. YYYY.MM (예: 2026.05)', { type: 'error' });
+        return;
+      }
+      if (state.archive[key]) {
+        toast('이미 존재하는 호입니다.', { type: 'warn' });
+        return;
+      }
+      state.archive[key] = defaultVolume();
+      renderSidebar();
+      selectMonth(key);
+      markDirty();
+      toast(`${key} 호가 추가되었습니다.`, { type: 'success' });
+    };
+
+    const deleteVolume = async () => {
+      if (!state.selectedMonth) return;
+      const key = state.selectedMonth;
+      const confirmed = await modal({
+        title: `${key} 호를 삭제하시겠습니까?`,
+        message: '이 호의 모든 앨범 정보가 제거됩니다. 저장 전까지는 Undo로 복구할 수 있습니다.',
+        confirmLabel: '삭제',
+        mode: 'confirm'
+      });
+      if (!confirmed) return;
+
+      const backup = state.archive[key];
+      delete state.archive[key];
+      state.trashStack.push({ type: 'volume', month: key, data: backup });
+      state.selectedMonth = '';
+      refs.editor.classList.add('hidden');
+      refs.empty.classList.remove('hidden');
+      renderSidebar();
+      markDirty();
+      toast(`${key} 호 삭제됨`, {
+        action: {
+          label: 'Undo',
+          handler: () => {
+            const entry = state.trashStack.pop();
+            if (entry?.type !== 'volume') return;
+            state.archive[entry.month] = entry.data;
             renderSidebar();
-            document.getElementById('loading-overlay').style.display = 'none';
-        };
+            selectMonth(entry.month);
+            markDirty();
+          }
+        }
+      });
+    };
 
-        const renderSidebar = () => {
-            const container = document.getElementById('month-list'); container.innerHTML = '';
-            Object.keys(archiveData).sort().reverse().forEach(m => {
-                const btn = document.createElement('button');
-                const active = m === selectedMonth;
-                btn.className = `w-full text-left px-5 py-4 rounded-xl text-xs font-black transition-all ${active ? 'bg-[#5F4B8B] text-white shadow-xl shadow-[#5F4B8B]/20 scale-[1.02]' : 'bg-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`;
-                btn.innerText = m; btn.onclick = () => selectMonth(m);
-                container.appendChild(btn);
-            });
-        };
+    /* ─── SAVE ─── */
+    const normalizeArchive = () => {
+      // Ensure schema consistency (year, album fields)
+      Object.values(state.archive).forEach((vol) => {
+        vol.albums = (vol.albums || []).map((a) => ({
+          title: a.title || '',
+          artist: a.artist || '',
+          year: a.year || '',
+          img: a.img || '',
+          desc: a.desc || ''
+        }));
+      });
+    };
 
-        const selectMonth = (month) => {
-            selectedMonth = month;
-            document.getElementById('editor-container').classList.remove('hidden');
-            document.getElementById('no-selection').classList.add('hidden');
-            const data = archiveData[month];
-            document.getElementById('theme-title').value = data.theme || "";
-            document.getElementById('theme-img').value = data.themeImg || "";
-            document.getElementById('theme-intro').value = data.intro || "";
-            
-            window.updatePreview('theme-preview', data.themeImg || "");
-            renderTracks(data.albums || []);
-            renderSidebar();
-        };
+    const save = async () => {
+      if (!state.dirty) {
+        toast('변경사항이 없습니다.', { timeout: 1500 });
+        return;
+      }
+      const btns = [refs.saveBtn, refs.saveBtnMobile];
+      btns.forEach((b) => b.disabled = true);
+      const originalHTML = refs.saveBtn.innerHTML;
+      refs.saveBtn.innerHTML = '<span class="animate-pulse">Syncing…</span>';
 
-        const escapeForJS = (str) => {
-            if (!str) return "";
-            return str.replace(/\\/g, "\\\\")
-                      .replace(/'/g, "\\'")
-                      .replace(/"/g, '&quot;')
-                      .replace(/\n/g, '\\n')
-                      .replace(/\r/g, '');
-        };
+      try {
+        normalizeArchive();
+        await setDoc(archiveDocRef, state.archive);
+        state.lastSavedSnapshot = snapshotArchive();
+        state.dirty = false;
+        btns.forEach((b) => b.classList.remove('dirty'));
+        toast('데이터베이스 동기화 완료', { type: 'success' });
+      } catch (e) {
+        toast('저장 실패: ' + e.message, { type: 'error', timeout: 5000 });
+      } finally {
+        refs.saveBtn.innerHTML = originalHTML;
+        btns.forEach((b) => b.disabled = false);
+      }
+    };
 
-        const renderTracks = (albums) => {
-            const container = document.getElementById('tracks-container'); container.innerHTML = '';
-            albums.forEach((album, idx) => {
-                const div = document.createElement('div'); 
-                div.className = 'group p-8 border border-slate-100 rounded-3xl relative bg-white hover:border-[#5F4B8B]/30 hover:shadow-2xl transition-all duration-300';
-                
-                const upBtnHTML = idx > 0 ? 
-                    `<button onclick="moveTrack(${idx}, -1)" class="p-1 text-slate-300 hover:text-[#5F4B8B] hover:bg-slate-50 rounded transition-all" title="위로 이동">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
-                    </button>` : `<div class="w-7"></div>`;
-                
-                const downBtnHTML = idx < albums.length - 1 ? 
-                    `<button onclick="moveTrack(${idx}, 1)" class="p-1 text-slate-300 hover:text-[#5F4B8B] hover:bg-slate-50 rounded transition-all" title="아래로 이동">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>` : `<div class="w-7"></div>`;
+    /* ─── FIELD SYNC (event delegation + debounce) ─── */
+    const debounce = (fn, wait = 150) => {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+    };
 
-                const safeImgUrl = album.img ? album.img.replace(/'/g, "\\'") : '';
+    const syncInput = (e) => {
+      const t = e.target;
+      const vol = state.archive[state.selectedMonth];
+      if (!vol) return;
 
-                div.innerHTML = `
-                    <div class="absolute top-8 left-8 text-[10px] font-black text-[#5F4B8B] tracking-widest flex items-center gap-2 uppercase">
-                        <span class="w-4 h-[2px] bg-[#5F4B8B]"></span> TRACK ${String(idx+1).padStart(2,'0')}
-                    </div>
-                    
-                    <div class="absolute top-8 right-8 flex items-center gap-1">
-                        ${upBtnHTML}
-                        ${downBtnHTML}
-                        <div class="w-px h-4 bg-slate-200 mx-1.5"></div>
-                        <button onclick="removeTrack(${idx})" class="p-1 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded transition-colors" title="삭제">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    </div>
+      // Theme fields
+      const field = t.dataset.field;
+      if (field) {
+        vol[field] = t.value;
+        if (field === 'themeImg') updatePreview(refs.themePreview, t.value);
+        markDirty();
+        return;
+      }
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 mt-10">
-                        <div>
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Album Title</label>
-                            <textarea oninput="updateTrackData(${idx}, 'title', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold focus:border-[#5F4B8B] outline-none transition-all min-h-[46px] resize-none">${album.title || ''}</textarea>
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Artist Name</label>
-                            <input type="text" value="${album.artist || ''}" oninput="updateTrackData(${idx}, 'artist', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold focus:border-[#5F4B8B] outline-none transition-all" placeholder="Artist">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Cover Source</label>
-                            <div class="input-group">
-                                <input type="text" id="track-img-${idx}" value="${album.img || ''}" oninput="updateTrackData(${idx}, 'img', this.value); updatePreview('preview-track-${idx}', this.value)" class="input-field-bare font-mono text-[10px] text-slate-500" placeholder="https://...">
-                                <label class="file-upload-trigger">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                    UPLOAD
-                                    <input type="file" class="hidden" accept="image/*" onchange="handleTrackFileAsBase64(this, ${idx})">
-                                </label>
-                            </div>
-                            <div id="preview-track-${idx}" class="img-preview-box ${album.img ? 'active' : ''}" style="background-image: url('${safeImgUrl}')"></div>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Liner Notes</label>
-                            <textarea oninput="updateTrackData(${idx}, 'desc', this.value)" class="input-field w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-medium min-h-[100px] focus:border-[#5F4B8B] outline-none transition-all leading-relaxed" placeholder="backstory...">${album.desc || ''}</textarea>
-                        </div>
-                    </div>`;
-                container.appendChild(div);
-            });
-        };
+      // Track fields
+      const trackField = t.dataset.trackField;
+      if (trackField) {
+        const card = t.closest('.track-card');
+        if (!card) return;
+        const idx = Number(card.dataset.idx);
+        if (!vol.albums?.[idx]) return;
+        let val = t.value;
+        if (trackField === 'year') val = val.replace(/[^\d]/g, '').slice(0, 4); // digit-only
+        if (val !== t.value) t.value = val;
+        vol.albums[idx][trackField] = val;
+        if (trackField === 'img') updatePreview(card.querySelector('.track-preview'), val);
+        markDirty();
+      }
+    };
+    const syncInputDebounced = debounce(markDirty, 250);
 
-        window.handleFileAsBase64 = (input, displayId, dataKey, previewId) => {
-            const file = input.files[0]; if (!file) return;
-            if (file.size > 1.2 * 1024 * 1024) { alert("파일이 너무 큽니다 (1MB 이하 권장)."); return; }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const base64Data = e.target.result;
-                document.getElementById(displayId).value = base64Data;
-                archiveData[selectedMonth][dataKey] = base64Data;
-                if(previewId) window.updatePreview(previewId, base64Data);
-            };
-            reader.readAsDataURL(file);
-        };
+    /* ─── CLICK DELEGATION ─── */
+    document.addEventListener('click', (e) => {
+      const actionEl = e.target.closest('[data-action]');
+      if (actionEl) {
+        const action = actionEl.dataset.action;
+        if (action === 'select-month') {
+          const m = actionEl.dataset.month;
+          if (m && m !== state.selectedMonth) selectMonth(m);
+          return;
+        }
+        if (action === 'remove-track') {
+          const card = actionEl.closest('.track-card');
+          if (card) removeTrack(Number(card.dataset.idx));
+          return;
+        }
+        if (action === 'delete-volume') {
+          deleteVolume();
+          return;
+        }
+      }
+    });
 
-        window.handleTrackFileAsBase64 = (input, idx) => {
-            const file = input.files[0]; if (!file) return;
-            if (file.size > 1024 * 1024) { alert("파일 용량을 줄여주세요 (1MB 이하 권장)."); return; }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const base64Data = e.target.result;
-                document.getElementById(`track-img-${idx}`).value = base64Data;
-                archiveData[selectedMonth].albums[idx].img = base64Data;
-                window.updatePreview(`preview-track-${idx}`, base64Data);
-            };
-            reader.readAsDataURL(file);
-        };
+    /* ─── FILE UPLOAD DELEGATION ─── */
+    document.addEventListener('change', (e) => {
+      const up = e.target.dataset.upload;
+      if (!up) return;
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (up === 'theme') {
+        handleImageUpload(file, {
+          onResult: (data) => {
+            refs.themeImg.value = data;
+            state.archive[state.selectedMonth].themeImg = data;
+          },
+          previewEl: refs.themePreview
+        });
+      } else if (up === 'track') {
+        const card = e.target.closest('.track-card');
+        if (!card) return;
+        const idx = Number(card.dataset.idx);
+        handleImageUpload(file, {
+          onResult: (data) => {
+            card.querySelector('[data-track-field="img"]').value = data;
+            state.archive[state.selectedMonth].albums[idx].img = data;
+          },
+          previewEl: card.querySelector('.track-preview')
+        });
+      }
+      // reset input so same file can be re-selected
+      e.target.value = '';
+    });
 
-        window.updateThemeData = (field, value) => { if (selectedMonth) archiveData[selectedMonth][field] = value; };
-        window.updateTrackData = (idx, field, value) => { if (selectedMonth) archiveData[selectedMonth].albums[idx][field] = value; };
-        
-        window.removeTrack = (idx) => { 
-            if (confirm("이 앨범을 삭제하시겠습니까?")) { 
-                archiveData[selectedMonth].albums.splice(idx, 1); 
-                renderTracks(archiveData[selectedMonth].albums); 
-            } 
-        };
+    /* ─── INPUT DELEGATION ─── */
+    document.addEventListener('input', syncInput);
 
-        window.moveTrack = (idx, direction) => {
-            if (!selectedMonth) return;
-            const albums = archiveData[selectedMonth].albums;
-            
-            if (direction === -1 && idx > 0) {
-                [albums[idx - 1], albums[idx]] = [albums[idx], albums[idx - 1]];
-            } else if (direction === 1 && idx < albums.length - 1) {
-                [albums[idx], albums[idx + 1]] = [albums[idx + 1], albums[idx]];
-            }
-            renderTracks(albums);
-        };
+    /* ─── KEYBOARD ─── */
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        save();
+      }
+    });
 
-        document.getElementById('add-track-btn').onclick = () => {
-            if (!selectedMonth) return;
-            if (!archiveData[selectedMonth].albums) archiveData[selectedMonth].albums = [];
-            archiveData[selectedMonth].albums.push({ title: "", artist: "", img: "", desc: "" });
-            renderTracks(archiveData[selectedMonth].albums);
-        };
+    /* ─── BUTTONS ─── */
+    refs.saveBtn.addEventListener('click', save);
+    refs.saveBtnMobile.addEventListener('click', save);
+    refs.addTrackBtn.addEventListener('click', addTrack);
+    refs.addMonthBtn.addEventListener('click', addVolume);
 
-        document.getElementById('add-month-btn').onclick = () => {
-            const nextMonth = prompt("새로운 호 입력 (예: 2026.05)");
-            if (nextMonth && !archiveData[nextMonth]) {
-                archiveData[nextMonth] = { theme: "새로운 테마", themeImg: "", intro: "", albums: [] };
-                renderSidebar(); selectMonth(nextMonth);
-            }
-        };
+    /* ─── INIT ─── */
+    const connect = () => {
+      refs.authDot.className = 'status-dot bg-green-500 animate-pulse';
+      refs.authStatus.textContent = 'Connected';
+      refs.authStatus.classList.replace('text-slate-400', 'text-green-600');
+    };
 
-        document.getElementById('save-btn').onclick = async () => {
-            const btn = document.getElementById('save-btn');
-            const originalText = btn.innerHTML;
-            btn.disabled = true; btn.innerHTML = '<span class="animate-pulse">Syncing...</span>';
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'archive', 'master'), archiveData);
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    alert("✨ 데이터베이스 동기화가 완료되었습니다.");
-                }, 500);
-            } catch (e) {
-                alert("동기화 실패: " + e.message);
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        };
+    const loadData = async () => {
+      try {
+        const snap = await getDoc(archiveDocRef);
+        state.archive = (snap.exists() && Object.keys(snap.data()).length)
+          ? snap.data()
+          : { '2026.04': defaultVolume('New Theme') };
+      } catch (err) {
+        console.error('Load error:', err);
+        toast('데이터 로드 실패. 로컬 기본값으로 시작합니다.', { type: 'error' });
+        state.archive = { '2026.04': defaultVolume('New Theme') };
+      }
+      state.lastSavedSnapshot = snapshotArchive();
+      renderSidebar();
+      refs.overlay.style.display = 'none';
+    };
 
-        init();
-    </script>
+    const init = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          try { await signInWithCustomToken(auth, __initial_auth_token); }
+          catch { await signInAnonymously(auth); }
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error('Auth error:', err);
+        refs.overlay.style.display = 'none';
+        toast('인증 실패', { type: 'error' });
+        return;
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          connect();
+          await loadData();
+        } else {
+          refs.overlay.style.display = 'none';
+        }
+      });
+    };
+
+    init();
+  </script>
 </body>
 </html>
