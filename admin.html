@@ -120,7 +120,6 @@
     <div class="max-w-5xl mx-auto min-h-screen flex flex-col">
         <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-8 pb-6 md:pt-12 md:pb-10 px-6 gap-6 sm:gap-0">
             <div class="flex items-center gap-5">
-                <!-- 비율을 유지하는 로고 이미지 출력 -->
                 <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" onerror="this.src='https://via.placeholder.com/120x28/111111/ffffff?text=MCP+LOGO'" alt="MCP Logo" class="admin-brand-logo">
                 <div>
                     <div class="flex items-center gap-2 mb-0.5">
@@ -224,6 +223,19 @@
         const appId = 'monthly-city-pop';
         let archiveData = {}; let selectedMonth = "";
 
+        // 이미지 미리보기를 전역 함수로 등록 (oninput 이벤트에서 호출 가능하게 함)
+        window.updatePreview = (id, url) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (url && url.length > 5) {
+                // 따옴표로 감싸서 URL 내 특수문자 크래시 방지
+                el.style.backgroundImage = `url('${url.replace(/'/g, "\\'")}')`;
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        };
+
         const init = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -284,19 +296,9 @@
             document.getElementById('theme-img').value = data.themeImg || "";
             document.getElementById('theme-intro').value = data.intro || "";
             
-            updatePreview('theme-preview', data.themeImg || "");
+            window.updatePreview('theme-preview', data.themeImg || "");
             renderTracks(data.albums || []);
             renderSidebar();
-        };
-
-        const updatePreview = (id, url) => {
-            const el = document.getElementById(id);
-            if(url && url.length > 5) {
-                el.style.backgroundImage = `url(${url})`;
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
-            }
         };
 
         const escapeForJS = (str) => {
@@ -323,6 +325,8 @@
                     `<button onclick="moveTrack(${idx}, 1)" class="p-1 text-slate-300 hover:text-[#5F4B8B] hover:bg-slate-50 rounded transition-all" title="아래로 이동">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </button>` : `<div class="w-7"></div>`;
+
+                const safeImgUrl = album.img ? album.img.replace(/'/g, "\\'") : '';
 
                 div.innerHTML = `
                     <div class="absolute top-8 left-8 text-[10px] font-black text-[#5F4B8B] tracking-widest flex items-center gap-2 uppercase">
@@ -357,7 +361,7 @@
                                     <input type="file" class="hidden" accept="image/*" onchange="handleTrackFileAsBase64(this, ${idx})">
                                 </label>
                             </div>
-                            <div id="preview-track-${idx}" class="img-preview-box ${album.img ? 'active' : ''}" style="background-image: url(${album.img})"></div>
+                            <div id="preview-track-${idx}" class="img-preview-box ${album.img ? 'active' : ''}" style="background-image: url('${safeImgUrl}')"></div>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Liner Notes</label>
@@ -376,7 +380,7 @@
                 const base64Data = e.target.result;
                 document.getElementById(displayId).value = base64Data;
                 archiveData[selectedMonth][dataKey] = base64Data;
-                if(previewId) updatePreview(previewId, base64Data);
+                if(previewId) window.updatePreview(previewId, base64Data);
             };
             reader.readAsDataURL(file);
         };
@@ -389,7 +393,7 @@
                 const base64Data = e.target.result;
                 document.getElementById(`track-img-${idx}`).value = base64Data;
                 archiveData[selectedMonth].albums[idx].img = base64Data;
-                updatePreview(`preview-track-${idx}`, base64Data);
+                window.updatePreview(`preview-track-${idx}`, base64Data);
             };
             reader.readAsDataURL(file);
         };
