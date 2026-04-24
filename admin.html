@@ -413,7 +413,7 @@
       trashStack: [],         // { type, month, index, album }
     };
 
-    const defaultAlbum = () => ({ title: '', artist: '', year: String(new Date().getFullYear()), img: '', desc: '' });
+    const defaultAlbum = () => ({ title: '', artist: '', year: String(new Date().getFullYear()), img: '', pickTrack: '', pickNote: '', desc: '' });
     const defaultVolume = (theme = '새로운 테마') => ({ theme, themeImg: '', intro: '', albums: [] });
 
     /* ─── DOM ─── */
@@ -695,9 +695,28 @@
             </div>
             <div class="track-preview img-preview-box"></div>
           </div>
+
+          <!-- Editor's Pick block -->
+          <div class="md:col-span-12 p-5 bg-[var(--uv)]/5 border border-[var(--uv)]/20 rounded-2xl">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="w-3 h-3 rounded-full bg-[var(--uv)]"></span>
+              <span class="text-[10px] font-black uppercase tracking-widest text-[var(--uv)]">Editor's Pick</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-x-5 gap-y-4">
+              <div class="md:col-span-5">
+                <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Pick Track</label>
+                <input type="text" data-track-field="pickTrack" class="w-full p-3 bg-white border border-slate-100 rounded-xl font-bold focus:border-[var(--uv)] outline-none transition-all" placeholder="예: Sparkle">
+              </div>
+              <div class="md:col-span-12">
+                <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Pick Note</label>
+                <textarea data-track-field="pickNote" class="w-full p-3 bg-white border border-slate-100 rounded-xl font-medium min-h-[90px] focus:border-[var(--uv)] outline-none transition-all leading-relaxed resize-y" placeholder="이 트랙을 고른 이유, 감상 포인트, 매력 등 자유롭게 서술…"></textarea>
+              </div>
+            </div>
+          </div>
+
           <div class="md:col-span-12">
-            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Liner Notes</label>
-            <textarea data-track-field="desc" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-medium min-h-[100px] focus:border-[var(--uv)] outline-none transition-all leading-relaxed resize-y" placeholder="backstory…"></textarea>
+            <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Liner Notes <span class="text-slate-300 normal-case tracking-normal font-mono text-[10px]">— 앨범 전체 리뷰</span></label>
+            <textarea data-track-field="desc" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-medium min-h-[120px] focus:border-[var(--uv)] outline-none transition-all leading-relaxed resize-y" placeholder="앨범 전체에 대한 설명, 맥락, 배경 스토리…"></textarea>
           </div>
         </div>
       `;
@@ -707,6 +726,8 @@
       div.querySelector('[data-track-field="artist"]').value = album.artist || '';
       div.querySelector('[data-track-field="year"]').value = album.year || '';
       div.querySelector('[data-track-field="img"]').value = album.img || '';
+      div.querySelector('[data-track-field="pickTrack"]').value = album.pickTrack || '';
+      div.querySelector('[data-track-field="pickNote"]').value = album.pickNote || '';
       div.querySelector('[data-track-field="desc"]').value = album.desc || '';
       updatePreview(div.querySelector('.track-preview'), album.img);
 
@@ -862,6 +883,8 @@
           artist: a.artist || '',
           year: a.year || '',
           img: a.img || '',
+          pickTrack: a.pickTrack || '',
+          pickNote: a.pickNote || '',
           desc: a.desc || ''
         }));
       });
