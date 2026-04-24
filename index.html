@@ -85,7 +85,9 @@
       width: 100%;
       overflow: hidden;
       background: var(--ink);
-      padding: 12px 0;
+      display: flex;
+      align-items: center;
+      height: 36px;
     }
     @keyframes marquee {
       0% { transform: translateX(0); }
@@ -93,18 +95,22 @@
     }
     .animate-marquee {
       display: inline-flex;
-      gap: 3rem;
+      align-items: center;
+      gap: 0;
       white-space: nowrap;
       animation: marquee 45s linear infinite;
       will-change: transform;
     }
     .marquee-text {
       font-family: 'Space Mono', monospace;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.3em;
       color: rgba(255,255,255,0.5);
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
     }
 
     .modal {
@@ -257,8 +263,8 @@
           </div>
           <div class="mt-auto ticker-wrap" aria-hidden="true">
             <div class="animate-marquee">
-              <span class="marquee-text">✦ Monthly City Pop Archive &nbsp;&nbsp;//&nbsp;&nbsp; Independent Sound Catalog &nbsp;&nbsp;//&nbsp;&nbsp; Curated Urban Groove &nbsp;&nbsp;//&nbsp;&nbsp; Digital Index &nbsp;&nbsp;//&nbsp;&nbsp; Since 2026 ✦</span>
-              <span class="marquee-text">✦ Monthly City Pop Archive &nbsp;&nbsp;//&nbsp;&nbsp; Independent Sound Catalog &nbsp;&nbsp;//&nbsp;&nbsp; Curated Urban Groove &nbsp;&nbsp;//&nbsp;&nbsp; Digital Index &nbsp;&nbsp;//&nbsp;&nbsp; Since 2026 ✦</span>
+              <span class="marquee-text">MONTHLY CITY POP &nbsp;✦&nbsp; A CURATED SOUND ARCHIVE &nbsp;✦&nbsp; EST. 2026 &nbsp;✦&nbsp;&nbsp;</span>
+              <span class="marquee-text">MONTHLY CITY POP &nbsp;✦&nbsp; A CURATED SOUND ARCHIVE &nbsp;✦&nbsp; EST. 2026 &nbsp;✦&nbsp;&nbsp;</span>
             </div>
           </div>
         </div>
