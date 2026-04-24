@@ -131,16 +131,23 @@
       to { opacity: 1; transform: translateY(0) }
     }
 
+    /* 긴 서술형 필드 — 줄바꿈 허용 */
     #theme-title,
     #theme-intro,
     #modal-title,
     #modal-artist,
-    #modal-desc,
-    .album-title,
-    .album-artist,
-    .album-desc {
+    #modal-desc {
       white-space: pre-wrap;
       word-break: break-word;
+    }
+
+    /* 앨범 카드 텍스트 — 한 줄 말줄임 (가변성 통제) */
+    .album-title,
+    .album-artist,
+    .album-year {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .footer-logo { height: 18px; width: auto; object-fit: contain; }
 
@@ -167,7 +174,8 @@
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
       <p id="modal-artist" class="font-mono text-[10px] text-gray-400 uppercase tracking-[0.3em] mb-4"></p>
-      <h2 id="modal-title" class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-8 md:mb-10 leading-none"></h2>
+      <h2 id="modal-title" class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-3 leading-none"></h2>
+      <p id="modal-year" class="font-mono text-xs font-black text-[var(--uv)] tracking-[0.3em] mb-8 md:mb-10"></p>
       <div class="w-12 h-px bg-black/10 mx-auto mb-8"></div>
       <div class="max-h-[50vh] overflow-y-auto px-2">
         <p id="modal-desc" class="text-base text-gray-600 leading-relaxed font-medium max-w-md mx-auto text-left md:text-center"></p>
@@ -289,7 +297,7 @@
         theme: "LOADING ARCHIVE…",
         themeImg: FALLBACK_IMG,
         intro: "아카이브 시스템과 동기화 중입니다.\n잠시만 기다려주세요.",
-        albums: [{ title: "System Ready", artist: "MCP", img: "", desc: "데이터 로드 대기 중…" }]
+        albums: [{ title: "System Ready", artist: "MCP", year: "2026", img: "", desc: "데이터 로드 대기 중…" }]
       }
     };
 
@@ -307,6 +315,7 @@
       modal: $('note-modal'),
       modalTitle: $('modal-title'),
       modalArtist: $('modal-artist'),
+      modalYear: $('modal-year'),
       modalDesc: $('modal-desc'),
     };
 
@@ -367,9 +376,24 @@
         title.className = 'album-title font-black text-sm md:text-base uppercase tracking-tight text-black mb-1 leading-tight transition-colors';
         title.textContent = album.title || '';
 
+        // artist + year row
+        const metaRow = document.createElement('div');
+        metaRow.className = 'flex items-baseline gap-2 mb-4 min-w-0';
+
         const artist = document.createElement('p');
-        artist.className = 'album-artist font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest mb-4 leading-tight';
+        artist.className = 'album-artist font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest leading-tight flex-1 min-w-0';
         artist.textContent = album.artist || '';
+        metaRow.appendChild(artist);
+
+        if (album.year) {
+          const sep = document.createElement('span');
+          sep.className = 'font-mono text-xs md:text-sm text-gray-300 font-bold shrink-0';
+          sep.textContent = '·';
+          const year = document.createElement('span');
+          year.className = 'album-year font-mono text-xs md:text-sm text-[var(--uv)] font-bold tracking-wider shrink-0';
+          year.textContent = String(album.year).slice(0, 4);
+          metaRow.append(sep, year);
+        }
 
         const notesBtn = document.createElement('button');
         notesBtn.type = 'button';
@@ -377,7 +401,7 @@
         notesBtn.dataset.idx = idx;
         notesBtn.innerHTML = '<span class="w-4 h-px bg-black/20"></span>Liner Notes';
 
-        info.append(title, artist, notesBtn);
+        info.append(title, metaRow, notesBtn);
         card.append(coverBtn, info);
         frag.appendChild(card);
       });
@@ -406,6 +430,7 @@
     const openModal = (album) => {
       refs.modalTitle.textContent = album.title || 'UNTITLED';
       refs.modalArtist.textContent = album.artist || 'UNKNOWN';
+      refs.modalYear.textContent = album.year ? `— ${String(album.year).slice(0, 4)} —` : '';
       refs.modalDesc.textContent = album.desc || 'No liner notes available.';
       refs.modal.classList.add('open');
       document.body.style.overflow = 'hidden';
