@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -15,6 +16,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
   <script src="https://cdn.tailwindcss.com"></script>
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@800&display=swap">
 
@@ -172,10 +174,12 @@
       border-radius: 4px;
     }
   </style>
+
 </head>
 <body class="selection:bg-black selection:text-white overflow-x-hidden">
 
   <!-- ─── MODAL ─── -->
+
   <div id="note-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-content px-4 relative">
       <button type="button" class="modal-close absolute -top-2 right-0 md:top-0 md:right-0 text-black focus-ring" aria-label="Close">
@@ -202,6 +206,7 @@
   </div>
 
   <!-- ─── HEADER ─── -->
+
   <header class="w-full bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40">
     <div class="max-w-[1400px] mx-auto flex items-center justify-between min-h-[70px] md:h-14 px-4 md:px-6 py-2 md:py-0">
       <div class="flex items-center min-w-0">
@@ -213,75 +218,82 @@
         <div class="hidden lg:block font-mono text-[9px] text-gray-400 uppercase tracking-[0.2em]">Curated Archive</div>
       </div>
 
-      <div class="dropdown relative shrink-0 ml-4" id="dropdown-toggle">
-        <button type="button" class="dropdown-btn flex items-center gap-2 px-3 py-1.5 md:py-2 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm focus-ring">
-          <div class="w-1.5 h-1.5 rounded-full bg-black"></div>
-          <span id="nav-month" class="font-mono text-[9px] font-black uppercase tracking-widest text-gray-800 pt-0.5">---</span>
-          <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div id="month-list" class="dropdown-menu mt-2 p-2" role="menu"></div>
-      </div>
-    </div>
+```
+  <div class="dropdown relative shrink-0 ml-4" id="dropdown-toggle">
+    <button type="button" class="dropdown-btn flex items-center gap-2 px-3 py-1.5 md:py-2 rounded-full border border-gray-100 bg-gray-50 hover:bg-white transition-all shadow-sm focus-ring">
+      <div class="w-1.5 h-1.5 rounded-full bg-black"></div>
+      <span id="nav-month" class="font-mono text-[9px] font-black uppercase tracking-widest text-gray-800 pt-0.5">---</span>
+      <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+    <div id="month-list" class="dropdown-menu mt-2 p-2" role="menu"></div>
+  </div>
+</div>
+```
+
   </header>
 
   <main class="max-w-[1400px] mx-auto w-full">
 
-    <!-- ─── HERO ─── -->
-    <section class="relative bg-white overflow-hidden border-y border-black">
-      <div id="theme-watermark" class="absolute right-0 bottom-0 text-[10rem] md:text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4" aria-hidden="true">--</div>
+```
+<!-- ─── HERO ─── -->
+<section class="relative bg-white overflow-hidden border-y border-black">
+  <div id="theme-watermark" class="absolute right-0 bottom-0 text-[10rem] md:text-[18rem] lg:text-[24rem] font-black text-gray-50 leading-none select-none z-0 tracking-tighter pointer-events-none translate-y-1/4 translate-x-1/4" aria-hidden="true">--</div>
 
-      <div class="grid md:grid-cols-12 relative z-10 items-stretch">
+  <div class="grid md:grid-cols-12 relative z-10 items-stretch">
 
-        <!-- ✦ Image column — FIXED mobile cover sizing ✦ -->
-        <div class="md:col-span-4 lg:col-span-3 py-8 px-6 md:p-8 flex items-center justify-center bg-gray-50/60 md:bg-gray-50/50 border-b md:border-b-0 md:border-r border-black">
-          <!--
-            모바일: 180px 고정 정사각형
-            태블릿+: 240px
-            데스크톱+: 280px
-            aspect-square + 명시적 w-[..]로 부모 flex가 늘리지 못하게 고정
-          -->
-          <div class="relative aspect-square overflow-hidden bg-gray-100 rounded-sm w-[180px] sm:w-[220px] md:w-[240px] lg:w-[280px] shrink-0 md:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]">
-            <img
-              id="theme-img"
-              alt="Theme Cover"
-              src="https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=800"
-              class="absolute inset-0 w-full h-full object-cover grayscale-[5%] md:hover:grayscale-0 transition-all duration-700"
-              loading="eager"
-              decoding="async">
-          </div>
+    <!-- ✦ Image column — FIXED mobile cover sizing ✦ -->
+    <div class="md:col-span-4 lg:col-span-3 py-8 px-6 md:p-8 flex items-center justify-center bg-gray-50/60 md:bg-gray-50/50 border-b md:border-b-0 md:border-r border-black">
+      <!--
+        모바일: 180px 고정 정사각형
+        태블릿+: 240px
+        데스크톱+: 280px
+        aspect-square + 명시적 w-[..]로 부모 flex가 늘리지 못하게 고정
+      -->
+      <div class="relative aspect-square overflow-hidden bg-gray-100 rounded-sm w-[180px] sm:w-[220px] md:w-[240px] lg:w-[280px] shrink-0 md:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]">
+        <img
+          id="theme-img"
+          alt="Theme Cover"
+          src="https://images.unsplash.com/photo-1571677422251-713bf27d7920?w=800"
+          class="absolute inset-0 w-full h-full object-cover grayscale-[5%] md:hover:grayscale-0 transition-all duration-700"
+          loading="eager"
+          decoding="async">
+      </div>
+    </div>
+
+    <!-- Text column -->
+    <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center min-w-0">
+      <div class="px-6 py-10 md:px-12 relative z-20">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-10 h-[2px] bg-[var(--uv)]"></span>
+          <span id="theme-vol-label" class="font-mono text-[10px] md:text-[11px] font-black text-black uppercase tracking-[0.3em]">---</span>
         </div>
-
-        <!-- Text column -->
-        <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-center min-w-0">
-          <div class="px-6 py-10 md:px-12 relative z-20">
-            <div class="flex items-center gap-3 mb-6">
-              <span class="w-10 h-[2px] bg-[var(--uv)]"></span>
-              <span id="theme-vol-label" class="font-mono text-[10px] md:text-[11px] font-black text-black uppercase tracking-[0.3em]">---</span>
-            </div>
-            <h2 id="theme-title" class="mb-6 max-w-4xl"></h2>
-            <p id="theme-intro" class="text-sm md:text-base text-gray-500 leading-relaxed font-medium italic border-l-[3px] border-[var(--uv)] pl-5 max-w-xl"></p>
-          </div>
-          <div class="mt-auto ticker-wrap" aria-hidden="true">
-            <div class="animate-marquee">
-              <span class="marquee-text">MONTHLY CITY POP &nbsp;✦&nbsp; A CURATED SOUND ARCHIVE &nbsp;✦&nbsp; EST. 2026 &nbsp;✦&nbsp;&nbsp;</span>
-              <span class="marquee-text">MONTHLY CITY POP &nbsp;✦&nbsp; A CURATED SOUND ARCHIVE &nbsp;✦&nbsp; EST. 2026 &nbsp;✦&nbsp;&nbsp;</span>
-            </div>
-          </div>
+        <h2 id="theme-title" class="mb-6 max-w-4xl"></h2>
+        <p id="theme-intro" class="text-sm md:text-base text-gray-500 leading-relaxed font-medium italic border-l-[3px] border-[var(--uv)] pl-5 max-w-xl"></p>
+      </div>
+      <div class="mt-auto ticker-wrap" aria-hidden="true">
+        <div class="animate-marquee">
+          <span class="marquee-text">MONTHLY CITY POP &nbsp;✦&nbsp; A CURATED SOUND ARCHIVE &nbsp;✦&nbsp; EST. 2026 &nbsp;✦&nbsp;&nbsp;</span>
+          <span class="marquee-text">MONTHLY CITY POP &nbsp;✦&nbsp; A CURATED SOUND ARCHIVE &nbsp;✦&nbsp; EST. 2026 &nbsp;✦&nbsp;&nbsp;</span>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    <!-- ─── COLLECTION ─── -->
-    <section class="p-6 md:p-10 lg:p-14 bg-white">
-      <div class="mb-10 md:mb-14 flex items-end justify-between">
-        <h3 class="font-logo text-lg md:text-xl font-black uppercase tracking-tighter text-black leading-none">Collection</h3>
-        <div class="flex-1 h-px bg-gray-100 ml-8 md:ml-12 hidden sm:block mb-1"></div>
-      </div>
-      <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 md:gap-x-10 gap-y-12 md:gap-y-16 items-start"></div>
-    </section>
+<!-- ─── COLLECTION ─── -->
+<section class="p-6 md:p-10 lg:p-14 bg-white">
+  <div class="mb-10 md:mb-14 flex items-end justify-between">
+    <h3 class="font-logo text-lg md:text-xl font-black uppercase tracking-tighter text-black leading-none">Collection</h3>
+    <div class="flex-1 h-px bg-gray-100 ml-8 md:ml-12 hidden sm:block mb-1"></div>
+  </div>
+  <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 md:gap-x-10 gap-y-12 md:gap-y-16 items-start"></div>
+</section>
+```
+
   </main>
 
   <!-- ─── FOOTER ─── -->
+
   <footer class="bg-white py-8 border-t border-gray-100 text-center flex flex-col items-center gap-2.5">
     <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" alt="MCP Logo" class="footer-logo" loading="lazy">
     <div class="flex flex-col items-center gap-1">
@@ -392,6 +404,10 @@
         const info = document.createElement('div');
         info.className = 'flex-1 flex flex-col';
 
+        const year = document.createElement('p');
+        year.className = 'album-year font-mono text-[10px] md:text-xs text-gray-400 font-bold tracking-[0.2em] mb-2';
+        year.textContent = album.year ? String(album.year).slice(0, 4) : '';
+
         const title = document.createElement('h3');
         title.className = 'album-title font-black text-sm md:text-base uppercase tracking-tight text-black mb-1 leading-tight transition-colors';
         title.textContent = album.title || '';
@@ -400,17 +416,13 @@
         artist.className = 'album-artist font-mono text-xs md:text-sm text-gray-400 font-bold uppercase tracking-widest leading-tight';
         artist.textContent = album.artist || '';
 
-        const year = document.createElement('p');
-        year.className = 'album-year font-mono text-[10px] md:text-xs text-[var(--uv)] font-bold tracking-[0.2em] mt-1';
-        year.textContent = album.year ? String(album.year).slice(0, 4) : '';
-
         const notesBtn = document.createElement('button');
         notesBtn.type = 'button';
         notesBtn.className = 'modal-trigger w-fit font-mono text-[10px] md:text-[11px] font-black text-black/40 hover:text-black tracking-[0.2em] uppercase transition-all flex items-center gap-2 focus-ring mt-4';
         notesBtn.dataset.idx = idx;
         notesBtn.innerHTML = '<span class="w-4 h-px bg-black/20"></span>Liner Notes';
 
-        info.append(title, artist, year, notesBtn);
+        info.append(year, title, artist, notesBtn);
         card.append(coverBtn, info);
         frag.appendChild(card);
       });
@@ -541,5 +553,6 @@
 
     init();
   </script>
+
 </body>
 </html>
