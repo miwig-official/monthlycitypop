@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@800&display=swap">
-  <!-- SortableJS for drag & drop -->
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <style>
     :root {
@@ -100,7 +99,6 @@
     .btn-save:hover { transform: scale(1.05); background: var(--uv-deep); }
     .btn-save:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
-    /* Dirty indicator dot on save button */
     .btn-save.dirty::after {
       content: '';
       position: absolute;
@@ -147,7 +145,6 @@
       border-radius: .75rem;
     }
 
-    /* Sortable */
     .sortable-ghost {
       opacity: .3;
       background: #f1f5f9 !important;
@@ -162,7 +159,6 @@
     }
     .drag-handle:active { cursor: grabbing; }
 
-    /* Toast */
     #toast-host {
       position: fixed;
       bottom: 24px;
@@ -208,7 +204,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Floating save (mobile) */
     .floating-save {
       position: fixed;
       right: 16px;
@@ -221,7 +216,6 @@
       .header-save { display: none; }
     }
 
-    /* Modal */
     .mcp-modal {
       position: fixed;
       inset: 0;
@@ -248,25 +242,71 @@
       outline-offset: 2px;
       border-radius: 4px;
     }
+
+    /* ─── Publish toggle switch ─── */
+    .toggle-switch {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-switch input { display: none; }
+    .toggle-track {
+      width: 44px;
+      height: 24px;
+      background: #cbd5e1;
+      border-radius: 999px;
+      position: relative;
+      transition: background .25s ease;
+      flex-shrink: 0;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 20px; height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform .25s cubic-bezier(.4, 1.5, .5, 1);
+      box-shadow: 0 2px 4px rgba(0,0,0,.15);
+    }
+    .toggle-switch input:checked + .toggle-track {
+      background: var(--uv);
+    }
+    .toggle-switch input:checked + .toggle-track::after {
+      transform: translateX(20px);
+    }
+    .toggle-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      transition: color .2s;
+    }
+    .toggle-switch input:checked ~ .toggle-label-on { color: var(--uv); }
+    .toggle-switch input:not(:checked) ~ .toggle-label-off { color: #64748b; }
+
+    /* ─── Hidden volume sidebar styling ─── */
+    .month-btn.hidden-vol { opacity: .5; }
+    .month-btn.hidden-vol .vol-status { color: #94a3b8; }
   </style>
 </head>
 <body class="selection:bg-[#5F4B8B] selection:text-white antialiased">
 
-  <!-- Loading -->
   <div id="loading-overlay" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
     <div class="w-12 h-12 border-[3px] border-slate-100 border-t-[#5F4B8B] rounded-full animate-spin"></div>
     <p class="mt-6 font-mono text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">System Initializing…</p>
   </div>
 
-  <!-- Toast host -->
   <div id="toast-host"></div>
-
-  <!-- Modal host (new month / confirm) -->
   <div id="modal-host" class="mcp-modal" role="dialog" aria-modal="true"></div>
 
   <div class="max-w-5xl mx-auto min-h-screen flex flex-col">
 
-    <!-- Header -->
     <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-8 pb-6 md:pt-12 md:pb-10 px-6 gap-6 sm:gap-0">
       <div class="flex items-center gap-5">
         <img src="https://miwig-official.github.io/monthlycitypop/logo.jpg" alt="MCP Logo" class="admin-brand-logo" onerror="this.style.display='none'">
@@ -287,7 +327,6 @@
 
     <div class="grid md:grid-cols-12 gap-8 flex-1 pb-24 px-4 md:px-0">
 
-      <!-- Sidebar -->
       <aside class="md:col-span-4 lg:col-span-3">
         <div class="sticky top-8">
           <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
@@ -304,14 +343,12 @@
         </div>
       </aside>
 
-      <!-- Editor -->
       <main class="md:col-span-8 lg:col-span-9">
 
-        <!-- Theme -->
         <div id="editor-container" class="hidden space-y-6">
 
           <div class="card">
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
               <div class="flex items-center gap-3">
                 <div class="w-1 h-6 bg-[var(--uv)] rounded-full"></div>
                 <h2 class="text-lg font-black text-slate-900 tracking-tight uppercase pt-0.5">Primary Theme</h2>
@@ -326,6 +363,20 @@
                 </button>
               </div>
             </div>
+
+            <!-- Publish toggle row -->
+            <div class="mb-6 p-4 bg-slate-50 rounded-xl flex items-center justify-between gap-4 flex-wrap">
+              <div class="flex-1 min-w-0">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Visibility</p>
+                <p id="publish-helper" class="text-xs text-slate-400 font-medium leading-snug">이 호의 인덱스 페이지 노출 여부</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="publish-toggle" data-field="published">
+                <span class="toggle-track"></span>
+                <span class="toggle-label toggle-label-on">Public</span>
+              </label>
+            </div>
+
             <div class="space-y-6">
               <div>
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Theme Concept Title</label>
@@ -350,7 +401,6 @@
             </div>
           </div>
 
-          <!-- Tracks -->
           <div class="card">
             <div class="flex items-center justify-between mb-10">
               <div class="flex items-center gap-3">
@@ -368,7 +418,6 @@
           </div>
         </div>
 
-        <!-- Empty state -->
         <div id="no-selection" class="card flex flex-col items-center justify-center py-40 text-slate-400 text-center gap-4">
           <svg class="w-12 h-12 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l7-3 7 3z"/></svg>
           <div>
@@ -380,7 +429,6 @@
     </div>
   </div>
 
-  <!-- Floating save (mobile only) -->
   <button id="save-btn-mobile" class="btn-save floating-save relative focus-ring">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
   </button>
@@ -390,7 +438,6 @@
     import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    /* ─── CONFIG ─── */
     const firebaseConfig = {
       apiKey: "AIzaSyDXMTDaE76mqn6S6w2F5s4qHhdFphNULg8",
       authDomain: "monthly-city-pop.firebaseapp.com",
@@ -400,23 +447,21 @@
       appId: "1:860318834352:web:f1b4d1c3212a41a9dde575"
     };
     const APP_ID = 'monthly-city-pop';
-    const IMG_MAX_BYTES = 1024 * 1024;          // 1 MB
-    const IMG_TARGET_SIZE = 800;                // resize to this square
+    const IMG_MAX_BYTES = 1024 * 1024;
+    const IMG_TARGET_SIZE = 800;
     const IMG_JPEG_QUALITY = 0.78;
 
-    /* ─── STATE ─── */
     const state = {
       archive: {},
       selectedMonth: '',
       dirty: false,
       lastSavedSnapshot: '',
-      trashStack: [],         // { type, month, index, album }
+      trashStack: [],
     };
 
     const defaultAlbum = () => ({ title: '', artist: '', year: String(new Date().getFullYear()), img: '', pickTrack: '', pickNote: '', desc: '' });
-    const defaultVolume = (theme = '새로운 테마') => ({ theme, themeImg: '', intro: '', albums: [] });
+    const defaultVolume = (theme = '새로운 테마') => ({ theme, themeImg: '', intro: '', published: false, albums: [] });
 
-    /* ─── DOM ─── */
     const $ = (id) => document.getElementById(id);
     const refs = {
       overlay: $('loading-overlay'),
@@ -432,6 +477,8 @@
       themeImg: $('theme-img'),
       themeIntro: $('theme-intro'),
       themePreview: $('theme-preview'),
+      publishToggle: $('publish-toggle'),
+      publishHelper: $('publish-helper'),
       tracks: $('tracks-container'),
       trackCount: $('track-count'),
       previewLink: $('preview-link'),
@@ -441,13 +488,11 @@
       addMonthBtn: $('add-month-btn'),
     };
 
-    /* ─── FIREBASE ─── */
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const archiveDocRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'archive', 'master');
 
-    /* ─── TOAST ─── */
     const toast = (msg, { type = '', action, timeout = 3000 } = {}) => {
       const el = document.createElement('div');
       el.className = `toast ${type}`;
@@ -474,7 +519,6 @@
       return el;
     };
 
-    /* ─── MODAL (prompt / confirm) ─── */
     const modal = ({ title, message, placeholder = '', defaultValue = '', confirmLabel = 'Confirm', cancelLabel = '취소', mode = 'prompt' }) => {
       return new Promise((resolve) => {
         refs.modalHost.innerHTML = '';
@@ -507,7 +551,6 @@
       });
     };
 
-    /* ─── DIRTY TRACKING ─── */
     const snapshotArchive = () => JSON.stringify(state.archive);
     const markDirty = () => {
       state.dirty = snapshotArchive() !== state.lastSavedSnapshot;
@@ -521,7 +564,6 @@
       }
     });
 
-    /* ─── IMAGE RESIZE (reduces base64 bloat) ─── */
     const resizeImage = (file) => new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -533,7 +575,6 @@
           canvas.height = size;
           const ctx = canvas.getContext('2d');
 
-          // cover-crop (center)
           const ratio = Math.max(size / img.width, size / img.height);
           const w = img.width * ratio;
           const h = img.height * ratio;
@@ -579,14 +620,12 @@
       }
     };
 
-    /* ─── PREVIEW ─── */
     const updatePreview = (el, url) => {
       if (!el) return;
       if (url && url.length > 5) {
         el.classList.add('active');
         el.classList.remove('error');
         el.style.backgroundImage = `url("${CSS.escape(url).replace(/\\"/g, '"')}")`;
-        // Basic URL validation for non-data URLs
         if (!url.startsWith('data:')) {
           const test = new Image();
           test.onerror = () => el.classList.add('error');
@@ -599,30 +638,46 @@
       }
     };
 
-    /* ─── SIDEBAR ─── */
     const renderSidebar = () => {
       const months = Object.keys(state.archive).sort().reverse();
       refs.volumeCount.textContent = String(months.length).padStart(2, '0');
 
       const frag = document.createDocumentFragment();
       months.forEach((m) => {
+        const isActive = m === state.selectedMonth;
+        const isPublished = state.archive[m]?.published !== false;
+
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.dataset.action = 'select-month';
         btn.dataset.month = m;
-        const active = m === state.selectedMonth;
-        btn.className = `focus-ring w-full text-left px-5 py-4 rounded-xl text-xs font-black transition-all ${
-          active
+        btn.className = `month-btn focus-ring w-full text-left px-5 py-3.5 rounded-xl text-xs font-black transition-all flex items-center justify-between gap-2 ${
+          isActive
             ? 'bg-[var(--uv)] text-white shadow-xl shadow-[#5F4B8B]/20 scale-[1.02]'
             : 'bg-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+        } ${!isPublished ? 'hidden-vol' : ''}`;
+
+        const label = document.createElement('span');
+        label.textContent = m;
+
+        const status = document.createElement('span');
+        status.className = `vol-status font-mono text-[8px] tracking-widest ${
+          isActive ? 'text-white/70' : (isPublished ? 'text-emerald-500' : 'text-slate-400')
         }`;
-        btn.textContent = m;
+        if (isPublished) {
+          status.innerHTML = '<svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>';
+          status.title = 'Public';
+        } else {
+          status.innerHTML = '<svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>';
+          status.title = 'Hidden';
+        }
+
+        btn.append(label, status);
         frag.appendChild(btn);
       });
       refs.monthList.replaceChildren(frag);
     };
 
-    /* ─── EDITOR ─── */
     const selectMonth = (month) => {
       if (!state.archive[month]) return;
       state.selectedMonth = month;
@@ -633,16 +688,24 @@
       refs.themeTitle.value = data.theme || '';
       refs.themeImg.value = data.themeImg || '';
       refs.themeIntro.value = data.intro || '';
+      refs.publishToggle.checked = data.published !== false;
+      updatePublishHelper();
       updatePreview(refs.themePreview, data.themeImg);
 
-      // preview link (점프)
       refs.previewLink.href = `./index.html#${month}`;
 
       renderTracks(data.albums || []);
       renderSidebar();
     };
 
-    /* ─── TRACKS ─── */
+    const updatePublishHelper = () => {
+      const isOn = refs.publishToggle.checked;
+      refs.publishHelper.textContent = isOn
+        ? '공개 — 인덱스 페이지에 노출됩니다.'
+        : '비공개 — 인덱스에서 보이지 않습니다 (관리자만 볼 수 있음).';
+      refs.publishHelper.style.color = isOn ? '#059669' : '#94a3b8';
+    };
+
     let sortable = null;
 
     const createTrackCard = (album, idx) => {
@@ -686,7 +749,7 @@
           <div class="md:col-span-12">
             <label class="block text-[9px] font-black text-slate-400 uppercase mb-2 tracking-widest">Cover Source</label>
             <div class="input-group">
-              <input type="text" data-track-field="img" data-track-img class="input-field-bare font-mono text-[10px] text-slate-500" placeholder="https://…">
+              <input type="text" data-track-field="img" class="input-field-bare font-mono text-[10px] text-slate-500" placeholder="https://…">
               <label class="file-upload-trigger">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                 UPLOAD
@@ -696,7 +759,6 @@
             <div class="track-preview img-preview-box"></div>
           </div>
 
-          <!-- Editor's Pick block -->
           <div class="md:col-span-12 p-5 bg-[var(--uv)]/5 border border-[var(--uv)]/20 rounded-2xl">
             <div class="flex items-center gap-2 mb-4">
               <span class="w-3 h-3 rounded-full bg-[var(--uv)]"></span>
@@ -721,7 +783,6 @@
         </div>
       `;
 
-      // populate values via .value (safe from XSS)
       div.querySelector('[data-track-field="title"]').value = album.title || '';
       div.querySelector('[data-track-field="artist"]').value = album.artist || '';
       div.querySelector('[data-track-field="year"]').value = album.year || '';
@@ -740,7 +801,6 @@
       albums.forEach((album, idx) => frag.appendChild(createTrackCard(album, idx)));
       refs.tracks.replaceChildren(frag);
 
-      // Initialize Sortable
       if (sortable) sortable.destroy();
       sortable = Sortable.create(refs.tracks, {
         animation: 180,
@@ -772,7 +832,6 @@
       vol.albums.push(defaultAlbum());
       renderTracks(vol.albums);
       markDirty();
-      // scroll to and focus new track
       requestAnimationFrame(() => {
         const last = refs.tracks.lastElementChild;
         last?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -802,7 +861,6 @@
       });
     };
 
-    /* ─── VOLUME MGMT ─── */
     const suggestNextMonth = () => {
       const months = Object.keys(state.archive).sort().reverse();
       if (!months.length) {
@@ -810,7 +868,7 @@
         return `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}`;
       }
       const [y, m] = months[0].split('.').map(Number);
-      const next = new Date(y, m, 1); // m is already 1-indexed, so this advances
+      const next = new Date(y, m, 1);
       return `${next.getFullYear()}.${String(next.getMonth() + 1).padStart(2, '0')}`;
     };
 
@@ -818,7 +876,7 @@
       const suggested = suggestNextMonth();
       const input = await modal({
         title: '새 호 추가',
-        message: 'YYYY.MM 형식으로 입력하세요. (예: 2026.05)',
+        message: 'YYYY.MM 형식으로 입력하세요. (예: 2026.05)\n새 호는 기본적으로 비공개로 생성됩니다.',
         placeholder: 'YYYY.MM',
         defaultValue: suggested,
         confirmLabel: '추가'
@@ -837,7 +895,7 @@
       renderSidebar();
       selectMonth(key);
       markDirty();
-      toast(`${key} 호가 추가되었습니다.`, { type: 'success' });
+      toast(`${key} 호가 추가되었습니다 (비공개).`, { type: 'success' });
     };
 
     const deleteVolume = async () => {
@@ -874,10 +932,9 @@
       });
     };
 
-    /* ─── SAVE ─── */
     const normalizeArchive = () => {
-      // Ensure schema consistency (year, album fields)
       Object.values(state.archive).forEach((vol) => {
+        if (typeof vol.published !== 'boolean') vol.published = true;
         vol.albums = (vol.albums || []).map((a) => ({
           title: a.title || '',
           artist: a.artist || '',
@@ -915,27 +972,27 @@
       }
     };
 
-    /* ─── FIELD SYNC (event delegation + debounce) ─── */
-    const debounce = (fn, wait = 150) => {
-      let t;
-      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
-    };
-
     const syncInput = (e) => {
       const t = e.target;
       const vol = state.archive[state.selectedMonth];
       if (!vol) return;
 
-      // Theme fields
       const field = t.dataset.field;
       if (field) {
-        vol[field] = t.value;
-        if (field === 'themeImg') updatePreview(refs.themePreview, t.value);
+        if (t.type === 'checkbox') {
+          vol[field] = t.checked;
+          if (field === 'published') {
+            updatePublishHelper();
+            renderSidebar();
+          }
+        } else {
+          vol[field] = t.value;
+          if (field === 'themeImg') updatePreview(refs.themePreview, t.value);
+        }
         markDirty();
         return;
       }
 
-      // Track fields
       const trackField = t.dataset.trackField;
       if (trackField) {
         const card = t.closest('.track-card');
@@ -943,16 +1000,14 @@
         const idx = Number(card.dataset.idx);
         if (!vol.albums?.[idx]) return;
         let val = t.value;
-        if (trackField === 'year') val = val.replace(/[^\d]/g, '').slice(0, 4); // digit-only
+        if (trackField === 'year') val = val.replace(/[^\d]/g, '').slice(0, 4);
         if (val !== t.value) t.value = val;
         vol.albums[idx][trackField] = val;
         if (trackField === 'img') updatePreview(card.querySelector('.track-preview'), val);
         markDirty();
       }
     };
-    const syncInputDebounced = debounce(markDirty, 250);
 
-    /* ─── CLICK DELEGATION ─── */
     document.addEventListener('click', (e) => {
       const actionEl = e.target.closest('[data-action]');
       if (actionEl) {
@@ -974,8 +1029,13 @@
       }
     });
 
-    /* ─── FILE UPLOAD DELEGATION ─── */
     document.addEventListener('change', (e) => {
+      // Publish toggle (checkbox)
+      if (e.target === refs.publishToggle) {
+        syncInput(e);
+        return;
+      }
+      // File uploads
       const up = e.target.dataset.upload;
       if (!up) return;
       const file = e.target.files?.[0];
@@ -1000,14 +1060,11 @@
           previewEl: card.querySelector('.track-preview')
         });
       }
-      // reset input so same file can be re-selected
       e.target.value = '';
     });
 
-    /* ─── INPUT DELEGATION ─── */
     document.addEventListener('input', syncInput);
 
-    /* ─── KEYBOARD ─── */
     document.addEventListener('keydown', (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
@@ -1015,13 +1072,11 @@
       }
     });
 
-    /* ─── BUTTONS ─── */
     refs.saveBtn.addEventListener('click', save);
     refs.saveBtnMobile.addEventListener('click', save);
     refs.addTrackBtn.addEventListener('click', addTrack);
     refs.addMonthBtn.addEventListener('click', addVolume);
 
-    /* ─── INIT ─── */
     const connect = () => {
       refs.authDot.className = 'status-dot bg-green-500 animate-pulse';
       refs.authStatus.textContent = 'Connected';
@@ -1039,6 +1094,10 @@
         toast('데이터 로드 실패. 로컬 기본값으로 시작합니다.', { type: 'error' });
         state.archive = { '2026.04': defaultVolume('New Theme') };
       }
+      // 기존 데이터 호환: published 필드 없는 호는 공개로 간주
+      Object.values(state.archive).forEach((vol) => {
+        if (typeof vol.published !== 'boolean') vol.published = true;
+      });
       state.lastSavedSnapshot = snapshotArchive();
       renderSidebar();
       refs.overlay.style.display = 'none';
