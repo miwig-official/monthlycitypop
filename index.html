@@ -122,14 +122,18 @@
       background: rgba(255,255,255,0.98);
       backdrop-filter: blur(10px);
       display: none;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
       padding: 2rem 1rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
     .modal.open { display: flex; animation: fadeIn .35s ease forwards; }
     .modal-content {
       max-width: 600px;
       width: 100%;
+      margin: auto;
       text-align: center;
       animation: slideUp .5s cubic-bezier(.16,1,.3,1) forwards;
     }
@@ -198,52 +202,8 @@
       color: #9ca3af;
     }
 
-    /* ─── MODAL SCROLL AREA ─── */
-    .modal-scroll-wrap {
-      position: relative;
-    }
-    /* Bottom fade indicator — shown when content overflows */
-    .modal-scroll-wrap::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 36px;
-      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.98));
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity .25s ease;
-      border-radius: 0 0 6px 6px;
-      z-index: 2;
-    }
-    .modal-scroll-wrap.has-overflow:not(.scrolled-bottom)::after {
-      opacity: 1;
-    }
-
-    .modal-scroll {
-      max-height: 50vh;
-      overflow-y: auto;
-      overscroll-behavior: contain;        /* iOS scroll chaining 방지 */
-      -webkit-overflow-scrolling: touch;   /* iOS 부드러운 스크롤 */
-      padding: 0 0.5rem 0.5rem;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(95,75,139,0.35) transparent;
-    }
-    .modal-scroll::-webkit-scrollbar {
-      width: 6px;
-    }
-    .modal-scroll::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .modal-scroll::-webkit-scrollbar-thumb {
-      background: rgba(95,75,139,0.3);
-      border-radius: 3px;
-      transition: background .2s;
-    }
-    .modal-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(95,75,139,0.6);
-    }
+    /* ─── MODAL INNER CONTENT WRAPPER ─── */
+    /* (전체 모달이 스크롤되므로 별도 max-height 없음) */
   </style>
 
 </head>
@@ -261,20 +221,16 @@
       <h2 id="modal-title" class="text-3xl md:text-5xl font-black uppercase tracking-tighter mb-3 leading-none"></h2>
       <p id="modal-year" class="font-mono text-xs font-black text-[var(--uv)] tracking-[0.3em] mb-8 md:mb-10"></p>
       <div class="w-12 h-px bg-black/10 mx-auto mb-8"></div>
-      <div id="modal-scroll-wrap" class="modal-scroll-wrap">
-        <div id="modal-scroll" class="modal-scroll">
-          <!-- Editor's Pick block -->
-          <div id="modal-pick" class="hidden mb-8 p-5 md:p-6 border border-[var(--uv)]/25 rounded-xl bg-[var(--uv)]/5 text-left max-w-md mx-auto">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="w-1.5 h-1.5 rounded-full bg-[var(--uv)]"></span>
-              <span class="font-mono text-[9px] font-black tracking-[0.3em] uppercase text-[var(--uv)]">Editor's Pick</span>
-            </div>
-            <p id="modal-pick-track" class="text-lg md:text-xl font-black tracking-tight mb-3 leading-tight text-black"></p>
-            <p id="modal-pick-note" class="text-sm leading-relaxed text-gray-600 font-medium"></p>
-          </div>
-          <p id="modal-desc" class="text-base text-gray-600 leading-relaxed font-medium max-w-md mx-auto text-left"></p>
+      <!-- Editor's Pick block -->
+      <div id="modal-pick" class="hidden mb-8 p-5 md:p-6 border border-[var(--uv)]/25 rounded-xl bg-[var(--uv)]/5 text-left max-w-md mx-auto">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-1.5 h-1.5 rounded-full bg-[var(--uv)]"></span>
+          <span class="font-mono text-[9px] font-black tracking-[0.3em] uppercase text-[var(--uv)]">Editor's Pick</span>
         </div>
+        <p id="modal-pick-track" class="text-lg md:text-xl font-black tracking-tight mb-3 leading-tight text-black"></p>
+        <p id="modal-pick-note" class="text-sm leading-relaxed text-gray-600 font-medium"></p>
       </div>
+      <p id="modal-desc" class="text-base text-gray-600 leading-relaxed font-medium max-w-md mx-auto text-left"></p>
       <button type="button" class="modal-close mt-12 md:mt-16 font-mono text-[10px] font-black tracking-widest uppercase border-b border-black pb-1 focus-ring">Close Window</button>
     </div>
   </div>
@@ -425,8 +381,6 @@
       modalPick: $('modal-pick'),
       modalPickTrack: $('modal-pick-track'),
       modalPickNote: $('modal-pick-note'),
-      modalScroll: $('modal-scroll'),
-      modalScrollWrap: $('modal-scroll-wrap'),
       contentWrapper: $('content-wrapper'),
       emptyState: $('empty-state'),
     };
@@ -553,20 +507,6 @@
       renderSelector();
     };
 
-    /* ─── MODAL SCROLL HELPERS ─── */
-    const updateScrollFade = () => {
-      const el = refs.modalScroll;
-      const wrap = refs.modalScrollWrap;
-      if (!el || !wrap) return;
-      const overflows = el.scrollHeight > el.clientHeight + 2;
-      wrap.classList.toggle('has-overflow', overflows);
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4;
-      wrap.classList.toggle('scrolled-bottom', atBottom);
-    };
-
-    refs.modalScroll.addEventListener('scroll', updateScrollFade, { passive: true });
-    window.addEventListener('resize', updateScrollFade);
-
     const openModal = (album) => {
       refs.modalImg.src = album.img || PLACEHOLDER_IMG;
       refs.modalImg.alt = album.title || '';
@@ -589,11 +529,9 @@
       refs.modal.classList.add('open');
       document.body.style.overflow = 'hidden';
 
-      // CRITICAL: 매번 스크롤 위치 초기화 + fade 상태 갱신
-      // 레이아웃이 적용된 다음 프레임에서 처리 (DOM 업데이트가 반영된 후)
+      // 모달 자체 스크롤 위치 초기화 (이전 모달의 위치 잔존 방지)
       requestAnimationFrame(() => {
-        refs.modalScroll.scrollTop = 0;
-        updateScrollFade();
+        refs.modal.scrollTop = 0;
       });
     };
     const closeModal = () => {
